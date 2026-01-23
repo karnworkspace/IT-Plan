@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { taskService, type Task } from '../services/taskService';
-import { projectService, type Project } from '../services/projectService';
+import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
     Card,
     Row,
     Col,
-    Button,
     Typography,
     Space,
     Tag,
     Progress,
-    Avatar,
-    Select,
     Checkbox,
     message,
     Spin,
@@ -22,43 +19,28 @@ import {
     ClockCircleOutlined,
     CalendarOutlined,
     ExclamationCircleOutlined,
-    FolderOutlined,
 } from '@ant-design/icons';
 import './MyTasksPage.css';
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 export const MyTasksPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [selectedProject, setSelectedProject] = useState<string | undefined>(undefined);
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
-    const [myOnly, setMyOnly] = useState(true);
 
+    // Load my tasks on mount
     useEffect(() => {
-        loadData();
-    }, [selectedProject, statusFilter, priorityFilter, myOnly]);
+        loadMyTasks();
+    }, []);
 
-    const loadData = async () => {
+    const loadMyTasks = async () => {
         try {
             setLoading(true);
-            
-            // Load projects first if not loaded
-            if (projects.length === 0) {
-                const projectsResponse = await projectService.getProjects({ pageSize: 100 });
-                setProjects(projectsResponse.projects);
-            }
-
-            // Load tasks
-            const tasksResponse = await taskService.getTasks(
-                selectedProject || projects[0]?.id || '',
-                { pageSize: 100 }
-            );
-            setTasks(tasksResponse.tasks);
+            const response = await taskService.getMyTasks({ pageSize: 100 });
+            setTasks(response.tasks || []);
         } catch (error) {
             message.error('Failed to load tasks');
             console.error(error);
@@ -73,10 +55,6 @@ export const MyTasksPage: React.FC = () => {
 
     const handlePriorityFilter = (checkedValues: string[]) => {
         setPriorityFilter(checkedValues);
-    };
-
-    const handleProjectChange = (value: string) => {
-        setSelectedProject(value);
     };
 
     const getPriorityColor = (priority: string) => {
@@ -119,12 +97,31 @@ export const MyTasksPage: React.FC = () => {
         if (priorityFilter.length > 0 && !priorityFilter.includes(task.priority)) {
             return false;
         }
-        // Filter by assignee (my tasks only)
-        if (myOnly) {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            return task.assigneeId === user.id || task.createdById === user.id;
-        }
         return true;
+    });
+
+    // Sort by priority first: URGENT > HIGH > MEDIUM > LOW
+    // Then by due date (closest due date first)
+    const priorityOrder = ['URGENT', 'HIGH', 'MEDIUM', 'LOW'];
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
+        const aIndex = priorityOrder.indexOf(a.priority);
+        const bIndex = priorityOrder.indexOf(b.priority);
+        
+        // First sort by priority
+        if (aIndex !== bIndex) {
+            return aIndex - bIndex;
+        }
+        
+        // If priority is same, sort by due date (closest first)
+        if (a.dueDate && b.dueDate) {
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        }
+        
+        // If one has due date and other doesn't, the one with due date comes first
+        if (a.dueDate) return -1;
+        if (b.dueDate) return 1;
+        
+        return 0;
     });
 
     const taskGroups = {
@@ -137,49 +134,12 @@ export const MyTasksPage: React.FC = () => {
 
     return (
         <Layout className="my-tasks-layout">
-            <Sider width={250} className="my-tasks-sider">
-                <div className="logo">
-                    <CheckCircleOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-                    <Title level={4} style={{ margin: 0, color: 'white' }}>My Tasks</Title>
-                </div>
-
-                <div className="sidebar-menu">
-                    <div className="menu-item">
-                        <FolderOutlined /> Dashboard
-                    </div>
-                    <div className="menu-item">
-                        <FolderOutlined /> Projects
-                    </div>
-                    <div className="menu-item active">
-                        <CheckCircleOutlined /> My Tasks
-                    </div>
-                    <div className="menu-item">
-                        <CalendarOutlined /> Calendar
-                    </div>
-                </div>
-            </Sider>
+            <Sidebar />
 
             <Layout>
                 <Header className="my-tasks-header">
                     <Title level={3}>My Tasks</Title>
-                    <Space size="large">
-                        <Select
-                            placeholder="Select Project"
-                            style={{ width: 200 }}
-                            allowClear
-                            value={selectedProject}
-                            onChange={handleProjectChange}
-                        >
-                            {projects.map(project => (
-                                <Option key={project.id} value={project.id}>
-                                    {project.name}
-                                </Option>
-                            ))}
-                        </Select>
-                        <Checkbox checked={myOnly} onChange={(e) => setMyOnly(e.target.checked)}>
-                            My Tasks Only
-                        </Checkbox>
-                    </Space>
+                    <Text type="secondary">Tasks assigned to or created by you</Text>
                 </Header>
 
                 <Content className="my-tasks-content">
@@ -226,55 +186,70 @@ export const MyTasksPage: React.FC = () => {
                                 </Text>
                             </Card>
                         ) : (
-                            <Row gutter={[16, 16]}>
-                                {Object.entries(taskGroups).map(([status, tasks]) => (
-                                    tasks.length > 0 && (
-                                        <Col xs={24} sm={12} md={12} lg={8} xl={6} key={status}>
-                                            <Card
-                                                title={
+                            <div style={{ marginTop: 24 }}>
+                                {/* Status Header */}
+                                <Row gutter={[16, 16]}>
+                                    {Object.entries(taskGroups).map(([status, tasks]) =>
+                                        tasks.length > 0 ? (
+                                            <Col key={status} span={24}>
+                                                <Card 
+                                                    className="status-header-card"
+                                                    style={{ marginBottom: 16 }}
+                                                >
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                         {getStatusIcon(status)}
-                                                        <span>{status.replace(/_/g, ' ')}</span>
-                                                        <Tag>{tasks.length}</Tag>
+                                                        <Title level={4} style={{ margin: 0 }}>
+                                                            {status.replace(/_/g, ' ')}
+                                                        </Title>
+                                                        <Tag>{tasks.length} tasks</Tag>
                                                     </div>
-                                                }
-                                                className="task-group-card"
+                                                </Card>
+                                            </Col>
+                                        ) : null
+                                    )}
+                                </Row>
+
+                                {/* Tasks Grid - Sorted by Priority */}
+                                <Row gutter={[16, 16]}>
+                                    {sortedTasks.map(task => (
+                                        <Col xs={24} sm={12} md={8} lg={6} xl={4} key={task.id}>
+                                            <Card 
+                                                className="task-card"
+                                                hoverable
                                             >
-                                                <Space direction="vertical" style={{ width: '100%' }} size="small">
-                                                    {tasks.slice(0, 5).map(task => (
-                                                        <Card key={task.id} size="small" className="task-item">
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                                <div style={{ flex: 1 }}>
-                                                                    <Text strong style={{ display: 'block' }}>{task.title}</Text>
-                                                                    {task.dueDate && (
-                                                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                                                            <CalendarOutlined /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                                                                        </Text>
-                                                                    )}
-                                                                </div>
-                                                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                                    <Tag color={getPriorityColor(task.priority)}>{task.priority}</Tag>
-                                                                    <Progress
-                                                                        type="circle"
-                                                                        width={40}
-                                                                        percent={task.progress}
-                                                                        strokeWidth={6}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </Card>
-                                                    ))}
-                                                    {tasks.length > 5 && (
-                                                        <Text type="secondary" style={{ textAlign: 'center', display: 'block' }}>
-                                                            +{tasks.length - 5} more tasks
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <Text strong style={{ display: 'block', fontSize: 14 }}>
+                                                            {task.title}
                                                         </Text>
-                                                    )}
-                                                </Space>
+                                                        {task.dueDate && (
+                                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                                                                <CalendarOutlined /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                                                            </Text>
+                                                        )}
+                                                    </div>
+                                                    <Tag color={getPriorityColor(task.priority)} style={{ marginLeft: 8 }}>
+                                                        {task.priority}
+                                                    </Tag>
+                                                </div>
+
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Space size="small">
+                                                        <Tag color="blue">
+                                                            {getStatusIcon(task.status)} {task.status.replace(/_/g, ' ')}
+                                                        </Tag>
+                                                    </Space>
+                                                    <Progress 
+                                                        percent={task.progress} 
+                                                        size="small"
+                                                        style={{ width: 80 }}
+                                                    />
+                                                </div>
                                             </Card>
                                         </Col>
-                                    )
-                                ))}
-                            </Row>
+                                    ))}
+                                </Row>
+                            </div>
                         )}
                     </Spin>
                 </Content>

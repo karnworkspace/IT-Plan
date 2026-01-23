@@ -8,6 +8,7 @@ interface User {
     email: string;
     name: string;
     role: string;
+    pinSetAt?: string | null;
 }
 
 interface AuthState {
@@ -111,7 +112,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             await authService.setupPin({ pin, confirmPin });
-            set({ isLoading: false });
+
+            // Update user.pinSetAt to prevent redirect loop
+            const currentUser = get().user;
+            if (currentUser) {
+                set({
+                    user: { ...currentUser, pinSetAt: new Date().toISOString() },
+                    isLoading: false
+                });
+            } else {
+                set({ isLoading: false });
+            }
         } catch (error: any) {
             const errorMessage = error.response?.data?.error || 'Failed to setup PIN';
             set({ error: errorMessage, isLoading: false });

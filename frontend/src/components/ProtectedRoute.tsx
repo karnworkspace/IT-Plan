@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const { isAuthenticated, isLoading, loadUser } = useAuthStore();
+    const { isAuthenticated, isLoading, loadUser, user } = useAuthStore();
 
     useEffect(() => {
         loadUser();
@@ -30,6 +30,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
+    }
+
+    // Check if PIN is set
+    if (user && !user.pinSetAt) {
+        return <Navigate to="/setup-pin" replace />;
     }
 
     return <>{children}</>;

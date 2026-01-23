@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { taskService, type Task } from '../services/taskService';
 import { projectService, type Project } from '../services/projectService';
+import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
     Card,
@@ -24,7 +25,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import './CalendarPage.css';
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -36,25 +37,40 @@ export const CalendarPage: React.FC = () => {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
+    // Load projects on mount
     useEffect(() => {
-        loadData();
+        loadProjects();
+    }, []);
+
+    // Load tasks when project is selected
+    useEffect(() => {
+        if (selectedProject) {
+            loadTasks(selectedProject);
+        }
     }, [selectedProject]);
 
-    const loadData = async () => {
+    const loadProjects = async () => {
         try {
             setLoading(true);
+            const projectsResponse = await projectService.getProjects({ pageSize: 100 });
+            setProjects(projectsResponse.projects);
 
-            // Load projects if not loaded
-            if (projects.length === 0) {
-                const projectsResponse = await projectService.getProjects({ pageSize: 100 });
-                setProjects(projectsResponse.projects);
+            // Auto-select first project
+            if (projectsResponse.projects.length > 0) {
+                setSelectedProject(projectsResponse.projects[0].id);
             }
+        } catch (error) {
+            message.error('Failed to load projects');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            // Load tasks
-            const tasksResponse = await taskService.getTasks(
-                selectedProject || projects[0]?.id || '',
-                { pageSize: 100 }
-            );
+    const loadTasks = async (projectId: string) => {
+        try {
+            setLoading(true);
+            const tasksResponse = await taskService.getTasks(projectId, { pageSize: 100 });
             setTasks(tasksResponse.tasks);
         } catch (error) {
             message.error('Failed to load tasks');
@@ -146,27 +162,7 @@ export const CalendarPage: React.FC = () => {
 
     return (
         <Layout className="calendar-layout">
-            <Sider width={250} className="calendar-sider">
-                <div className="logo">
-                    <CalendarOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-                    <Title level={4} style={{ margin: 0, color: 'white' }}>Calendar</Title>
-                </div>
-
-                <div className="sidebar-menu">
-                    <div className="menu-item">
-                        <FolderOutlined /> Dashboard
-                    </div>
-                    <div className="menu-item">
-                        <FolderOutlined /> Projects
-                    </div>
-                    <div className="menu-item">
-                        <CheckCircleOutlined /> My Tasks
-                    </div>
-                    <div className="menu-item active">
-                        <CalendarOutlined /> Calendar
-                    </div>
-                </div>
-            </Sider>
+            <Sidebar />
 
             <Layout>
                 <Header className="calendar-header">

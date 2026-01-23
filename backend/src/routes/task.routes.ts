@@ -7,6 +7,7 @@ import {
   deleteTask,
   updateTaskStatus,
   getTaskStats,
+  getMyTasks,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 
@@ -19,6 +20,9 @@ router.use(authenticate);
 router.get('/projects/:projectId/tasks', getTasks);
 router.get('/projects/:projectId/tasks/stats', getTaskStats);
 router.post('/projects/:projectId/tasks', createTask);
+
+// My tasks route (tasks assigned to or created by current user)
+router.get('/my-tasks', getMyTasks);
 
 // Individual task routes
 router.get('/tasks/:id', getTask);

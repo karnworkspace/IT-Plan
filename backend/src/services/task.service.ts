@@ -328,6 +328,76 @@ export class TaskService {
   }
 
   /**
+   * Get all tasks assigned to or created by a user (across all projects)
+   */
+  async getMyTasks(userId: string, filters?: { status?: string; priority?: string; page?: number; limit?: number }): Promise<PaginationResult<any>> {
+    const { status, priority, page = 1, limit = 50 } = filters || {};
+
+    // Build where clause - tasks where user is assignee OR creator
+    const where: any = {
+      OR: [
+        { assigneeId: userId },
+        { createdById: userId },
+      ],
+    };
+
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+
+    // Get total count
+    const total = await prisma.task.count({ where });
+
+    // Get tasks with pagination
+    const tasks = await prisma.task.findMany({
+      where,
+      include: {
+        project: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            dailyUpdates: true,
+          },
+        },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        { dueDate: 'asc' },
+        { priority: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
+
+    return {
+      data: tasks,
+      pagination: {
+        page,
+        limit,
+        total,
+      },
+    };
+  }
+
+  /**
    * Get task statistics for a project
    */
   async getTaskStats(projectId: string): Promise<any> {

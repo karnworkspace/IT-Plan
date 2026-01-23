@@ -94,6 +94,25 @@ export const taskService = {
   },
 
   /**
+   * Get my tasks (assigned to or created by current user)
+   */
+  async getMyTasks(params?: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+    priority?: string;
+  }): Promise<TasksResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('limit', params.pageSize.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.priority) queryParams.append('priority', params.priority);
+
+    const response = await api.get(`/my-tasks?${queryParams.toString()}`);
+    return response.data.data;
+  },
+
+  /**
    * Get task by ID
    */
   async getTask(id: string): Promise<Task> {

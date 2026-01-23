@@ -274,6 +274,27 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
 };
 
 /**
+ * Get all tasks assigned to or created by the current user
+ */
+export const getMyTasks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = extractUserId(req);
+
+    const filters = {
+      status: req.query.status as string | undefined,
+      priority: req.query.priority as string | undefined,
+      page: req.query.page ? parseInt(req.query.page as string) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+    };
+
+    const result = await taskService.getMyTasks(userId, filters);
+    return sendSuccess(res, { tasks: result.data, pagination: result.pagination }, '200');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get task statistics for a project
  */
 export const getTaskStats = async (req: Request, res: Response, next: NextFunction) => {

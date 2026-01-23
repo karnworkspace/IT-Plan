@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { projectService, type Project } from '../services/projectService';
+import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
     Card,
@@ -28,7 +29,7 @@ import {
 } from '@ant-design/icons';
 import './ProjectsPage.css';
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -148,27 +149,7 @@ export const ProjectsPage: React.FC = () => {
 
     return (
         <Layout className="projects-layout">
-            <Sider width={250} className="projects-sider">
-                <div className="logo">
-                    <FolderOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-                    <Title level={4} style={{ margin: 0, color: 'white' }}>Projects</Title>
-                </div>
-
-                <div className="sidebar-menu">
-                    <div className="menu-item">
-                        <FolderOutlined /> Dashboard
-                    </div>
-                    <div className="menu-item active">
-                        <FolderOutlined /> Projects
-                    </div>
-                    <div className="menu-item">
-                        <FolderOutlined /> My Tasks
-                    </div>
-                    <div className="menu-item">
-                        <CalendarOutlined /> Calendar
-                    </div>
-                </div>
-            </Sider>
+            <Sidebar />
 
             <Layout>
                 <Header className="projects-header">

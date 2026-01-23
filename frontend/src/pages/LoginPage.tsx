@@ -29,7 +29,13 @@ export const LoginPage: React.FC = () => {
         try {
             await loginWithEmail(values.email, values.password, values.remember);
             message.success('Login successful!');
-            navigate('/dashboard');
+            // Check if PIN is set, redirect to setup-pin if not
+            const { user } = useAuthStore.getState();
+            if (user && !user.pinSetAt) {
+                navigate('/setup-pin');
+            } else {
+                navigate('/dashboard');
+            }
         } catch (error) {
             message.error('Login failed. Please check your credentials.');
         }

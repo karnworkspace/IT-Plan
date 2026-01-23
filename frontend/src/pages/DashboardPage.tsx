@@ -4,7 +4,7 @@ import type { Project, ProjectStats } from '../services/projectService';
 import type { Task, TaskStats } from '../services/taskService';
 import { projectService } from '../services/projectService';
 import { taskService } from '../services/taskService';
-import { useAuthStore } from '../store/authStore';
+import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
     Card,
@@ -30,22 +30,14 @@ import {
     EditOutlined,
     ShareAltOutlined,
     DownOutlined,
-    TeamOutlined,
-    CalendarOutlined,
 } from '@ant-design/icons';
 import './DashboardPage.css';
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 export const DashboardPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const { logout } = useAuthStore();
-
-    const handleLogout = async () => {
-        await logout();
-        window.location.href = '/login';
-    };
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -148,40 +140,7 @@ export const DashboardPage: React.FC = () => {
 
     return (
         <Layout className="dashboard-layout">
-            {/* Sidebar */}
-            <Sider width={250} className="dashboard-sider">
-                <div className="logo">
-                    <TeamOutlined style={{ fontSize: 24 }} />
-                    <Title level={4} style={{ margin: 0, color: 'white' }}>TaskFlow</Title>
-                </div>
-
-                <div className="sidebar-menu">
-                    <div className="menu-item active">
-                        <FolderOutlined /> Dashboard
-                    </div>
-                    <div className="menu-item">
-                        <FolderOutlined /> Projects
-                    </div>
-                    <div className="menu-item">
-                        <CheckCircleOutlined /> My Tasks
-                    </div>
-                    <div className="menu-item">
-                        <CalendarOutlined /> Calendar
-                    </div>
-                </div>
-
-                <div className="sidebar-user">
-                    <Avatar>K</Avatar>
-                    <Text style={{ color: 'white' }}>KARN</Text>
-                    <Button 
-                        type="text" 
-                        onClick={handleLogout}
-                        style={{ color: 'white', marginTop: 8 }}
-                    >
-                        Logout
-                    </Button>
-                </div>
-            </Sider>
+            <Sidebar />
 
             <Layout>
                 {/* Header */}

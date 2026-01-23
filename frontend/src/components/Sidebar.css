@@ -1,0 +1,54 @@
+.app-sider {
+    background: #001529 !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Offset content for fixed sidebar */
+.app-sider + .ant-layout {
+    margin-left: 0;
+}
+
+.logo {
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 16px 0;
+}
+
+.menu-item {
+    padding: 12px 24px;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.menu-item.active {
+    background: #1890ff;
+    color: white;
+}
+
+.sidebar-user {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}

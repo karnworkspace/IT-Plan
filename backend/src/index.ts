@@ -4,6 +4,7 @@ import { config } from './config';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import { apiLimiter } from './middlewares/rateLimiter.middleware';
+import { startAllJobs } from './jobs';
 
 // Create Express app
 const app: Application = express();
@@ -45,6 +46,9 @@ app.listen(PORT, () => {
     console.log(`📝 Environment: ${config.nodeEnv}`);
     console.log(`🌐 CORS enabled for: ${config.cors.origin}`);
     console.log(`\n✅ Server started successfully!`);
+    
+    // Start background jobs
+    startAllJobs();
 });
 
 // Handle unhandled promise rejections

@@ -1,0 +1,108 @@
+.dashboard-layout {
+    min-height: 100vh;
+}
+
+.dashboard-sider {
+    background: #001529;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 16px 0;
+}
+
+.menu-item {
+    padding: 12px 24px;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.menu-item.active {
+    background: #1890ff;
+    color: white;
+}
+
+.sidebar-user {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-header {
+    background: white;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-content {
+    padding: 24px;
+    background: #f5f5f5;
+    overflow-y: auto;
+}
+
+.project-selector-card {
+    margin-bottom: 24px;
+}
+
+.project-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.project-selector:hover {
+    opacity: 0.8;
+}
+
+.project-overview-card {
+    margin-bottom: 24px;
+}
+
+.mini-project-card {
+    margin-bottom: 16px;
+}
+
+.task-column-card {
+    margin-bottom: 16px;
+}
+
+.task-column-card .ant-card-head {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.task-card {
+    margin-bottom: 12px;
+    border-left: 3px solid #1890ff;
+}
+
+.task-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Authentication Models
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("MEMBER") // ADMIN, MEMBER
+
+  // PIN Authentication
+  pinHash   String?
+  pinSetAt  DateTime?
+
+  // Account Security
+  loginAttempts     Int      @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  refreshTokens     RefreshToken[]
+  ownedProjects     Project[]        @relation("ProjectOwner")
+  projectMembers    ProjectMember[]
+  tasks             Task[]           @relation("TaskAssignee")
+  createdTasks      Task[]           @relation("TaskCreator")
+  comments          Comment[]
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// Project Models
+// ============================================
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String   @default("#1890ff")
+  icon        String?
+  status      String   @default("ACTIVE") // ACTIVE, ARCHIVED, COMPLETED
+
+  // Ownership
+  ownerId String
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  owner         User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       ProjectMember[]
+  tasks         Task[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+
+  @@index([ownerId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      String   @default("MEMBER") // OWNER, ADMIN, MEMBER
+  joinedAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+// ============================================
+// Task Models
+// ============================================
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  status      String   @default("TODO") // TODO, IN_PROGRESS, IN_REVIEW, DONE, BLOCKED
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+
+  // Project & Assignment
+  projectId String
+  assigneeId String?
+  createdById String
+
+  // Dates
+  dueDate   DateTime?
+  startDate DateTime?
+
+  // Progress
+  progress Int @default(0) // 0-100
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee     User?          @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy    User           @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  comments     Comment[]
+  dailyUpdates DailyUpdate[]
+  notifications Notification[]
+  activityLogs ActivityLog[]
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([createdById])
+  @@index([status])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+// ============================================
+// Task Updates & Comments
+// ============================================
+
+model DailyUpdate {
+  id        String   @id @default(uuid())
+  taskId    String
+  date      DateTime @default(now())
+  progress  Int      // 0-100
+  status    String   // TODO, IN_PROGRESS, IN_REVIEW, DONE, BLOCKED
+  notes     String?
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([date])
+  @@map("daily_updates")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("comments")
+}
+
+// ============================================
+// Notification Models
+// ============================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // TASK_ASSIGNED, TASK_DUE_SOON, TASK_OVERDUE, TASK_COMPLETED, COMMENT_ADDED, PROJECT_INVITE, DAILY_REMINDER
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+
+  // Related entities
+  projectId String?
+  taskId    String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ============================================
+// Activity Log Models
+// ============================================
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String   // CREATED, UPDATED, DELETED, ASSIGNED, COMPLETED, COMMENTED
+  entityType String  // "task", "project", "comment"
+  entityId  String
+  metadata  String?  // JSON string for additional data
+
+  // Related entities
+  projectId String?
+  taskId    String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([taskId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ============================================
+// Type Constants (for TypeScript reference)
+// ============================================
+// UserRole: "ADMIN" | "MEMBER"
+// ProjectStatus: "ACTIVE" | "ARCHIVED" | "COMPLETED"
+// ProjectMemberRole: "OWNER" | "ADMIN" | "MEMBER"
+// TaskStatus: "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE" | "BLOCKED"
+// Priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+// NotificationType: "TASK_ASSIGNED" | "TASK_DUE_SOON" | "TASK_OVERDUE" | "TASK_COMPLETED" | "COMMENT_ADDED" | "PROJECT_INVITE" | "DAILY_REMINDER"
+// ActivityType: "CREATED" | "UPDATED" | "DELETED" | "ASSIGNED" | "COMPLETED" | "COMMENTED"

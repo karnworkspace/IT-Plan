@@ -1,0 +1,26 @@
+.pin-input-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.pin-input-box {
+  width: 48px !important;
+  height: 56px !important;
+  font-size: 24px !important;
+  text-align: center !important;
+  font-family: monospace !important;
+  border-radius: 8px !important;
+}
+
+.pin-input-box input {
+  text-align: center !important;
+  font-size: 24px !important;
+  font-family: monospace !important;
+}
+
+.pin-input-box:focus,
+.pin-input-box:focus-within {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}

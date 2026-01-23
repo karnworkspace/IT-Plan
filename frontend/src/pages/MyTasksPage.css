@@ -1,0 +1,88 @@
+.my-tasks-layout {
+    min-height: 100vh;
+}
+
+.my-tasks-sider {
+    background: #001529;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+.my-tasks-sider .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #1f2937;
+}
+
+.my-tasks-sider .sidebar-menu {
+    flex: 1;
+    padding: 20px 0;
+}
+
+.my-tasks-sider .menu-item {
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.my-tasks-sider .menu-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.my-tasks-sider .menu-item.active {
+    color: white;
+    background: #1890ff;
+}
+
+.my-tasks-header {
+    background: white;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.my-tasks-content {
+    padding: 24px;
+    background: #f5f5f5;
+    min-height: calc(100vh - 64px);
+}
+
+.task-group-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-group-card .ant-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-item {
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.task-item:hover {
+    border-color: #1890ff;
+    cursor: pointer;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.filters-card {
+    background: white;
+    border-radius: 8px;
+}

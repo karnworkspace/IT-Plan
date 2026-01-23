@@ -5,6 +5,7 @@ import taskRoutes from './task.routes';
 import dailyUpdateRoutes from './dailyUpdate.routes';
 import commentRoutes from './comment.routes';
 import notificationRoutes from './notification.routes';
+import activityLogRoutes from './activityLog.routes';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/', taskRoutes);
 router.use('/', dailyUpdateRoutes);
 router.use('/', commentRoutes);
 router.use('/', notificationRoutes);
+router.use('/', activityLogRoutes);
 
 export default router;

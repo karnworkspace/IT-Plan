@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import notificationService from './notification.service';
 
 const prisma = new PrismaClient();
 
@@ -177,7 +178,7 @@ export class TaskService {
    * Create new task
    */
   async createTask(data: CreateTaskInput): Promise<any> {
-    return await prisma.task.create({
+    const task = await prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
@@ -211,6 +212,20 @@ export class TaskService {
         },
       },
     });
+
+    // Trigger notification for assignee
+    if (data.assigneeId && data.assigneeId !== data.createdById) {
+      await notificationService.createNotification({
+        userId: data.assigneeId,
+        type: 'TASK_ASSIGNED',
+        title: 'New Task Assigned',
+        message: `You have been assigned to task: ${task.title}`,
+        taskId: task.id,
+        projectId: task.projectId,
+      });
+    }
+
+    return task;
   }
 
   /**
@@ -218,23 +233,35 @@ export class TaskService {
    */
   async updateTask(id: string, data: UpdateTaskInput, userId: string): Promise<any | null> {
     // Check if user has permission (assignee, creator, or project owner)
-    const task = await prisma.task.findUnique({
+    const existingTask = await prisma.task.findUnique({
       where: { id },
       include: {
         project: true,
       },
     });
 
-    if (!task) {
+    if (!existingTask) {
       return null;
     }
 
-    const isAssignee = task.assigneeId === userId;
-    const isCreator = task.createdById === userId;
-    const isProjectOwner = task.project.ownerId === userId;
+    const isAssignee = existingTask.assigneeId === userId;
+    const isCreator = existingTask.createdById === userId;
+    const isProjectOwner = existingTask.project.ownerId === userId;
 
     if (!isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to update this task');
+    }
+
+    // Trigger notification when assignee changes
+    if (data.assigneeId && data.assigneeId !== existingTask.assigneeId) {
+      await notificationService.createNotification({
+        userId: data.assigneeId,
+        type: 'TASK_ASSIGNED',
+        title: 'Task Assigned to You',
+        message: `You have been assigned to task: ${existingTask.title}`,
+        taskId: id,
+        projectId: existingTask.projectId,
+      });
     }
 
     return await prisma.task.update({
@@ -299,32 +326,46 @@ export class TaskService {
    */
   async updateTaskStatus(id: string, status: string, progress: number, userId: string): Promise<any> {
     // Check if user has permission
-    const task = await prisma.task.findUnique({
+    const existingTask = await prisma.task.findUnique({
       where: { id },
       include: {
         project: true,
       },
     });
 
-    if (!task) {
+    if (!existingTask) {
       throw new Error('Task not found');
     }
 
-    const isAssignee = task.assigneeId === userId;
-    const isCreator = task.createdById === userId;
-    const isProjectOwner = task.project.ownerId === userId;
+    const isAssignee = existingTask.assigneeId === userId;
+    const isCreator = existingTask.createdById === userId;
+    const isProjectOwner = existingTask.project.ownerId === userId;
 
     if (!isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to update this task');
     }
 
-    return await prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: { id },
       data: {
         status,
         progress,
       },
     });
+
+    // Trigger notification when task completed
+    if (status === 'DONE' && existingTask.createdById !== userId) {
+      await notificationService.createNotification({
+        userId: existingTask.createdById,
+        type: 'TASK_COMPLETED',
+        title: 'Task Completed',
+        message: `Task "${existingTask.title}" has been marked as completed`,
+        taskId: id,
+        projectId: existingTask.projectId,
+      });
+    }
+
+    return updatedTask;
   }
 
   /**

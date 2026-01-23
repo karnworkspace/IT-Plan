@@ -7,6 +7,10 @@ import {
   updateProject,
   deleteProject,
   getProjectStats,
+  getProjectMembers,
+  addProjectMember,
+  updateProjectMemberRole,
+  removeProjectMember,
 } from '../controllers/project.controller';
 
 const router = Router();
@@ -55,5 +59,33 @@ router.put('/:id', updateProject);
  * @access  Private (owner only)
  */
 router.delete('/:id', deleteProject);
+
+/**
+ * @route   GET /api/v1/projects/:id/members
+ * @desc    Get all project members
+ * @access  Private
+ */
+router.get('/:id/members', getProjectMembers);
+
+/**
+ * @route   POST /api/v1/projects/:id/members
+ * @desc    Add member to project
+ * @access  Private (owner/admin only)
+ */
+router.post('/:id/members', addProjectMember);
+
+/**
+ * @route   PUT /api/v1/projects/:id/members/:memberId
+ * @desc    Update member role
+ * @access  Private (owner only)
+ */
+router.put('/:id/members/:memberId', updateProjectMemberRole);
+
+/**
+ * @route   DELETE /api/v1/projects/:id/members/:memberId
+ * @desc    Remove member from project
+ * @access  Private (owner/admin only)
+ */
+router.delete('/:id/members/:memberId', removeProjectMember);
 
 export default router;

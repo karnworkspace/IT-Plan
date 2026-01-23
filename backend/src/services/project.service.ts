@@ -239,6 +239,98 @@ export class ProjectService {
       progress: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
   }
+
+  /**
+   * Get all members of a project
+   */
+  async getProjectMembers(projectId: string): Promise<any[]> {
+    return await prisma.projectMember.findMany({
+      where: { projectId },
+      include: {
+        user: {
+          select: { id: true, email: true, name: true }
+        }
+      },
+      orderBy: { joinedAt: 'asc' }
+    });
+  }
+
+  /**
+   * Add member to project
+   */
+  async addProjectMember(projectId: string, userId: string, role: string, requesterId: string): Promise<any> {
+    // Check if requester is owner or admin
+    const requesterMember = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId: requesterId } }
+    });
+    
+    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+      throw new Error('Only project owners and admins can add members');
+    }
+    
+    // Check if user already exists
+    const existingMember = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } }
+    });
+    
+    if (existingMember) {
+      throw new Error('User is already a member of this project');
+    }
+    
+    return await prisma.projectMember.create({
+      data: { projectId, userId, role },
+      include: {
+        user: { select: { id: true, email: true, name: true } }
+      }
+    });
+  }
+
+  /**
+   * Update member role
+   */
+  async updateMemberRole(projectId: string, memberId: string, role: string, requesterId: string): Promise<any> {
+    // Check if requester has permission
+    const requesterMember = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId: requesterId } }
+    });
+    
+    if (!requesterMember || requesterMember.role !== 'OWNER') {
+      throw new Error('Only project owners can change member roles');
+    }
+    
+    return await prisma.projectMember.update({
+      where: { id: memberId },
+      data: { role },
+      include: {
+        user: { select: { id: true, email: true, name: true } }
+      }
+    });
+  }
+
+  /**
+   * Remove member from project
+   */
+  async removeProjectMember(projectId: string, memberId: string, requesterId: string): Promise<void> {
+    // Check if requester has permission
+    const requesterMember = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId: requesterId } }
+    });
+    
+    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+      throw new Error('Only project owners and admins can remove members');
+    }
+    
+    // Prevent removing the owner
+    const targetMember = await prisma.projectMember.findUnique({
+      where: { id: memberId }
+    });
+    
+    if (targetMember?.role === 'OWNER') {
+      throw new Error('Cannot remove project owner');
+    }
+    
+    await prisma.projectMember.delete({ where: { id: memberId } });
+  }
 }
 
 export default new ProjectService();

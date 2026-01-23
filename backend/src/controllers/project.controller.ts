@@ -183,3 +183,107 @@ export const getProjectStats = async (
     return sendError(res, 'Failed to fetch project statistics', 500);
   }
 };
+
+/**
+ * Get all project members
+ */
+export const getProjectMembers = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    const members = await projectService.getProjectMembers(String(id));
+
+    return sendSuccess(res, { members });
+  } catch (error) {
+    return sendError(res, 'Failed to fetch project members', 500);
+  }
+};
+
+/**
+ * Add member to project
+ */
+export const addProjectMember = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { userId, role = 'MEMBER' } = req.body;
+    const requesterId = extractUserId(req);
+
+    if (!userId) {
+      return sendError(res, 'userId is required', 400);
+    }
+
+    const member = await projectService.addProjectMember(String(id), userId, role, requesterId);
+
+    return sendSuccess(res, { member }, 201);
+  } catch (error: any) {
+    if (error.message === 'Only project owners and admins can add members') {
+      return sendError(res, 'Only project owners and admins can add members', 403);
+    }
+    if (error.message === 'User is already a member of this project') {
+      return sendError(res, 'User is already a member of this project', 400);
+    }
+    return sendError(res, 'Failed to add member', 500);
+  }
+};
+
+/**
+ * Update member role
+ */
+export const updateProjectMemberRole = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { id, memberId } = req.params;
+    const { role } = req.body;
+    const requesterId = extractUserId(req);
+
+    if (!role || !['OWNER', 'ADMIN', 'MEMBER'].includes(role)) {
+      return sendError(res, 'Valid role is required (OWNER, ADMIN, MEMBER)', 400);
+    }
+
+    const member = await projectService.updateMemberRole(String(id), String(memberId), role, requesterId);
+
+    return sendSuccess(res, { member });
+  } catch (error: any) {
+    if (error.message === 'Only project owners can change member roles') {
+      return sendError(res, 'Only project owners can change member roles', 403);
+    }
+    return sendError(res, 'Failed to update member role', 500);
+  }
+};
+
+/**
+ * Remove member from project
+ */
+export const removeProjectMember = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { id, memberId } = req.params;
+    const requesterId = extractUserId(req);
+
+    await projectService.removeProjectMember(String(id), String(memberId), requesterId);
+
+    return sendSuccess(res, { message: 'Member removed successfully' });
+  } catch (error: any) {
+    if (error.message === 'Only project owners and admins can remove members') {
+      return sendError(res, 'Only project owners and admins can remove members', 403);
+    }
+    if (error.message === 'Cannot remove project owner') {
+      return sendError(res, 'Cannot remove project owner', 400);
+    }
+    return sendError(res, 'Failed to remove member', 500);
+  }
+};

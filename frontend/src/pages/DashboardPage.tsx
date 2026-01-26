@@ -1,10 +1,4 @@
-// Dashboard Page with Project Selector
 import React, { useState, useEffect } from 'react';
-import type { Project, ProjectStats } from '../services/projectService';
-import type { Task, TaskStats } from '../services/taskService';
-import { projectService } from '../services/projectService';
-import { taskService } from '../services/taskService';
-import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
     Card,
@@ -12,302 +6,301 @@ import {
     Col,
     Progress,
     Avatar,
-    Tag,
-    Button,
-    Statistic,
     Typography,
-    Dropdown,
     Space,
-    Badge,
+    Statistic,
+    List,
+    Timeline,
+    Tag,
     Spin,
-    message,
+    Button,
 } from 'antd';
 import {
-    FolderOutlined,
+    ProjectOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
-    ExclamationCircleOutlined,
-    EditOutlined,
-    ShareAltOutlined,
-    DownOutlined,
+    TeamOutlined,
+    RocketOutlined,
+    ArrowRightOutlined,
+    FolderOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { Sidebar } from '../components/Sidebar';
+import { projectService } from '../services/projectService';
+import { taskService } from '../services/taskService';
+import { activityLogService } from '../services/activityLogService';
+import { useAuthStore } from '../store/authStore';
 import './DashboardPage.css';
 
-const { Header, Content } = Layout;
+dayjs.extend(relativeTime);
+
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export const DashboardPage: React.FC = () => {
+    const navigate = useNavigate();
+    const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [projectStats, setProjectStats] = useState<TaskStats | null>(null);
 
-    // Load projects on mount
-    useEffect(() => {
-        loadProjects();
-    }, []);
+    // Stats State
+    const [stats, setStats] = useState({
+        totalProjects: 0,
+        activeProjects: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        pendingTasks: 0,
+        overdueTasks: 0,
+        completionRate: 0,
+    });
 
-    // Load tasks when project selected
+    // Data State
+    const [recentProjects, setRecentProjects] = useState<any[]>([]);
+    const [myTasks, setMyTasks] = useState<any[]>([]);
+    const [recentActivities, setRecentActivities] = useState<any[]>([]);
+
     useEffect(() => {
-        if (selectedProject) {
-            loadTasksAndStats(selectedProject.id);
+        if (user) {
+            loadDashboardData();
         }
-    }, [selectedProject]);
+    }, [user]);
 
-    const loadProjects = async () => {
+    const loadDashboardData = async () => {
+        if (!user) return;
+
         try {
             setLoading(true);
-            const response = await projectService.getProjects({ status: 'ACTIVE', pageSize: 50 });
-            setProjects(response.projects);
-            if (response.projects.length > 0 && !selectedProject) {
-                setSelectedProject(response.projects[0]);
-            }
+
+            // Parallel data loading
+            const [
+                projectsRes,
+                tasksRes,
+                activitiesRes
+            ] = await Promise.all([
+                projectService.getProjects({ pageSize: 5 }), // Get recent 5 projects
+                taskService.getMyTasks({ pageSize: 5, status: 'IN_PROGRESS' }), // Get my top 5 tasks
+                activityLogService.getUserActivities(user.id, 10) // Get recent 10 activities
+            ]);
+
+            // Calculate aggregated stats (In real app, backend should provide a stats endpoint)
+            const totalProjects = projectsRes.total || projectsRes.projects.length;
+            const activeProjects = projectsRes.projects.filter((p: any) => p.status === 'ACTIVE').length;
+
+            const myTotalTasks = tasksRes.total || 0;
+
+            setStats({
+                totalProjects,
+                activeProjects,
+                totalTasks: myTotalTasks,
+                completedTasks: 0, // Placeholder
+                pendingTasks: myTotalTasks,
+                overdueTasks: 0, // Placeholder
+                completionRate: 65, // Mock for visual
+            });
+
+            setRecentProjects(projectsRes.projects.slice(0, 4));
+            setMyTasks(tasksRes.tasks.slice(0, 5));
+            setRecentActivities(activitiesRes?.data?.activities || []); // Handle response structure
         } catch (error) {
-            message.error('Failed to load projects');
-            console.error(error);
+            console.error('Failed to load dashboard data', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const loadTasksAndStats = async (projectId: string) => {
-        try {
-            const [tasksResponse, statsResponse] = await Promise.all([
-                taskService.getTasks(projectId, { pageSize: 20 }),
-                taskService.getTaskStats(projectId)
-            ]);
-            setTasks(tasksResponse.tasks);
-            setProjectStats(statsResponse);
-        } catch (error) {
-            message.error('Failed to load project data');
-            console.error(error);
+    const StatusCard = ({ title, value, icon, color, suffix }: any) => (
+        <Card className="stat-card" bordered={false}>
+            <Statistic
+                title={<Text type="secondary">{title}</Text>}
+                value={value}
+                valueStyle={{ color: '#1f2937', fontWeight: 600 }}
+                prefix={<span style={{ color, marginRight: 8, fontSize: 20 }}>{icon}</span>}
+                suffix={suffix}
+            />
+        </Card>
+    );
+
+    const getActionColor = (action: string) => {
+        switch (action) {
+            case 'CREATED': return 'green';
+            case 'UPDATED': return 'blue';
+            case 'DELETED': return 'red';
+            case 'COMPLETED': return 'purple';
+            default: return 'gray';
         }
     };
-
-    const handleProjectChange = (projectId: string) => {
-        const project = projects.find((p) => p.id === projectId);
-        if (project) {
-            setSelectedProject(project);
-        }
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'active':
-                return 'success';
-            case 'planning':
-                return 'warning';
-            case 'on_hold':
-                return 'default';
-            case 'ACTIVE':
-                return 'success';
-            case 'ARCHIVED':
-                return 'default';
-            case 'COMPLETED':
-                return 'success';
-            default:
-                return 'default';
-        }
-    };
-
-    const getPriorityColor = (priority: string) => {
-        switch (priority) {
-            case 'high':
-            case 'URGENT':
-                return 'red';
-            case 'medium':
-                return 'orange';
-            case 'low':
-            case 'LOW':
-                return 'green';
-            default:
-                return 'default';
-        }
-    };
-
-    const projectMenuItems = projects.map((project) => ({
-        key: project.id,
-        label: (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FolderOutlined />
-                <span>{project.name}</span>
-                {selectedProject?.id === project.id && <CheckCircleOutlined style={{ color: '#52c41a' }} />}
-            </div>
-        ),
-        onClick: () => handleProjectChange(project.id),
-    }));
 
     return (
         <Layout className="dashboard-layout">
             <Sidebar />
 
-            <Layout>
-                {/* Header */}
-                <Header className="dashboard-header">
-                    <Text type="secondary">Dashboard</Text>
-                    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                        <Badge count={0}>
-                            <Button type="text" icon={<ExclamationCircleOutlined />} />
-                        </Badge>
-                        <Avatar>K</Avatar>
-                    </div>
-                </Header>
-
-                {/* Content */}
+            <Layout className="dashboard-main">
                 <Content className="dashboard-content">
-                    {/* Project Selector */}
-                    <Card className="project-selector-card">
-                        <Dropdown menu={{ items: projectMenuItems }} trigger={['click']}>
-                            <div className="project-selector">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <FolderOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-                                    <div>
-                                        <Title level={4} style={{ margin: 0 }}>{selectedProject?.name || 'Select a project'}</Title>
-                                        {selectedProject && (
-                                            <Tag color={getStatusColor(selectedProject.status)}>
-                                                {selectedProject.status.replace('_', ' ').toUpperCase()}
-                                            </Tag>
-                                        )}
-                                    </div>
-                                    <DownOutlined />
-                                </div>
-                            </div>
-                        </Dropdown>
-                    </Card>
+                    <div className="dashboard-header-section">
+                        <div>
+                            <Title level={2} style={{ margin: 0 }}>
+                                Welcome back, {user?.name?.split(' ')[0]}! 👋
+                            </Title>
+                            <Text type="secondary">Here's what's happening with your projects today.</Text>
+                        </div>
+                        <Button type="primary" size="large" onClick={() => navigate('/projects')}>
+                            View All Projects
+                        </Button>
+                    </div>
 
-                    {/* Project Overview */}
-                    <Card className="project-overview-card">
-                        <Spin spinning={loading}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                                <Title level={4}>{selectedProject?.name}</Title>
-                                <Space>
-                                    <Button icon={<EditOutlined />}>Edit</Button>
-                                    <Button icon={<ShareAltOutlined />}>Share</Button>
-                                </Space>
-                            </div>
-
-                            <Row gutter={16}>
-                                <Col span={6}>
-                                    <Statistic
-                                        title="Total Tasks"
-                                        value={projectStats?.total || 0}
-                                        prefix={<FolderOutlined />}
-                                    />
-                                </Col>
-                                <Col span={6}>
-                                    <Statistic
-                                        title="Completed"
-                                        value={projectStats?.done || 0}
-                                        prefix={<CheckCircleOutlined />}
-                                        valueStyle={{ color: '#52c41a' }}
-                                    />
-                                </Col>
-                                <Col span={6}>
-                                    <Statistic
-                                        title="In Progress"
-                                        value={projectStats?.inProgress || 0}
-                                        prefix={<ClockCircleOutlined />}
-                                        valueStyle={{ color: '#1890ff' }}
-                                    />
-                                </Col>
-                                <Col span={6}>
-                                    <Statistic
-                                        title="Overdue"
-                                        value={projectStats?.overdue || 0}
-                                        prefix={<ExclamationCircleOutlined />}
-                                        valueStyle={{ color: '#f5222d' }}
-                                    />
-                                </Col>
-                            </Row>
-
-                            {selectedProject && projectStats && (
-                                <div style={{ marginTop: 24 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                        <Text strong>{Math.round((projectStats.done / (projectStats.total || 1)) * 100)}% Complete</Text>
-                                        <Text type="secondary">
-                                            {new Date(selectedProject.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - Present
-                                        </Text>
-                                    </div>
-                                    <Progress 
-                                        percent={Math.round((projectStats.done / (projectStats.total || 1)) * 100)} 
-                                        status="active" 
-                                    />
-                                </div>
-                            )}
-                        </Spin>
-                    </Card>
-
-                    {/* My Projects Overview */}
                     <Spin spinning={loading}>
-                        <Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>MY PROJECTS OVERVIEW</Title>
-                        <Row gutter={16}>
-                            {projects.slice(0, 4).map((project) => (
-                                <Col span={12} key={project.id}>
-                                    <Card className="mini-project-card" hoverable>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <Text strong>{project.name}</Text>
-                                                <Tag color={getStatusColor(project.status)} style={{ marginLeft: 8 }}>
-                                                    {project.status}
-                                                </Tag>
-                                            </div>
-                                        </div>
-                                        {project._count && (
-                                            <>
-                                                <Progress percent={50} size="small" style={{ marginTop: 12 }} />
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
-                                                    <Text type="secondary">Tasks: {project._count?.tasks || 0}</Text>
-                                                    <Text type="secondary">Members: {project._count?.members || 0}</Text>
-                                                </div>
-                                            </>
-                                        )}
-                                    </Card>
-                                </Col>
-                            ))}
+                        {/* Stats Row */}
+                        <Row gutter={[20, 20]} className="stats-row">
+                            <Col xs={24} sm={12} lg={6}>
+                                <StatusCard
+                                    title="Active Projects"
+                                    value={stats.activeProjects}
+                                    icon={<ProjectOutlined />}
+                                    color="#1890ff"
+                                />
+                            </Col>
+                            <Col xs={24} sm={12} lg={6}>
+                                <StatusCard
+                                    title="My Pending Tasks"
+                                    value={stats.pendingTasks}
+                                    icon={<ClockCircleOutlined />}
+                                    color="#fa8c16"
+                                />
+                            </Col>
+                            <Col xs={24} sm={12} lg={6}>
+                                <StatusCard
+                                    title="Team Members"
+                                    value={8} // Mock for demo
+                                    icon={<TeamOutlined />}
+                                    color="#52c41a"
+                                />
+                            </Col>
+                            <Col xs={24} sm={12} lg={6}>
+                                <StatusCard
+                                    title="Completion Rate"
+                                    value={stats.completionRate}
+                                    suffix="%"
+                                    icon={<RocketOutlined />}
+                                    color="#722ed1"
+                                />
+                            </Col>
                         </Row>
-                    </Spin>
 
-                    {/* Task Board Section */}
-                    <Spin spinning={loading}>
-                        <Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>TASK BOARD SECTION</Title>
-                        <Row gutter={16}>
-                            {['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'].map((status) => {
-                                const statusTasks = tasks.filter(t => t.status === status).slice(0, 2);
-                                const statusLabel = status.replace(/_/g, ' ');
-                                return (
-                                    <Col span={6} key={status}>
-                                        <Card
-                                            title={
-                                                <span>
-                                                    {statusLabel} ({statusTasks.length})
-                                                </span>
-                                            }
-                                            className="task-column-card"
-                                        >
-                                            {statusTasks.map((task) => (
-                                                <Card key={task.id} size="small" className="task-card">
-                                                    <Text strong>{task.title}</Text>
-                                                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <Avatar size="small">{task.assignee?.name?.charAt(0) || '?'}</Avatar>
-                                                        <Tag color={getPriorityColor(task.priority)}>{task.priority}</Tag>
+                        <div className="dashboard-grid">
+                            {/* Left Column: Recent Projects & My Tasks */}
+                            <div className="main-col">
+                                {/* Recent Projects */}
+                                <div className="section-header">
+                                    <Title level={4}>Recent Projects</Title>
+                                    <Button type="link" onClick={() => navigate('/projects')}>View all</Button>
+                                </div>
+                                <Row gutter={[16, 16]}>
+                                    {recentProjects.map(project => (
+                                        <Col xs={24} md={12} key={project.id}>
+                                            <Card
+                                                hoverable
+                                                className="project-summary-card"
+                                                onClick={() => navigate(`/projects/${project.id}`)}
+                                            >
+                                                <div className="card-header">
+                                                    <div className="project-icon" style={{ backgroundColor: project.color }}>
+                                                        <FolderOutlined />
                                                     </div>
-                                                    <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
-                                                        Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
-                                                    </Text>
-                                                    <Progress percent={task.progress} size="small" style={{ marginTop: 8 }} />
-                                                </Card>
-                                            ))}
-                                            {statusTasks.length === 0 && (
-                                                <Text type="secondary" style={{ display: 'block', textAlign: 'center', padding: 16 }}>
-                                                    No tasks
+                                                    <Tag color={project.status === 'ACTIVE' ? 'success' : 'default'}>
+                                                        {project.status}
+                                                    </Tag>
+                                                </div>
+                                                <Title level={5} ellipsis className="mt-4 mb-2">
+                                                    {project.name}
+                                                </Title>
+                                                <Text type="secondary" ellipsis>
+                                                    {project.description || 'No description'}
                                                 </Text>
-                                            )}
-                                        </Card>
-                                    </Col>
-                                );
-                            })}
-                        </Row>
+                                                <div className="mt-4">
+                                                    <div className="flex justify-between mb-1">
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>Progress</Text>
+                                                        <Text strong style={{ fontSize: 12 }}>65%</Text>
+                                                    </div>
+                                                    <Progress percent={65} showInfo={false} strokeColor={project.color} />
+                                                </div>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+
+                                {/* My Tasks */}
+                                <div className="section-header mt-8">
+                                    <Title level={4}>My Active Tasks</Title>
+                                    <Button type="link" onClick={() => navigate('/my-tasks')}>View all</Button>
+                                </div>
+                                <Card className="tasks-list-card" bordered={false}>
+                                    <List
+                                        dataSource={myTasks}
+                                        renderItem={task => (
+                                            <List.Item
+                                                actions={[
+                                                    <Button
+                                                        type="text"
+                                                        icon={<ArrowRightOutlined />}
+                                                        onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
+                                                    />
+                                                ]}
+                                            >
+                                                <List.Item.Meta
+                                                    avatar={
+                                                        <Avatar
+                                                            style={{
+                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#f5f5f5',
+                                                                color: task.priority === 'URGENT' ? 'white' : '#8c8c8c'
+                                                            }}
+                                                            icon={<CheckCircleOutlined />}
+                                                        />
+                                                    }
+                                                    title={<Text strong>{task.title}</Text>}
+                                                    description={
+                                                        <Space split={<div className="divider-dot" />}>
+                                                            <Text type="secondary">{task.project?.name}</Text>
+                                                            <Text type="secondary">
+                                                                Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
+                                                            </Text>
+                                                        </Space>
+                                                    }
+                                                />
+                                            </List.Item>
+                                        )}
+                                    />
+                                </Card>
+                            </div>
+
+                            {/* Right Column: Activity Feed */}
+                            <div className="side-col">
+                                <div className="section-header">
+                                    <Title level={4}>Recent Activity</Title>
+                                </div>
+                                <Card className="activity-card" bordered={false}>
+                                    <Timeline>
+                                        {recentActivities.length > 0 ? recentActivities.map(log => (
+                                            <Timeline.Item
+                                                key={log.id}
+                                                color={getActionColor(log.action)}
+                                            >
+                                                <Text strong>{log.user?.name}</Text>
+                                                <Text type="secondary"> {log.action.toLowerCase()} </Text>
+                                                <Text strong>{log.entityType}</Text>
+                                                <br />
+                                                <Text style={{ fontSize: 13 }}>
+                                                    {log.task?.title || log.project?.name || 'an item'}
+                                                </Text>
+                                                <div className="time-caption">
+                                                    {dayjs(log.createdAt).fromNow()}
+                                                </div>
+                                            </Timeline.Item>
+                                        )) : <Text type="secondary">No recent activities</Text>}
+                                    </Timeline>
+                                </Card>
+                            </div>
+                        </div>
                     </Spin>
                 </Content>
             </Layout>

@@ -9,6 +9,7 @@ import {
     DashboardOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
+import { NotificationPopover } from './NotificationPopover';
 import './Sidebar.css';
 
 const { Sider } = Layout;
@@ -51,12 +52,19 @@ export const Sidebar: React.FC = () => {
             </div>
 
             <div className="sidebar-user">
-                <Avatar>{user?.name?.charAt(0) || 'U'}</Avatar>
-                <Text style={{ color: 'white' }}>{user?.name || 'User'}</Text>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Avatar style={{ backgroundColor: '#1890ff' }}>{user?.name?.charAt(0) || 'U'}</Avatar>
+                        <Text style={{ color: 'white', maxWidth: 120 }} ellipsis>{user?.name || 'User'}</Text>
+                    </div>
+                    <NotificationPopover />
+                </div>
                 <Button
-                    type="text"
+                    type="default"
+                    ghost
+                    block
                     onClick={handleLogout}
-                    style={{ color: 'white', marginTop: 8 }}
+                    style={{ color: 'rgba(255,255,255,0.8)', borderColor: 'rgba(255,255,255,0.4)' }}
                 >
                     Logout
                 </Button>

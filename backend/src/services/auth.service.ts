@@ -16,6 +16,22 @@ export class AuthService {
      * Register a new user
      */
     async register(email: string, password: string, name: string) {
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+            throw new Error('Invalid email format');
+        }
+
+        // Validate password
+        if (!password || password.length < 6) {
+            throw new Error('Password must be at least 6 characters');
+        }
+
+        // Validate name
+        if (!name || name.trim().length === 0) {
+            throw new Error('Name is required');
+        }
+
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
             where: { email },

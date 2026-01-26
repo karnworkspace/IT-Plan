@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SetupPinPage } from './pages/SetupPinPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { MyTasksPage } from './pages/MyTasksPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
@@ -39,6 +40,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProjectsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId"
+            element={
+              <ProtectedRoute>
+                <ProjectDetailPage />
               </ProtectedRoute>
             }
           />

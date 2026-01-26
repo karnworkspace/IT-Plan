@@ -1,0 +1,142 @@
+/* TaskDetailModal.css */
+
+.task-detail-modal .ant-modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.task-detail-modal .ant-modal-body {
+    padding: 0;
+}
+
+.task-detail-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 85vh;
+}
+
+/* Header */
+.task-detail-header {
+    background: #f8f9fa;
+    padding: 24px 32px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.title-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+/* Content */
+.task-detail-content {
+    padding: 24px 32px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.section {
+    margin-bottom: 24px;
+}
+
+/* Metadata Grid */
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-item .ant-typography-secondary {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Updates */
+.update-form-card {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    border: 1px solid #e8e8e8;
+}
+
+.update-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Comments */
+.comments-list {
+    margin-bottom: 24px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-content {
+    position: relative;
+    padding-right: 24px;
+}
+
+.delete-comment-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ant-list-item:hover .delete-comment-btn {
+    opacity: 1;
+}
+
+.comment-input-area {
+    background: #fafafa;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #8c8c8c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .metadata-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}

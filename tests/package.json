@@ -1,0 +1,28 @@
+{
+    "name": "yty-project-tests",
+    "version": "1.0.0",
+    "description": "Automated Test Suite for YTY Task Management System",
+    "scripts": {
+        "test": "npm run test:api && npm run test:e2e",
+        "test:api": "jest --config jest.config.js --runInBand",
+        "test:api:watch": "jest --config jest.config.js --watch",
+        "test:api:coverage": "jest --config jest.config.js --coverage",
+        "test:e2e": "playwright test",
+        "test:e2e:ui": "playwright test --ui",
+        "test:e2e:headed": "playwright test --headed",
+        "test:e2e:debug": "playwright test --debug",
+        "test:report": "playwright show-report",
+        "setup": "npm install && npx playwright install"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@playwright/test": "^1.41.0",
+        "@types/jest": "^29.5.11",
+        "@types/node": "^20.11.0",
+        "@types/supertest": "^6.0.2",
+        "jest": "^29.7.0",
+        "supertest": "^6.3.4",
+        "ts-jest": "^29.1.2",
+        "typescript": "^5.3.3"
+    }
+}

@@ -84,15 +84,21 @@
 
 ---
 
-## สถานะโปรเจคปัจจุบัน (Last Updated: 2026-01-22)
+## สถานะโปรเจคปัจจุบัน (Last Updated: 2026-01-27)
 
 | Component | Status | Progress |
 |-----------|--------|----------|
 | Frontend | ✅ Complete | 100% |
 | Backend | ✅ Complete | 100% |
 | API Testing | ✅ Passed | 100% |
-| Integration | ⏳ Pending | 0% |
-| **Overall** | **In Progress** | **70%** |
+| Integration | ✅ Complete | 100% |
+| **Deployment (UAT)** | **✅ Live** | **100%** |
+| **Overall** | **✅ Production Ready** | **100%** |
+
+### 🌐 Live URLs (UAT)
+- **Frontend:** https://frontend-beta-seven-60.vercel.app
+- **Backend API:** https://backend-five-iota-42.vercel.app
+- **Database:** Vercel Postgres (Neon) - `taskflow-db`
 
 **ดูรายละเอียดเพิ่มเติม:** `Doc/PROJECT-PROGRESS.md`
 

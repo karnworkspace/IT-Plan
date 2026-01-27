@@ -42,12 +42,54 @@ The Task Management System has been successfully updated and verified.
 *   The system is now populated with the latest data from `IT2026.xlsx`.
 *   All tests passed successfully.
 
-### ✅ Jan 27 Updates: Role & UI Refinements
-1.  **Resolved Task Visibility**:
-    *   **CHIAN & OHM** (Admins) now see **ALL** tasks.
-    *   **KARN & TRI** now see only their Assigned tasks + Team tasks (Resolved the "Seeing too many tasks" issue).
-2.  **UI Enhancements**:
-    *   Added **Project Members Avatar Group** to Project Cards.
-    *   Added **Members List Modal** for quick team viewing.
-3.  **Data Sync**:
-    *   Synced Project Members from existing task assignments.
+### ✅ อัปเดต 27 ม.ค.: ปรับปรุง Role และ UI
+1.  **แก้ไขการแสดงผล Task**:
+    *   **CHIAN & OHM** (Admins) เห็น **งานทั้งหมด**
+    *   **KARN & TRI** เห็นเฉพาะงานที่ได้รับมอบหมาย + งานของทีม (แก้ไขปัญหา "เห็นงานมากเกินไป")
+2.  **ปรับปรุง UI**:
+    *   เพิ่ม **Project Members Avatar Group** ใน Project Cards
+    *   เพิ่ม **Members List Modal** สำหรับดูสมาชิกทีม
+3.  **ซิงค์ข้อมูล**:
+    *   ซิงค์สมาชิกโปรเจคจากการมอบหมายงานที่มีอยู่
+
+### ✅ อัปเดต 27 ม.ค.: Deploy ขึ้น Production (UAT)
+1.  **Deploy Backend ขึ้น Vercel**:
+    *   ย้ายฐานข้อมูลจาก SQLite ไป PostgreSQL (Neon)
+    *   สร้างไฟล์ config สำหรับ Vercel (`vercel.json`, `api/index.ts`)
+    *   แก้ไข TypeScript build errors (type assertions, sendSuccess parameter order)
+    *   Deploy แล้วที่: **https://backend-five-iota-42.vercel.app**
+
+2.  **ย้ายฐานข้อมูล**:
+    *   สร้าง Vercel Postgres database: `taskflow-db` (Singapore region)
+    *   ลบ SQLite migrations เก่า
+    *   สร้าง PostgreSQL migration ใหม่: `20260127071753_init`
+    *   สร้าง tables ทั้งหมดสำเร็จใน production
+
+3.  **Deploy Frontend**:
+    *   ตั้งค่า production API URL ใน `.env.production`
+    *   Deploy แล้วที่: **https://frontend-beta-seven-60.vercel.app**
+    *   เชื่อมต่อกับ production backend สำเร็จ
+
+4.  **ตั้งค่า Environment Variables**:
+    *   Backend: JWT secrets, CORS origin, Database URLs (pooled & direct)
+    *   Frontend: Production API base URL
+    *   ข้อมูลสำคัญทั้งหมดปลอดภัยใน Vercel environment variables
+
+### 🌐 URLs สำหรับทดสอบ (UAT)
+- **Frontend:** https://frontend-beta-seven-60.vercel.app
+- **Backend API:** https://backend-five-iota-42.vercel.app
+- **Database:** Vercel Postgres (Neon) - `taskflow-db`
+
+### 🧪 วิธีทดสอบ UAT
+1.  **เข้าระบบที่:** https://frontend-beta-seven-60.vercel.app
+2.  **ข้อมูลเข้าสู่ระบบ:**
+    *   Email: `tharab@sena.co.th` | Password: `123456` | PIN: `123456`
+    *   หรือใช้ test accounts ที่มีอยู่
+3.  **ทดสอบฟีเจอร์:**
+    *   Dashboard พร้อมข้อมูลโปรเจคจริง
+    *   สร้าง/แก้ไข projects และ tasks
+    *   Gantt Chart view
+    *   มอบหมายงานและอัปเดตสถานะ
+    *   ระบบแจ้งเตือน
+
+

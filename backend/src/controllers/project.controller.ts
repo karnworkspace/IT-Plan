@@ -17,8 +17,8 @@ export const getProjects = async (
     const filters: any = {};
     if (status) filters.status = status as string;
     if (owner_id) filters.ownerId = owner_id as string;
-    if (page) filters.page = parseInt(page as string);
-    if (limit) filters.limit = parseInt(limit as string);
+    if (page) filters.page = parseInt(page as string, 10);
+    if (limit) filters.limit = parseInt(limit as string, 10);
 
     const result = await projectService.getAllProjects(filters);
 
@@ -42,7 +42,7 @@ export const getProject = async (
   try {
     const { id } = req.params;
 
-    const project = await projectService.getProjectById(id);
+    const project = await projectService.getProjectById(id as string);
 
     if (!project) {
       return sendError(res, 'Project not found', 404);
@@ -85,7 +85,7 @@ export const createProject = async (
       ownerId: userId,
     });
 
-    return sendSuccess(res, { project }, 201);
+    return sendSuccess(res, { project }, undefined, 201);
   } catch (error) {
     return sendError(res, 'Failed to create project', 500);
   }
@@ -115,19 +115,17 @@ export const updateProject = async (
       }
     }
 
-    const project = await projectService.updateProject(
-      id,
-      {
-        name: name !== undefined ? (typeof name === 'string' ? name.trim() : String(name)) : undefined,
-        description: description !== undefined ? (typeof description === 'string' ? description.trim() : description) : undefined,
-        color,
-        icon,
-        status,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
-      },
-      userId
-    );
+    const updateData = {
+      name: name !== undefined ? (typeof name === 'string' ? name.trim() : String(name)) : undefined,
+      description: description !== undefined ? (typeof description === 'string' ? description.trim() : description) : undefined,
+      color,
+      icon,
+      status,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+
+    const project = await projectService.updateProject(id as string, updateData, userId);
 
     if (!project) {
       return sendError(res, 'Project not found or you do not have permission', 404);
@@ -154,7 +152,7 @@ export const deleteProject = async (
     const { id } = req.params;
     const userId = extractUserId(req);
 
-    const deleted = await projectService.deleteProject(String(id), userId);
+    const deleted = await projectService.deleteProject(id as string, userId);
 
     if (!deleted) {
       return sendError(res, 'Project not found or you do not have permission', 404);
@@ -180,7 +178,7 @@ export const getProjectStats = async (
   try {
     const { id } = req.params;
 
-    const stats = await projectService.getProjectStats(id);
+    const stats = await projectService.getProjectStats(id as string);
 
     return sendSuccess(res, { stats });
   } catch (error) {
@@ -224,9 +222,9 @@ export const addProjectMember = async (
       return sendError(res, 'userId is required', 400);
     }
 
-    const member = await projectService.addProjectMember(String(id), userId, role, requesterId);
+    const member = await projectService.addProjectMember(id as string, userId, role, requesterId);
 
-    return sendSuccess(res, { member }, 201);
+    return sendSuccess(res, { member }, undefined, 201);
   } catch (error: any) {
     if (error.message === 'Only project owners and admins can add members') {
       return sendError(res, 'Only project owners and admins can add members', 403);

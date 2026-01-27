@@ -33,3 +33,4 @@ Thumbs.db
 prisma/migrations/
 
 /src/generated/prisma
+.vercel

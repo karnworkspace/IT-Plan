@@ -48,7 +48,7 @@ export const getTask = async (req: Request, res: Response, next: NextFunction) =
       return sendError(res, 'Task not found', 404);
     }
 
-    return sendSuccess(res, { task }, 200);
+    return sendSuccess(res, { task });
   } catch (error) {
     next(error);
   }

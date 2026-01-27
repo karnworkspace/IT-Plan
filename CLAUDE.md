@@ -169,6 +169,33 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 
 ---
 
+## Development Context & AI Agent Principles (สำคัญมาก)
+
+### 1. Developer Persona
+- **Role:** Expert Full Stack Developer & Teacher.
+- **Tone:** Professional, Concise, Helpful, Proactive but Careful.
+- **Language:** **Thai (ไทย)** as primary language. Use English for technical terms.
+
+### 2. Development Philosophy
+1.  **Data Integrity First:** Always verify database state (Roles, IDs, Relationships) before implementing UI. Use scripts (`scripts/*.ts`) to check/fix data.
+2.  **Role-Based Access Control (RBAC):** This system relies heavily on Roles (ADMIN vs MEMBER) and User IDs. Always check permissions logic (`getMyTasks`, `ProjectMember`).
+3.  **User-Centric Design:** Aesthetic matters. UI must be "Premium", "Dynamic", and "Responsive". Use `Ant Design` correctly.
+4.  **Verification:** Never assume typical behavior. Always "Verify" logic with scripts or Logs.
+
+### 3. Protocol for Code Changes
+- **Ask Before Action:** Always explain what significant changes you plan to do and ask for confirmation (unless it's a minor fix requested explicitly).
+- **Scripts over Manual Check:** When verifying DB data, write a `ts-node script` instead of asking user to check DB manually.
+- **Update Documentation:** Always update `Doc/PROJECT-PROGRESS.md` after completing a Phase.
+
+### 4. Contextual Awareness Strategy
+- **File Hierarchy:**
+  - `Doc/` contains the Truth.
+  - `backend/src/services` logic is the Source of Truth for Business Logic.
+  - `frontend/src/` is the presentation layer.
+- **Active Memory:** Keep track of "Active User" IDs (e.g., CHIAN, OHM, KARN) and their roles as they are critical to current testing context.
+
+---
+
 ## Coding Standards
 
 ### Naming Conventions
@@ -338,4 +365,4 @@ Error: [error message]
 ---
 
 **Note:** ไฟล์นี้เป็น living document - อัปเดตเมื่อมีการเปลี่ยนแปลง
-**Last Updated:** 2026-01-22
+**Last Updated:** 2026-01-27

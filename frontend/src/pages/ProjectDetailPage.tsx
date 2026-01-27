@@ -70,6 +70,7 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.
 };
 
 import { TaskDetailModal } from './TaskDetailModal';
+import { GanttChart } from '../components/GanttChart';
 
 export const ProjectDetailPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -552,6 +553,17 @@ export const ProjectDetailPage: React.FC = () => {
                                         </Card>
                                     ))
                                 )}
+                            </div>
+                        </TabPane>
+
+                        {/* Gantt View */}
+                        <TabPane tab="Gantt View" key="gantt">
+                            <div style={{ padding: '16px 0' }}>
+                                <GanttChart
+                                    tasks={tasks}
+                                    projectStartDate={project?.startDate}
+                                    projectEndDate={project?.endDate}
+                                />
                             </div>
                         </TabPane>
                     </Tabs>

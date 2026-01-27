@@ -1,7 +1,7 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-01-26 10:15
-**Status:** Testing Complete ✅ (Phase 7)
+**Last Updated:** 2026-01-27 11:15
+**Status:** Role & Visibility Enhancement Complete ✅ (Phase 8)
 **Next Step:** Complete Remaining Frontend Pages (Projects List, Task Detail, Notifications)
 
 ---
@@ -454,7 +454,20 @@ backend/
    - Unread count badge
    - Mark as read functionality
 
-### Phase 8: Deployment (0%)
+### Phase 8: Role & Visibility Enhancement (100%) ✅ NEW (2026-01-27)
+
+1. ✅ **Role Management & Visibility Logic**
+   - **Admin (CHIAN, OHM):** See ALL tasks globally.
+   - **Leaders (KARN, TRI):** See Assigned Tasks + TEAM Bucket Tasks.
+   - **Team Bucket:** "TEAM" user (`team@sena.co.th`) created for shared tasks.
+   - **Optimization:** Removed "Created By Me" view for leaders to reduce clutter.
+
+2. ✅ **Project Members UI**
+   - **Avatar Group:** Display real member avatars on Project Cards (Max 3 + Count).
+   - **Sync Mechanism:** Implemented script to populate `ProjectMember` from task history.
+   - **Members Modal:** Interactive modal listing all project members with roles.
+
+### Phase 9: Deployment (0%)
 
 1. ⏳ Setup production environment
 2. ⏳ Deploy backend

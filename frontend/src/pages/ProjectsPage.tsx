@@ -452,33 +452,29 @@ export const ProjectsPage: React.FC = () => {
                                                         </Space>
                                                     </Tooltip>
 
-                                                    <div
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleShowMembers(project);
-                                                        }}
-                                                        style={{ cursor: 'pointer' }}
-                                                    >
-                                                        <Avatar.Group
-                                                            maxCount={3}
-                                                            maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}
-                                                            size="small"
+                                                    <Tooltip title={`${project.members?.length || 0} members - Click to view`}>
+                                                        <div
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleShowMembers(project);
+                                                            }}
+                                                            style={{
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '6px',
+                                                                padding: '4px 10px',
+                                                                borderRadius: '16px',
+                                                                backgroundColor: 'rgba(0,0,0,0.04)',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.08)'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
                                                         >
-                                                            {project.members && project.members.length > 0 ? (
-                                                                project.members.map(m => (
-                                                                    <Tooltip title={m.user.name} key={m.id}>
-                                                                        <Avatar style={{ backgroundColor: '#87d068' }}>
-                                                                            {m.user.name?.charAt(0).toUpperCase()}
-                                                                        </Avatar>
-                                                                    </Tooltip>
-                                                                ))
-                                                            ) : (
-                                                                <Tooltip title="View Members">
-                                                                    <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#ccc' }} />
-                                                                </Tooltip>
-                                                            )}
-                                                        </Avatar.Group>
-                                                    </div>
+                                                            <TeamOutlined style={{ fontSize: '14px', color: '#666' }} />
+                                                            <Text style={{ fontSize: '13px', color: '#666' }}>{project.members?.length || 0}</Text>
+                                                        </div>
+                                                    </Tooltip>
 
 
                                                 </div>

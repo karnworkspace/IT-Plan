@@ -1,6 +1,5 @@
 // Authentication Store using Zustand
 import { create } from 'zustand';
-import type { AuthResponse } from '../services/authService';
 import { authService } from '../services/authService';
 
 interface User {

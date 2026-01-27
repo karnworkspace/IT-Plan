@@ -17,12 +17,10 @@ import {
 } from 'antd';
 import {
     CalendarOutlined,
-    FolderOutlined,
     ClockCircleOutlined,
     CheckCircleOutlined,
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import './CalendarPage.css';
 
 const { Header, Content } = Layout;

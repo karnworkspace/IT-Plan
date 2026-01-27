@@ -1,6 +1,8 @@
 // PinInput Component - 6-digit PIN input
-import React, { useState, useRef, KeyboardEvent, ClipboardEvent } from 'react';
+import React, { useState, useRef } from 'react';
+import type { KeyboardEvent, ClipboardEvent } from 'react';
 import { Input } from 'antd';
+import type { InputRef } from 'antd';
 import './PinInput.css';
 
 interface PinInputProps {
@@ -53,16 +55,16 @@ export const PinInput: React.FC<PinInputProps> = ({
   const handlePaste = (e: ClipboardEvent) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').slice(0, length);
-    
+
     if (!/^\d+$/.test(pastedData)) return;
 
     const newValues = pastedData.split('');
     const filledValues = [...newValues, ...Array(length - newValues.length).fill('')];
     setValues(filledValues);
-    
+
     const pin = pastedData;
     onChange(pin);
-    
+
     if (pin.length === length && onComplete) {
       onComplete(pin);
     }
@@ -77,7 +79,7 @@ export const PinInput: React.FC<PinInputProps> = ({
       {values.map((value, index) => (
         <Input
           key={index}
-          ref={(el) => (inputRefs.current[index] = el?.input || null)}
+          ref={(el: InputRef | null) => { inputRefs.current[index] = el?.input ?? null; }}
           value={value}
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}

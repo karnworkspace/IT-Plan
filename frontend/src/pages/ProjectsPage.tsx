@@ -38,7 +38,6 @@ import {
     MoreOutlined,
     EyeOutlined,
     ProjectOutlined,
-    UserOutlined,
 } from '@ant-design/icons';
 import './ProjectsPage.css';
 
@@ -368,7 +367,6 @@ export const ProjectsPage: React.FC = () => {
                                     const statusConfig = getStatusConfig(project.status);
                                     const totalTasks = project.stats?.total || project._count?.tasks || 0;
                                     const completedTasks = project.stats?.completed || 0;
-                                    const memberCount = project._count?.members || 1;
 
                                     // Calculate progress if not provided
                                     const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;

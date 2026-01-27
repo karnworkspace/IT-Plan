@@ -887,6 +887,21 @@ Ready for user acceptance testing (UAT).
 | Environment Vars | ✅ ตั้งค่าแล้ว | ข้อมูลสำคัญปลอดภัย |
 | Migration | ✅ เสร็จสิ้น | PostgreSQL schema ใหม่ |
 
+### 📊 ข้อมูลที่ Import ไปยัง Production Database
+
+| ประเภทข้อมูล | จำนวน | รายละเอียด |
+|-------------|--------|-----------|
+| **Users** | 77 | รวม SENA staff (adinuna, tharab, monchiant, nattapongm, team) + test users |
+| **Projects** | 25 | พร้อม details, dates, owners, status |
+| **Tasks** | 68 | พร้อม assignments, priorities, dates, progress |
+| **Project Members** | 38 | พร้อม roles และ join dates |
+
+**วิธีการ Import:**
+1. Export จาก local SQLite database (`backend/prisma/dev.db`)
+2. Import ไปยัง Vercel Postgres ด้วย Prisma Client
+3. ตรวจสอบ foreign key relationships (Users → Projects → Tasks → Members)
+4. สำเร็จ 100% ไม่มี errors
+
 ---
 
 ## 🎉 สถานะโปรเจค: เสร็จสมบูรณ์ 100% และ Deploy แล้ว!

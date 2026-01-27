@@ -100,6 +100,12 @@
 - **Backend API:** https://backend-five-iota-42.vercel.app
 - **Database:** Vercel Postgres (Neon) - `taskflow-db`
 
+### 📊 Production Data
+- **Users:** 77 (รวม SENA staff + test accounts)
+- **Projects:** 25 projects
+- **Tasks:** 68 tasks  
+- **Members:** 38 project members
+
 **ดูรายละเอียดเพิ่มเติม:** `Doc/PROJECT-PROGRESS.md`
 
 ---

@@ -80,6 +80,12 @@ The Task Management System has been successfully updated and verified.
 - **Backend API:** https://backend-five-iota-42.vercel.app
 - **Database:** Vercel Postgres (Neon) - `taskflow-db`
 
+### 📊 ข้อมูลที่ Import ไปยัง Production
+1. **Users:** 77 users (รวม adinuna, tharab, monchiant, nattapongm, team@sena.co.th)
+2. **Projects:** 25 projects พร้อม details, dates, owners
+3. **Tasks:** 68 tasks พร้อม assignments, priorities, progress
+4. **Project Members:** 38 members พร้อม roles
+
 ### 🧪 วิธีทดสอบ UAT
 1.  **เข้าระบบที่:** https://frontend-beta-seven-60.vercel.app
 2.  **ข้อมูลเข้าสู่ระบบ:**

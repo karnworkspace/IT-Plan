@@ -38,6 +38,7 @@ import {
     MoreOutlined,
     EyeOutlined,
     ProjectOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import './ProjectsPage.css';
 
@@ -78,6 +79,8 @@ export const ProjectsPage: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
+    const [selectedProjectForMembers, setSelectedProjectForMembers] = useState<ProjectWithStats | null>(null);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -194,6 +197,11 @@ export const ProjectsPage: React.FC = () => {
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleShowMembers = (project: ProjectWithStats) => {
+        setSelectedProjectForMembers(project);
+        setIsMembersModalVisible(true);
     };
 
     const getStatusConfig = (status: string) => {
@@ -444,26 +452,35 @@ export const ProjectsPage: React.FC = () => {
                                                         </Space>
                                                     </Tooltip>
 
-                                                    <Tooltip title={`${memberCount} team member${memberCount > 1 ? 's' : ''}`}>
-                                                        <Space className="footer-stat">
-                                                            <TeamOutlined />
-                                                            <Text>{memberCount}</Text>
-                                                        </Space>
-                                                    </Tooltip>
+                                                    <div
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleShowMembers(project);
+                                                        }}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        <Avatar.Group
+                                                            maxCount={3}
+                                                            maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}
+                                                            size="small"
+                                                        >
+                                                            {project.members && project.members.length > 0 ? (
+                                                                project.members.map(m => (
+                                                                    <Tooltip title={m.user.name} key={m.id}>
+                                                                        <Avatar style={{ backgroundColor: '#87d068' }}>
+                                                                            {m.user.name?.charAt(0).toUpperCase()}
+                                                                        </Avatar>
+                                                                    </Tooltip>
+                                                                ))
+                                                            ) : (
+                                                                <Tooltip title="View Members">
+                                                                    <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#ccc' }} />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Avatar.Group>
+                                                    </div>
 
-                                                    <Avatar.Group maxCount={3} size="small">
-                                                        {Array(Math.min(memberCount, 3)).fill(0).map((_, i) => (
-                                                            <Avatar
-                                                                key={i}
-                                                                style={{
-                                                                    backgroundColor: project.color,
-                                                                    opacity: 0.8 + i * 0.1
-                                                                }}
-                                                            >
-                                                                {String.fromCharCode(65 + i)}
-                                                            </Avatar>
-                                                        ))}
-                                                    </Avatar.Group>
+
                                                 </div>
                                             </Card>
                                         </Col>
@@ -570,6 +587,45 @@ export const ProjectsPage: React.FC = () => {
                         </Col>
                     </Row>
                 </Form>
+            </Modal>
+
+            {/* Members View Modal */}
+            <Modal
+                title={
+                    <Space>
+                        <TeamOutlined />
+                        <Typography.Text strong>Project Members</Typography.Text>
+                        {selectedProjectForMembers && <Tag color={selectedProjectForMembers.color}>{selectedProjectForMembers.name}</Tag>}
+                    </Space>
+                }
+                open={isMembersModalVisible}
+                onCancel={() => setIsMembersModalVisible(false)}
+                footer={null}
+                width={500}
+            >
+                {selectedProjectForMembers?.members && selectedProjectForMembers.members.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                        {selectedProjectForMembers.members.map(member => (
+                            <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #f0f0f0' }}>
+                                <Space>
+                                    <Avatar style={{ backgroundColor: '#87d068' }} size="large">
+                                        {member.user.name?.charAt(0).toUpperCase()}
+                                    </Avatar>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>{member.user.name}</Typography.Text>
+                                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{member.user.email}</Typography.Text>
+                                    </div>
+                                </Space>
+                                <Tag color={member.role === 'OWNER' ? 'gold' : 'blue'}>{member.role}</Tag>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '24px', color: '#999' }}>
+                        <TeamOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+                        <div>No additional members found.</div>
+                    </div>
+                )}
             </Modal>
         </Layout>
     );

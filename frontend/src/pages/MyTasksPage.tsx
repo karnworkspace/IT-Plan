@@ -19,13 +19,16 @@ import {
     ClockCircleOutlined,
     CalendarOutlined,
     ExclamationCircleOutlined,
+    FolderOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 export const MyTasksPage: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -106,21 +109,21 @@ export const MyTasksPage: React.FC = () => {
     const sortedTasks = [...filteredTasks].sort((a, b) => {
         const aIndex = priorityOrder.indexOf(a.priority);
         const bIndex = priorityOrder.indexOf(b.priority);
-        
+
         // First sort by priority
         if (aIndex !== bIndex) {
             return aIndex - bIndex;
         }
-        
+
         // If priority is same, sort by due date (closest first)
         if (a.dueDate && b.dueDate) {
             return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         }
-        
+
         // If one has due date and other doesn't, the one with due date comes first
         if (a.dueDate) return -1;
         if (b.dueDate) return 1;
-        
+
         return 0;
     });
 
@@ -149,29 +152,29 @@ export const MyTasksPage: React.FC = () => {
                                 <div>
                                     <Text strong style={{ marginBottom: 8, display: 'block' }}>Status</Text>
                                     <Checkbox.Group
-                                value={statusFilter}
-                                onChange={handleStatusFilter}
-                            >
-                                <Checkbox value="TODO">To Do</Checkbox>
-                                <Checkbox value="IN_PROGRESS">In Progress</Checkbox>
-                                <Checkbox value="IN_REVIEW">In Review</Checkbox>
-                                <Checkbox value="DONE">Done</Checkbox>
-                                <Checkbox value="BLOCKED">Blocked</Checkbox>
-                            </Checkbox.Group>
-                        </div>
+                                        value={statusFilter}
+                                        onChange={handleStatusFilter}
+                                    >
+                                        <Checkbox value="TODO">To Do</Checkbox>
+                                        <Checkbox value="IN_PROGRESS">In Progress</Checkbox>
+                                        <Checkbox value="IN_REVIEW">In Review</Checkbox>
+                                        <Checkbox value="DONE">Done</Checkbox>
+                                        <Checkbox value="BLOCKED">Blocked</Checkbox>
+                                    </Checkbox.Group>
+                                </div>
 
-                        <div>
-                            <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
-                            <Checkbox.Group
-                                value={priorityFilter}
-                                onChange={handlePriorityFilter}
-                            >
-                                <Checkbox value="URGENT">Urgent</Checkbox>
-                                <Checkbox value="HIGH">High</Checkbox>
-                                <Checkbox value="MEDIUM">Medium</Checkbox>
-                                <Checkbox value="LOW">Low</Checkbox>
-                            </Checkbox.Group>
-                        </div>
+                                <div>
+                                    <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
+                                    <Checkbox.Group
+                                        value={priorityFilter}
+                                        onChange={handlePriorityFilter}
+                                    >
+                                        <Checkbox value="URGENT">Urgent</Checkbox>
+                                        <Checkbox value="HIGH">High</Checkbox>
+                                        <Checkbox value="MEDIUM">Medium</Checkbox>
+                                        <Checkbox value="LOW">Low</Checkbox>
+                                    </Checkbox.Group>
+                                </div>
                             </Space>
                         </Card>
 
@@ -192,7 +195,7 @@ export const MyTasksPage: React.FC = () => {
                                     {Object.entries(taskGroups).map(([status, tasks]) =>
                                         tasks.length > 0 ? (
                                             <Col key={status} span={24}>
-                                                <Card 
+                                                <Card
                                                     className="status-header-card"
                                                     style={{ marginBottom: 16 }}
                                                 >
@@ -213,37 +216,66 @@ export const MyTasksPage: React.FC = () => {
                                 <Row gutter={[16, 16]}>
                                     {sortedTasks.map(task => (
                                         <Col xs={24} sm={12} md={8} lg={6} xl={4} key={task.id}>
-                                            <Card 
+                                            <Card
                                                 className="task-card"
                                                 hoverable
+                                                style={{ overflow: 'hidden' }}
+                                                bodyStyle={{ padding: 0 }}
+                                                onClick={() => navigate(`/projects/${task.projectId}`)}
                                             >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <Text strong style={{ display: 'block', fontSize: 14 }}>
-                                                            {task.title}
-                                                        </Text>
-                                                        {task.dueDate && (
-                                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
-                                                                <CalendarOutlined /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                                                            </Text>
-                                                        )}
-                                                    </div>
-                                                    <Tag color={getPriorityColor(task.priority)} style={{ marginLeft: 8 }}>
-                                                        {task.priority}
-                                                    </Tag>
+                                                {/* Project Header */}
+                                                <div style={{
+                                                    padding: '8px 12px',
+                                                    background: task.project?.color || '#1890ff',
+                                                    color: '#fff',
+                                                    fontSize: '12px',
+                                                    fontWeight: 600,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px'
+                                                }}>
+                                                    <FolderOutlined />
+                                                    <span style={{
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
+                                                        {task.project?.name || 'Unknown Project'}
+                                                    </span>
                                                 </div>
 
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <Space size="small">
-                                                        <Tag color="blue">
-                                                            {getStatusIcon(task.status)} {task.status.replace(/_/g, ' ')}
+                                                {/* Card Content */}
+                                                <div style={{ padding: '16px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                                                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                            <Text strong style={{ display: 'block', fontSize: 14, marginBottom: 4 }} ellipsis={{ tooltip: true }}>
+                                                                {task.title}
+                                                            </Text>
+                                                            {task.dueDate && (
+                                                                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                                                                    <CalendarOutlined /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                                                                </Text>
+                                                            )}
+                                                        </div>
+                                                        <Tag color={getPriorityColor(task.priority)} style={{ marginLeft: 8 }}>
+                                                            {task.priority}
                                                         </Tag>
-                                                    </Space>
-                                                    <Progress 
-                                                        percent={task.progress} 
-                                                        size="small"
-                                                        style={{ width: 80 }}
-                                                    />
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Space size="small">
+                                                            <Tag color="blue" style={{ margin: 0 }}>
+                                                                {getStatusIcon(task.status)} {task.status.replace(/_/g, ' ')}
+                                                            </Tag>
+                                                        </Space>
+                                                        <Progress
+                                                            percent={task.progress}
+                                                            size="small"
+                                                            style={{ width: 60 }}
+                                                            showInfo={false}
+                                                            strokeColor={task.project?.color}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </Card>
                                         </Col>

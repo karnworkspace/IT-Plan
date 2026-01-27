@@ -23,6 +23,7 @@ export interface Task {
   project?: {
     id: string;
     name: string;
+    color?: string;
   };
 }
 

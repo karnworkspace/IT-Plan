@@ -417,16 +417,49 @@ export class TaskService {
   /**
    * Get all tasks assigned to or created by a user (across all projects)
    */
-  async getMyTasks(userId: string, filters?: { status?: string; priority?: string; page?: number; limit?: number }): Promise<PaginationResult<any>> {
+  /**
+   * Get all tasks based on user role and team visibility
+   */
+  async getMyTasks(user: { id: string; email: string; role: string }, filters?: { status?: string; priority?: string; page?: number; limit?: number }): Promise<PaginationResult<any>> {
     const { status, priority, page = 1, limit = 50 } = filters || {};
 
-    // Build where clause - tasks where user is assignee OR creator
-    const where: any = {
-      OR: [
-        { assigneeId: userId },
-        { createdById: userId },
-      ],
-    };
+    let where: any = {};
+
+    // 1. CHIAN / OHM / ADMIN Logic -> See ALL Tasks
+    const isAdminView =
+      user.email === 'monchiant@sena.co.th' ||
+      user.email === 'adinuna@sena.co.th' ||
+      user.role === 'ADMIN';
+
+    if (isAdminView) {
+      // No assignee filter = All tasks
+      where = {};
+    } else {
+      // 2. Determine visibility for Normal Users
+      // Find TEAM user ID (Shared tasks)
+      // Ideally we cache this, but for now we look it up.
+      // We assume the user with email 'team@sena.co.th' is the bucket for team tasks.
+      const teamUser = await prisma.user.findUnique({
+        where: { email: 'team@sena.co.th' },
+        select: { id: true }
+      });
+
+      // Users who can see TEAM tasks
+      const teamViewers = ['tharab@sena.co.th', 'nattapongm@sena.co.th'];
+
+      if (teamViewers.includes(user.email) && teamUser) {
+        // Can see My Assigned Tasks OR Team Tasks
+        where = {
+          OR: [
+            { assigneeId: user.id },
+            { assigneeId: teamUser.id },
+          ],
+        };
+      } else {
+        // Strict: ONLY Assigned Tasks (No CreatedBy logic anymore!)
+        where = { assigneeId: user.id };
+      }
+    }
 
     if (status) where.status = status;
     if (priority) where.priority = priority;

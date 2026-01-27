@@ -13,6 +13,15 @@ export interface Project {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  members?: {
+    id: string;
+    role: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  }[];
   _count?: {
     tasks: number;
     members: number;

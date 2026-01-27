@@ -65,6 +65,17 @@ export class ProjectService {
             email: true,
           },
         },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             tasks: true,

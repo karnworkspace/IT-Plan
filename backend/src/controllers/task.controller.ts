@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from '../types';
 import taskService, {
   CreateTaskInput,
   UpdateTaskInput,
@@ -278,7 +279,10 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
  */
 export const getMyTasks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = extractUserId(req);
+    const authReq = req as AuthRequest;
+    if (!authReq.user) {
+      return sendError(res, 'User not authenticated', 401);
+    }
 
     const filters = {
       status: req.query.status as string | undefined,
@@ -287,7 +291,7 @@ export const getMyTasks = async (req: Request, res: Response, next: NextFunction
       limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
     };
 
-    const result = await taskService.getMyTasks(userId, filters);
+    const result = await taskService.getMyTasks(authReq.user, filters);
     return sendSuccess(res, { tasks: result.data, pagination: result.pagination }, '200');
   } catch (error) {
     next(error);

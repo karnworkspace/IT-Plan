@@ -41,3 +41,13 @@ The Task Management System has been successfully updated and verified.
 ### 📝 Notes
 *   The system is now populated with the latest data from `IT2026.xlsx`.
 *   All tests passed successfully.
+
+### ✅ Jan 27 Updates: Role & UI Refinements
+1.  **Resolved Task Visibility**:
+    *   **CHIAN & OHM** (Admins) now see **ALL** tasks.
+    *   **KARN & TRI** now see only their Assigned tasks + Team tasks (Resolved the "Seeing too many tasks" issue).
+2.  **UI Enhancements**:
+    *   Added **Project Members Avatar Group** to Project Cards.
+    *   Added **Members List Modal** for quick team viewing.
+3.  **Data Sync**:
+    *   Synced Project Members from existing task assignments.

@@ -64,7 +64,7 @@ export const createProject = async (
 ) => {
   try {
     const userId = extractUserId(req);
-    const { name, description, color, icon } = req.body;
+    const { name, description, color, icon, startDate, endDate } = req.body;
 
     // Validation
     if (!name || (typeof name === 'string' && name.trim().length === 0)) {
@@ -80,6 +80,8 @@ export const createProject = async (
       description: description ? (typeof description === 'string' ? description.trim() : description) : undefined,
       color,
       icon,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
       ownerId: userId,
     });
 
@@ -100,7 +102,7 @@ export const updateProject = async (
   try {
     const { id } = req.params;
     const userId = extractUserId(req);
-    const { name, description, color, icon, status } = req.body;
+    const { name, description, color, icon, status, startDate, endDate } = req.body;
 
     // Validation
     if (name !== undefined) {
@@ -121,6 +123,8 @@ export const updateProject = async (
         color,
         icon,
         status,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
       },
       userId
     );
@@ -150,7 +154,7 @@ export const deleteProject = async (
     const { id } = req.params;
     const userId = extractUserId(req);
 
-    const deleted = await projectService.deleteProject(id, userId);
+    const deleted = await projectService.deleteProject(String(id), userId);
 
     if (!deleted) {
       return sendError(res, 'Project not found or you do not have permission', 404);

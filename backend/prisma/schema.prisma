@@ -71,6 +71,8 @@ model Project {
   color       String   @default("#1890ff")
   icon        String?
   status      String   @default("ACTIVE") // ACTIVE, ARCHIVED, COMPLETED
+  startDate   DateTime?
+  endDate     DateTime?
 
   // Ownership
   ownerId String

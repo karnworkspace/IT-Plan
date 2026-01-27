@@ -8,6 +8,8 @@ export interface Project {
   color: string;
   icon?: string;
   status: 'ACTIVE' | 'ARCHIVED' | 'COMPLETED';
+  startDate?: string;
+  endDate?: string;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
@@ -23,6 +25,8 @@ export interface CreateProjectInput {
   color?: string;
   icon?: string;
   status?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface UpdateProjectInput {
@@ -31,6 +35,8 @@ export interface UpdateProjectInput {
   color?: string;
   icon?: string;
   status?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface ProjectStats {

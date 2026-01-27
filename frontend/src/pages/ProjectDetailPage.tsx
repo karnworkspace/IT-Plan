@@ -311,6 +311,64 @@ export const ProjectDetailPage: React.FC = () => {
                         </Button>
                     </div>
 
+                    {/* Timeline & Countdown Section */}
+                    {(project.startDate || tasks.length > 0 || project.endDate) && (
+                        <div style={{ marginTop: 24, marginBottom: 8 }}>
+                            <Row gutter={[16, 16]}>
+                                {/* Start Date */}
+                                {project.startDate && (
+                                    <Col xs={24} sm={8}>
+                                        <Card bordered={false} className="timeline-card start-date" style={{ background: '#f6ffed', border: '1px solid #b7eb8f' }}>
+                                            <Statistic
+                                                title={<span style={{ color: '#389e0d', fontWeight: 600 }}><CalendarOutlined /> Project Start</span>}
+                                                value={dayjs(project.startDate).format('DD MMM YYYY')}
+                                                valueStyle={{ color: '#389e0d', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                            />
+                                        </Card>
+                                    </Col>
+                                )}
+
+                                {/* Due Date */}
+                                <Col xs={24} sm={8}>
+                                    <Card bordered={false} className="timeline-card due-date" style={{ background: '#e6f7ff', border: '1px solid #91d5ff' }}>
+                                        <Statistic
+                                            title={<span style={{ color: '#096dd9', fontWeight: 600 }}><ClockCircleOutlined /> Target Deadline</span>}
+                                            value={
+                                                project.endDate
+                                                    ? dayjs(project.endDate).format('DD MMM YYYY')
+                                                    : (tasks.some(t => t.dueDate)
+                                                        ? dayjs(Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime()))).format('DD MMM YYYY')
+                                                        : 'No deadline set')
+                                            }
+                                            valueStyle={{ color: '#096dd9', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                        />
+                                    </Card>
+                                </Col>
+
+                                {/* Days Remaining */}
+                                <Col xs={24} sm={8}>
+                                    <Card bordered={false} className="timeline-card remaining" style={{ background: '#fff7e6', border: '1px solid #ffd591' }}>
+                                        <Statistic
+                                            title={<span style={{ color: '#d46b08', fontWeight: 600 }}><SyncOutlined spin /> Time Remaining</span>}
+                                            value={
+                                                (() => {
+                                                    const targetDate = project.endDate
+                                                        ? new Date(project.endDate).getTime()
+                                                        : (tasks.some(t => t.dueDate) ? Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime())) : null);
+
+                                                    if (!targetDate) return '-';
+                                                    return Math.ceil((targetDate - Date.now()) / (1000 * 60 * 60 * 24));
+                                                })()
+                                            }
+                                            suffix={<span style={{ fontSize: '1rem', color: '#d46b08' }}>days left</span>}
+                                            valueStyle={{ color: '#d46b08', fontSize: '1.5rem', fontWeight: 'bold' }}
+                                        />
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </div>
+                    )}
+
                     {/* Stats */}
                     <Row gutter={16} className="project-stats">
                         <Col xs={6}>

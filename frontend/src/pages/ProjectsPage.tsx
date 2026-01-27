@@ -23,7 +23,9 @@ import {
     Badge,
     Statistic,
     Dropdown,
+    DatePicker,
 } from 'antd';
+import dayjs from 'dayjs';
 import type { MenuProps } from 'antd';
 import {
     PlusOutlined,
@@ -57,10 +59,12 @@ const PROJECT_COLORS = [
 
 interface ProjectWithStats extends Project {
     stats?: {
-        total_tasks: number;
-        completed_tasks: number;
-        in_progress_tasks: number;
-        progress: number;
+        total: number;
+        completed: number;
+        inProgress: number;
+        overdue: number;
+        // Keep these for safety/fallback if needed, or mapped
+        progress?: number;
     };
 }
 
@@ -138,6 +142,8 @@ export const ProjectsPage: React.FC = () => {
             description: project.description,
             color: project.color,
             status: project.status,
+            startDate: project.startDate ? dayjs(project.startDate) : null,
+            endDate: project.endDate ? dayjs(project.endDate) : null,
         });
         setIsModalVisible(true);
     };
@@ -352,10 +358,13 @@ export const ProjectsPage: React.FC = () => {
                             <Row gutter={[20, 20]}>
                                 {filteredProjects.map((project) => {
                                     const statusConfig = getStatusConfig(project.status);
-                                    const progress = project.stats?.progress || 0;
-                                    const totalTasks = project.stats?.total_tasks || project._count?.tasks || 0;
-                                    const completedTasks = project.stats?.completed_tasks || 0;
+                                    const totalTasks = project.stats?.total || project._count?.tasks || 0;
+                                    const completedTasks = project.stats?.completed || 0;
                                     const memberCount = project._count?.members || 1;
+
+                                    // Calculate progress if not provided
+                                    const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                                    const progress = project.stats?.progress ?? calculatedProgress;
 
                                     return (
                                         <Col xs={24} sm={12} lg={8} xl={6} key={project.id}>
@@ -547,6 +556,19 @@ export const ProjectsPage: React.FC = () => {
                             </Option>
                         </Select>
                     </Form.Item>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="startDate" label="Start Date">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="endDate" label="End Date">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
         </Layout>

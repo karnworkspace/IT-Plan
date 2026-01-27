@@ -12,7 +12,7 @@ const { TabPane } = Tabs;
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
-    const { loginWithEmail, loginWithPin, isLoading, error, clearError } = useAuthStore();
+    const { loginWithEmail, loginWithPin, isLoading, clearError } = useAuthStore();
 
     const [activeTab, setActiveTab] = useState<'email' | 'pin'>('pin');
 
@@ -27,16 +27,24 @@ export const LoginPage: React.FC = () => {
     const handleEmailLogin = async (values: { email: string; password: string; remember: boolean }) => {
         clearError();
         try {
+            console.log('Logging in with:', values.email);
             await loginWithEmail(values.email, values.password, values.remember);
             message.success('Login successful!');
-            // Check if PIN is set, redirect to setup-pin if not
+
+            // Check state immediately
             const { user } = useAuthStore.getState();
+            console.log('Login User State:', user);
+
             if (user && !user.pinSetAt) {
+                console.log('Redirecting to Setup PIN');
                 navigate('/setup-pin');
             } else {
-                navigate('/dashboard');
+                console.log('Redirecting to Dashboard');
+                // Force full reload to ensure clean state and avoid router loops
+                window.location.href = '/dashboard';
             }
         } catch (error) {
+            console.error('Login Error:', error);
             message.error('Login failed. Please check your credentials.');
         }
     };
@@ -54,10 +62,13 @@ export const LoginPage: React.FC = () => {
 
         clearError();
         try {
+            console.log('Logging in with PIN for:', email);
             await loginWithPin(email, pin, rememberDevice);
             message.success('Login successful!');
-            navigate('/dashboard');
+            console.log('Redirecting to Dashboard');
+            window.location.href = '/dashboard';
         } catch (error) {
+            console.error('PIN Login Error:', error);
             message.error('Invalid email or PIN');
             setPin(''); // Clear PIN on error
         }
@@ -232,7 +243,7 @@ export const LoginPage: React.FC = () => {
 
                     <div style={{ textAlign: 'center', marginTop: 24 }}>
                         <Text type="secondary">
-                            Don't have an account? <Link href="/signup">Sign Up</Link>
+                            Don't have an account? <Link onClick={() => navigate('/register')}>Sign Up</Link>
                         </Text>
                     </div>
                 </div>

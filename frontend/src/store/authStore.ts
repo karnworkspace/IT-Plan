@@ -22,6 +22,7 @@ interface AuthState {
     // Actions
     loginWithEmail: (email: string, password: string, remember?: boolean) => Promise<void>;
     loginWithPin: (email: string, pin: string, rememberDevice?: boolean) => Promise<void>;
+    register: (email: string, password: string, name: string) => Promise<void>;
     logout: () => Promise<void>;
     setupPin: (pin: string, confirmPin: string) => Promise<void>;
     loadUser: () => Promise<void>;
@@ -36,16 +37,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     isLoading: false,
     error: null,
 
+    register: async (email, password, name) => {
+        set({ isLoading: true, error: null });
+        try {
+            await authService.register({ email, password, name });
+            set({ isLoading: false });
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.error || 'Registration failed';
+            set({ error: errorMessage, isLoading: false });
+            throw error;
+        }
+    },
+
     loginWithEmail: async (email, password, remember = false) => {
         set({ isLoading: true, error: null });
         try {
             const response = await authService.loginWithEmail({ email, password, remember });
+            console.log('AuthStore Login Response:', response);
 
             const { accessToken, refreshToken, user } = response.data;
+            console.log('Destructured Token:', accessToken ? 'Yes' : 'No');
 
             // Save tokens
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
+            if (accessToken) {
+                localStorage.setItem('accessToken', accessToken);
+                console.log('Saved accessToken to localStorage');
+            }
+            if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 
             set({
                 user,

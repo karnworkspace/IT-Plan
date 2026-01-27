@@ -678,6 +678,11 @@ Show author name, timestamp, content
 - [x] FIX-004: ติดตั้ง node-cron และสร้าง reminder jobs
 - [x] FIX-005: อัพเดท documentation เพิ่ม Comment Flow
 - [x] FIX-006: สร้าง activityLogService.ts ใน frontend
+- [x] FE-001: Projects List Page (UI + Integration)
+- [x] FE-002: Project Detail Page (Board + List View)
+- [x] FE-003: Task Detail Modal (Tabs + Updates + Comments)
+- [x] FE-004: Notification System (Popover + Real-time)
+- [x] FE-005: Analytics Dashboard (Stats + Activity Feed)
 
 ---
 

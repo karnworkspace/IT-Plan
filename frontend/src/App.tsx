@@ -1,6 +1,7 @@
 import { ConfigProvider } from 'antd';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SetupPinPage } from './pages/SetupPinPage';
 import { ProjectsPage } from './pages/ProjectsPage';
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/setup-pin" element={<SetupPinPage />} />
 
           {/* Protected Routes */}

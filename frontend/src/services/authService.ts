@@ -40,7 +40,21 @@ export interface ApiResponse<T> {
     message?: string;
 }
 
+export interface RegisterRequest {
+    email: string;
+    password: string;
+    name: string;
+}
+
+// ...
+
 class AuthService {
+    // Register new user
+    async register(data: RegisterRequest): Promise<any> {
+        const response = await apiClient.post('/auth/register', data);
+        return response.data;
+    }
+
     // Login with email/password
     async loginWithEmail(data: LoginEmailRequest): Promise<AuthResponse> {
         const response = await apiClient.post<AuthResponse>('/auth/login', data);

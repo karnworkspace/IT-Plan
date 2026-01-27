@@ -495,13 +495,34 @@ npm run dev
 | 3 | ดู activity details | แสดง user, action, timestamp | [ ] |
 
 ### TC11.2: การดู Task Activities
-
 | ขั้นตอน | การกระทำ | ผลลัพธ์ที่คาดหวัง | ผ่าน/ไม่ผ่าน |
 |---------|----------|-------------------|--------------|
 | 1 | เปิด task details | ดู activity section | [ ] |
 | 2 | ดู activities | แสดง changes ที่เกิดขึ้นกับ task | [ ] |
 
 ---
+
+## Test Case 12: Dashboard Analytics (New)
+
+### TC12.1: Stats Accuracy
+| ขั้นตอน | การกระทำ | ผลลัพธ์ที่คาดหวัง | ผ่าน/ไม่ผ่าน |
+|---------|----------|-------------------|--------------|
+| 1 | นับจำนวน Active Projects จริง | ค่า Active Projects ใน Dashboard ตรงกับจำนวนจริง | [ ] |
+| 2 | สร้าง Task เพิ่ม 1 งาน | ค่า My Pending Tasks เพิ่มขึ้น 1 | [ ] |
+| 3 | Mark task as Done | ค่า Completion Rate เปลี่ยนแปลง | [ ] |
+
+### TC12.2: Activity Feed Real-time
+| ขั้นตอน | การกระทำ | ผลลัพธ์ที่คาดหวัง | ผ่าน/ไม่ผ่าน |
+|---------|----------|-------------------|--------------|
+| 1 | เปิด Dashboard ไว้ | Activity Feed แสดงรายการล่าสุด | [ ] |
+| 2 | User อื่นสร้าง Comment (Simulate) | Activity Feed อัพเดท (หลัง refresh หรือ auto) | [ ] |
+| 3 | คลิกที่รายการ Activity | Redirect ไปยัง entity ที่เกี่ยวข้อง | [ ] |
+
+### TC12.3: Recent Projects
+| ขั้นตอน | การกระทำ | ผลลัพธ์ที่คาดหวัง | ผ่าน/ไม่ผ่าน |
+|---------|----------|-------------------|--------------|
+| 1 | แก้ไข Project เก่า | Project นั้นเลื่อนขึ้นมาเป็น Recent | [ ] |
+| 2 | คลิกที่ Recent Project card | Redirect ไปหน้า Project Detail | [ ] |
 
 ## Test Results Summary
 

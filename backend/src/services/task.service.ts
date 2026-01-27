@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import notificationService from './notification.service';
+import activityLogService from './activityLog.service';
 
 const prisma = new PrismaClient();
 
@@ -68,7 +69,7 @@ export class TaskService {
     if (status) where.status = status;
     if (assigneeId) where.assigneeId = assigneeId;
     if (priority) where.priority = priority;
-    
+
     if (dueDateFrom || dueDateTo) {
       where.dueDate = {};
       if (dueDateFrom) where.dueDate.gte = dueDateFrom;
@@ -225,6 +226,17 @@ export class TaskService {
       });
     }
 
+    // Log activity
+    await activityLogService.createActivityLog({
+      userId: data.createdById,
+      action: 'CREATED',
+      entityType: 'task',
+      entityId: task.id,
+      projectId: task.projectId,
+      taskId: task.id,
+      metadata: { title: task.title }
+    });
+
     return task;
   }
 
@@ -264,7 +276,7 @@ export class TaskService {
       });
     }
 
-    return await prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: { id },
       data,
       include: {
@@ -288,6 +300,19 @@ export class TaskService {
         },
       },
     });
+
+    // Log activity
+    await activityLogService.createActivityLog({
+      userId,
+      action: 'UPDATED',
+      entityType: 'task',
+      entityId: id,
+      projectId: updatedTask.projectId,
+      taskId: id,
+      metadata: { changes: Object.keys(data) }
+    });
+
+    return updatedTask;
   }
 
   /**
@@ -313,6 +338,16 @@ export class TaskService {
     if (!isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to delete this task');
     }
+
+    // Log activity before deletion (so we have record, though cascade might delete it if linked)
+    await activityLogService.createActivityLog({
+      userId,
+      action: 'DELETED',
+      entityType: 'task',
+      entityId: id,
+      projectId: task.projectId,
+      metadata: { title: task.title }
+    });
 
     await prisma.task.delete({
       where: { id },
@@ -364,6 +399,17 @@ export class TaskService {
         projectId: existingTask.projectId,
       });
     }
+
+    // Log activity
+    await activityLogService.createActivityLog({
+      userId,
+      action: status === 'DONE' ? 'COMPLETED' : 'UPDATED',
+      entityType: 'task',
+      entityId: id,
+      projectId: existingTask.projectId,
+      taskId: id,
+      metadata: { status, progress }
+    });
 
     return updatedTask;
   }

@@ -110,23 +110,114 @@
 
 ---
 
-## โครงสร้างโปรเจค
+## โครงสร้างโปรเจค (Project Structure)
+
+### โครงสร้างหลัก
 
 ```
 YTY Project/
-├── Doc/                      # 📄 เอกสารทั้งหมด
-│   ├── PROJECT-PROGRESS.md   ⭐ สถานะโปรเจค (อ่านก่อน!)
-│   ├── QUICK-REFERENCE.md    📋 Quick reference
-│   ├── Quick-Start-Guide.md  🚀 Setup guide
-│   └── ...
-├── frontend/                 # ⚛️ React App (เสร็จแล้ว)
-├── backend/                  # 🚀 Express API (เสร็จแล้ว)
-├── Design/                   # 🎨 UI Mockups
-└── .claude/                  # 🤖 Claude context files
-    ├── context/
-    ├── skills/
-    └── templates/
+├── 📄 CLAUDE.md                    # คู่มือสำหรับ AI/Developer
+├── 📁 Doc/                         # เอกสารทั้งหมด
+│   ├── PROJECT-PROGRESS.md         # ⭐ สถานะโปรเจค (อ่านก่อนเสมอ!)
+│   ├── QUICK-REFERENCE.md          # 📋 Quick reference
+│   ├── Quick-Start-Guide.md        # 🚀 Setup guide
+│   ├── API-Specification.md        # API endpoints
+│   ├── Task-Management-System-Design.md  # System design
+│   ├── Development-Workflow.md     # Git workflow
+│   ├── TESTING-GUIDE.md            # Testing guide
+│   └── Static-PIN-Login-Guide.md   # PIN auth guide
+│
+├── 📁 Design/                      # UI/UX
+│   └── UI-Mockups/                 # Mockups ล่าสุด (7 ไฟล์)
+│       ├── 01-dashboard-v2.png
+│       ├── 02-login-page-pin.png
+│       ├── 03-task-detail.png
+│       └── ...
+│
+├── 📁 backend/                     # 🚀 Express API (Node.js + TypeScript)
+│   ├── src/
+│   │   ├── controllers/            # Request handlers
+│   │   ├── services/               # Business logic (Source of Truth)
+│   │   ├── routes/                 # API routes
+│   │   ├── middlewares/            # Auth, Error handling, Rate limit
+│   │   ├── utils/                  # Helper functions (JWT, bcrypt)
+│   │   ├── config/                 # Environment, Database config
+│   │   └── index.ts                # Entry point
+│   ├── prisma/
+│   │   ├── schema.prisma           # Database schema
+│   │   └── migrations/             # DB migrations
+│   ├── scripts/                    # Data import/export scripts
+│   │   ├── export-data.js
+│   │   ├── import-data.ts
+│   │   └── import-users.ts
+│   ├── .env.production             # Production env vars
+│   ├── vercel.json                 # Vercel deployment config
+│   └── package.json
+│
+├── 📁 frontend/                    # ⚛️ React App (TypeScript + Vite)
+│   ├── src/
+│   │   ├── components/             # Reusable components
+│   │   │   ├── PinInput.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── ...
+│   │   ├── pages/                  # Page components
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── DashboardPage.tsx
+│   │   │   ├── TaskDetailPage.tsx
+│   │   │   └── ...
+│   │   ├── services/               # API clients
+│   │   │   ├── api.service.ts
+│   │   │   ├── auth.service.ts
+│   │   │   └── ...
+│   │   ├── store/                  # Zustand state management
+│   │   │   └── authStore.ts
+│   │   ├── hooks/                  # Custom React hooks
+│   │   ├── utils/                  # Helper functions
+│   │   ├── layouts/                # Layout components
+│   │   ├── types/                  # TypeScript types
+│   │   └── App.tsx                 # Main app + Router
+│   ├── public/                     # Static assets
+│   ├── .env.production             # Production env vars
+│   ├── vercel.json                 # Vercel deployment config
+│   └── package.json
+│
+├── 📁 tests/                       # Test suites (Jest + Playwright)
+│   ├── api/                        # API tests (51 tests ✅)
+│   │   ├── auth.test.ts
+│   │   ├── projects.test.ts
+│   │   ├── tasks.test.ts
+│   │   ├── notifications.test.ts
+│   │   └── updates-comments.test.ts
+│   ├── e2e/                        # E2E tests (14 tests ✅)
+│   │   ├── auth.spec.ts
+│   │   └── tasks.spec.ts
+│   ├── setup/                      # Test setup
+│   └── package.json
+│
+├── 📁 .claude/                     # 🤖 Claude context files
+│   ├── context/                    # Context documents
+│   │   ├── 01-architecture.md
+│   │   ├── 02-tech-stack.md
+│   │   ├── 03-database-schema.md
+│   │   └── 05-coding-standards.md
+│   ├── skills/                     # Custom skills
+│   └── templates/                  # Templates
+│
+└── 📁 archive/                     # 🗃️ ไฟล์เก่า (ไม่แตะ!)
+    ├── old-docs/                   # เอกสารเก่า (4 ไฟล์)
+    ├── old-data/                   # CSV, Excel, JSON เก่า (9 ไฟล์)
+    └── old-designs/                # UI mockups เก่า (2 ไฟล์)
 ```
+
+### Key Directories
+
+| Folder | Purpose | Notes |
+|--------|---------|-------|
+| `Doc/` | เอกสารทั้งหมด | อ่าน PROJECT-PROGRESS.md ก่อนเสมอ |
+| `backend/src/services/` | Business logic | Source of Truth |
+| `frontend/src/pages/` | UI Pages | Presentation layer |
+| `tests/` | Test suites | 65/65 tests ✅ |
+| `archive/` | ไฟล์เก่า | **ห้ามแก้ไข/commit** |
 
 ---
 
@@ -161,23 +252,229 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 
 ---
 
-## Workflow การพัฒนา
+## Workflow การพัฒนา (Development Workflow)
 
-### 1. ก่อนเริ่มงาน
-- **อ่าน `Doc/PROJECT-PROGRESS.md` ก่อนเสมอ!**
-- ระบุ context files ที่เกี่ยวข้อง
-- ระบุ skills ที่ต้องใช้
-- เตรียม requirements ให้ชัดเจน
+### 🔄 Complete Development Cycle
 
-### 2. ระหว่างพัฒนา
-- แบ่งงานเป็นขั้นตอนย่อย
-- ทดสอบทุกขั้นตอน
-- Review โค้ดก่อน commit
+```
+1. Preparation → 2. Development → 3. Testing → 4. Documentation → 5. Commit → 6. Deploy
+```
 
-### 3. หลังเสร็จงาน
-- Test ครบถ้วน
-- **Update `Doc/PROJECT-PROGRESS.md`**
-- Commit และ push
+---
+
+### **ขั้นตอนที่ 1: เตรียมงาน (Preparation)**
+
+```bash
+# 1.1 อ่านเอกสารก่อนเริ่มงาน (บังคับ!)
+📖 Doc/PROJECT-PROGRESS.md      # สถานะปัจจุบัน
+📖 Doc/QUICK-REFERENCE.md       # Quick ref
+📖 Doc/API-Specification.md     # ถ้าทำ API
+
+# 1.2 ตรวจสอบ Git status
+git status
+git pull origin main
+
+# 1.3 สร้าง branch ใหม่ (ถ้าเป็นงานใหญ่)
+git checkout -b feature/new-feature-name
+```
+
+---
+
+### **ขั้นตอนที่ 2: พัฒนา Code (Development)**
+
+#### **Backend Development**
+
+```bash
+cd backend
+
+# เพิ่ม/แก้ไข files ตามลำดับ:
+1. prisma/schema.prisma          # ถ้าต้องแก้ database
+2. src/services/*.service.ts     # Business logic (เขียนก่อน!)
+3. src/controllers/*.controller.ts  # Request handlers
+4. src/routes/*.routes.ts        # API routes
+5. src/index.ts                  # Register routes
+
+# Run migrations (ถ้าแก้ schema)
+npx prisma migrate dev --name describe_change
+npx prisma generate
+
+# Test API
+npm run dev
+# Test ด้วย curl/Postman
+```
+
+**Example: เพิ่ม Comment Feature**
+```bash
+# 1. Business logic
+vim src/services/comment.service.ts
+# - createComment(), getCommentsByTask(), updateComment(), deleteComment()
+
+# 2. Controller
+vim src/controllers/comment.controller.ts
+# - handleCreate(), handleGetByTask(), handleUpdate(), handleDelete()
+
+# 3. Routes
+vim src/routes/comment.routes.ts
+# - POST /comments, GET /comments/task/:taskId, PUT /comments/:id, DELETE /comments/:id
+
+# 4. Register routes
+vim src/index.ts
+# - app.use('/api/v1/comments', commentRoutes)
+```
+
+#### **Frontend Development**
+
+```bash
+cd frontend
+
+# เพิ่ม/แก้ไข files ตามลำดับ:
+1. src/services/*.service.ts     # API client (เขียนก่อน!)
+2. src/store/*.ts                # State management (ถ้าต้องการ)
+3. src/components/*.tsx          # Reusable components
+4. src/pages/*.tsx               # Pages
+
+# Run dev server
+npm run dev
+# Test ที่ http://localhost:5173
+```
+
+**Example: เพิ่ม CommentList Component**
+```bash
+# 1. API service
+vim src/services/comment.service.ts
+# - getCommentsByTask(), createComment(), updateComment(), deleteComment()
+
+# 2. Component
+vim src/components/CommentList.tsx
+# - Display comments, Add comment form
+
+# 3. Integrate to page
+vim src/pages/TaskDetailPage.tsx
+# - Import CommentList, Pass taskId prop
+```
+
+---
+
+### **ขั้นตอนที่ 3: Testing**
+
+```bash
+# 3.1 Manual Testing
+# - Test functionality ใน browser/API
+# - ตรวจสอบ error handling
+# - ทดสอบ edge cases
+
+# 3.2 Automated Testing (ถ้ามี)
+cd tests
+npm test                         # Run all tests
+npm run test:api                 # API tests only
+npm run test:e2e                 # E2E tests only
+```
+
+---
+
+### **ขั้นตอนที่ 4: Documentation (สำคัญมาก!)**
+
+```bash
+# 4.1 อัปเดตเอกสาร (ทุกครั้ง!)
+✏️ Doc/PROJECT-PROGRESS.md      # อัปเดตสถานะ (บังคับ!)
+   - เพิ่ม task ที่ทำเสร็จ
+   - อัปเดต completion %
+   - เพิ่ม bug fixes (ถ้ามี)
+   - อัปเดต Last Updated
+
+✏️ Doc/QUICK-REFERENCE.md       # ถ้าเพิ่ม features/commands
+✏️ Doc/API-Specification.md     # ถ้าเพิ่ม/แก้ API
+✏️ CLAUDE.md                    # ถ้าเปลี่ยน workflow หลัก
+```
+
+---
+
+### **ขั้นตอนที่ 5: Git Commit**
+
+```bash
+# 5.1 Review changes
+git status
+git diff
+
+# 5.2 Stage files (เลือกไฟล์ที่เกี่ยวข้อง)
+git add backend/src/services/comment.service.ts
+git add backend/src/controllers/comment.controller.ts
+git add frontend/src/components/CommentList.tsx
+git add Doc/PROJECT-PROGRESS.md
+# หรือ git add . (ระวังไฟล์ sensitive!)
+
+# 5.3 Commit (ใช้ format ที่กำหนด)
+git commit -m "feat(comments): เพิ่ม Task Comment feature
+
+- Backend: Comment CRUD APIs
+- Frontend: CommentList component
+- อัปเดต PROJECT-PROGRESS.md
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+```
+
+**Commit Message Format:**
+```
+<type>(<scope>): <subject>
+
+<body>
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+
+Types:
+- feat: feature ใหม่
+- fix: แก้ bug
+- docs: แก้เอกสาร
+- refactor: ปรับโครงสร้าง
+- test: เพิ่ม tests
+- chore: งานทั่วไป
+```
+
+---
+
+### **ขั้นตอนที่ 6: Push & Deploy**
+
+```bash
+# 6.1 Push to remote
+git push origin main
+# หรือ git push origin feature/branch-name
+
+# 6.2 Auto Deploy (ถ้า push to main)
+# Vercel จะ auto deploy:
+# - Frontend: https://frontend-beta-seven-60.vercel.app
+# - Backend: https://backend-five-iota-42.vercel.app
+
+# 6.3 ตรวจสอบ deployment
+# - เช็คที่ Vercel dashboard
+# - ทดสอบ production URLs
+```
+
+---
+
+### **📋 Development Checklist**
+
+#### ✅ ก่อนเริ่มงาน
+- [ ] อ่าน `Doc/PROJECT-PROGRESS.md`
+- [ ] `git pull origin main`
+- [ ] เข้าใจ requirements ชัดเจน
+
+#### ✅ ระหว่างพัฒนา
+- [ ] เขียน business logic ก่อน (services)
+- [ ] เขียน controller/routes
+- [ ] Test API/UI manually
+- [ ] Handle errors ครบถ้วน
+
+#### ✅ ก่อน Commit
+- [ ] โค้ดทำงานถูกต้อง
+- [ ] Tests ผ่าน (ถ้ามี)
+- [ ] ไม่มี console.log ที่ไม่จำเป็น
+- [ ] ไม่มี sensitive data
+- [ ] **อัปเดต Doc/PROJECT-PROGRESS.md**
+
+#### ✅ หลัง Deploy
+- [ ] ตรวจสอบ production URLs
+- [ ] ทดสอบ features บน production
+- [ ] Monitor logs (ถ้ามี errors)
 
 ---
 
@@ -376,5 +673,7 @@ Error: [error message]
 
 ---
 
+---
+
 **Note:** ไฟล์นี้เป็น living document - อัปเดตเมื่อมีการเปลี่ยนแปลง
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-02-02 (เพิ่ม: Project Structure รายละเอียด + Complete Development Workflow)

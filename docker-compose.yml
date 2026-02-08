@@ -1,0 +1,68 @@
+# Docker Compose for TaskFlow Development
+# Usage: docker-compose up -d
+
+services:
+  # Backend API (Express + Prisma + SQLite)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: taskflow-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: file:./prisma/dev.db
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-your-super-secret-jwt-key-change-this}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ./backend/src:/app/src:delegated
+      - ./backend/prisma:/app/prisma:delegated
+      - backend_node_modules:/app/node_modules
+    networks:
+      - taskflow-network
+    command: >
+      sh -c "
+        npx prisma generate &&
+        npx prisma db push &&
+        npm run dev
+      "
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: taskflow-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api/v1}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/public:/app/public:delegated
+      - ./frontend/index.html:/app/index.html:delegated
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - taskflow-network
+
+volumes:
+  backend_node_modules:
+    name: taskflow_backend_modules
+  frontend_node_modules:
+    name: taskflow_frontend_modules
+
+networks:
+  taskflow-network:
+    name: taskflow-network
+    driver: bridge

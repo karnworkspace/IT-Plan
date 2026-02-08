@@ -252,6 +252,74 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 
 ---
 
+## 🐳 Docker Development (แนะนำ)
+
+### Quick Start with Docker
+
+```bash
+# 1. Setup environment
+cp docker/.env.example .env
+
+# 2. Start all services
+make dev
+
+# หรือใช้ docker-compose
+docker-compose up -d
+```
+
+### Services ที่รัน
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:5173 | React App (Hot Reload) |
+| **Backend** | http://localhost:3000 | Express API (Hot Reload) |
+| **PostgreSQL** | localhost:5432 | Database |
+| **Adminer** | http://localhost:8080 | Database GUI (optional) |
+
+### Docker Commands
+
+```bash
+# Development
+make dev          # Start development
+make dev-build    # Build and start
+make dev-down     # Stop
+make dev-logs     # View logs
+
+# Database
+make db-studio    # Open Prisma Studio
+make db-migrate   # Run migrations
+make db-reset     # Reset database
+
+# Production
+make prod         # Start production
+make prod-build   # Build for production
+
+# Cleanup
+make clean        # Remove all containers/volumes
+```
+
+### Docker Files
+
+```
+docker-compose.yml        # Development compose
+docker-compose.prod.yml   # Production compose
+Makefile                  # Shortcut commands
+docker/
+├── .env.example          # Environment template
+└── README.md             # Docker documentation
+backend/
+├── Dockerfile            # Backend multi-stage build
+└── .dockerignore
+frontend/
+├── Dockerfile            # Frontend multi-stage build
+├── .dockerignore
+└── docker/nginx.conf     # Production nginx config
+```
+
+**ดูรายละเอียดเพิ่มเติม:** `docker/README.md`
+
+---
+
 ## Workflow การพัฒนา (Development Workflow)
 
 ### 🔄 Complete Development Cycle
@@ -676,4 +744,4 @@ Error: [error message]
 ---
 
 **Note:** ไฟล์นี้เป็น living document - อัปเดตเมื่อมีการเปลี่ยนแปลง
-**Last Updated:** 2026-02-02 (เพิ่ม: Project Structure รายละเอียด + Complete Development Workflow)
+**Last Updated:** 2026-02-08 (เพิ่ม: Docker Development Setup)

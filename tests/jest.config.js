@@ -2,7 +2,7 @@
 const config = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    roots: ['<rootDir>/api'],
+    roots: ['<rootDir>/api', '<rootDir>/scenarios'],
     testMatch: ['**/*.test.ts'],
     moduleFileExtensions: ['ts', 'js', 'json'],
     transform: {

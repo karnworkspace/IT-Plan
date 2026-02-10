@@ -251,8 +251,8 @@ export const DashboardPage: React.FC = () => {
                                                     avatar={
                                                         <Avatar
                                                             style={{
-                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#f5f5f5',
-                                                                color: task.priority === 'URGENT' ? 'white' : '#8c8c8c'
+                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#e6f4ff',
+                                                                color: task.priority === 'URGENT' ? 'white' : '#1677ff'
                                                             }}
                                                             icon={<CheckCircleOutlined />}
                                                         />

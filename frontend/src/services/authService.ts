@@ -83,18 +83,34 @@ class AuthService {
         return response.data;
     }
 
-    // Request PIN reset
-    async requestPinReset(email: string): Promise<ApiResponse<null>> {
-        const response = await apiClient.post<ApiResponse<null>>('/auth/reset-pin', { email });
+    // Request Password reset (forgot password)
+    async requestPasswordReset(email: string): Promise<any> {
+        const response = await apiClient.post('/auth/forgot-password', { email });
+        return response.data.data;
+    }
+
+    // Reset password with token
+    async resetPassword(token: string, newPassword: string, confirmPassword: string): Promise<ApiResponse<null>> {
+        const response = await apiClient.post<ApiResponse<null>>('/auth/reset-password', {
+            token,
+            newPassword,
+            confirmPassword,
+        });
         return response.data;
     }
 
-    // Confirm PIN reset
-    async confirmPinReset(token: string, newPin: string, confirmNewPin: string): Promise<ApiResponse<null>> {
-        const response = await apiClient.post<ApiResponse<null>>('/auth/reset-pin/confirm', {
+    // Request PIN reset (forgot PIN)
+    async requestPinReset(email: string): Promise<any> {
+        const response = await apiClient.post('/auth/forgot-pin', { email });
+        return response.data.data;
+    }
+
+    // Reset PIN with token
+    async resetPinWithToken(token: string, newPin: string, confirmPin: string): Promise<ApiResponse<null>> {
+        const response = await apiClient.post<ApiResponse<null>>('/auth/reset-pin-token', {
             token,
             newPin,
-            confirmNewPin,
+            confirmPin,
         });
         return response.data;
     }

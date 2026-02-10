@@ -34,7 +34,7 @@
 }
 
 .page-subtitle {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     font-size: 15px;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .stat-card .ant-statistic-title {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.9);
     font-size: 13px;
 }
 
@@ -101,7 +101,7 @@
 }
 
 .filters-section .ant-input-affix-wrapper input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .filters-section .ant-select-selection-placeholder,
@@ -110,7 +110,7 @@
 }
 
 .filters-section .ant-select-arrow {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 /* Content Area */
@@ -237,12 +237,12 @@
 }
 
 .footer-stat {
-    color: #8c8c8c;
+    color: #595959;
     font-size: 13px;
 }
 
 .footer-stat .anticon {
-    color: #bfbfbf;
+    color: #8c8c8c;
 }
 
 /* Project Modal */

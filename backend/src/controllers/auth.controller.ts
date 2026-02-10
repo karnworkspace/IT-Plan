@@ -158,6 +158,98 @@ export class AuthController {
     }
 
     /**
+     * Request password reset (forgot password)
+     */
+    async forgotPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { email } = req.body;
+
+            // Validate input
+            if (!email) {
+                sendError(res, 'Email is required', 400);
+                return;
+            }
+
+            const result = await authService.requestPasswordReset(email);
+
+            sendSuccess(res, result, 'Password reset requested');
+        } catch (error: any) {
+            sendError(res, error.message, 400);
+        }
+    }
+
+    /**
+     * Reset password with token
+     */
+    async resetPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { token, newPassword, confirmPassword } = req.body;
+
+            // Validate input
+            if (!token || !newPassword || !confirmPassword) {
+                sendError(res, 'Token, new password, and confirmation are required', 400);
+                return;
+            }
+
+            const result = await authService.resetPasswordWithToken(
+                token,
+                newPassword,
+                confirmPassword
+            );
+
+            sendSuccess(res, result, 'Password reset successfully');
+        } catch (error: any) {
+            sendError(res, error.message, 400);
+        }
+    }
+
+    /**
+     * Request PIN reset (forgot PIN)
+     */
+    async forgotPin(req: Request, res: Response): Promise<void> {
+        try {
+            const { email } = req.body;
+
+            // Validate input
+            if (!email) {
+                sendError(res, 'Email is required', 400);
+                return;
+            }
+
+            const result = await authService.requestPinReset(email);
+
+            sendSuccess(res, result, 'PIN reset requested');
+        } catch (error: any) {
+            sendError(res, error.message, 400);
+        }
+    }
+
+    /**
+     * Reset PIN with token
+     */
+    async resetPinWithToken(req: Request, res: Response): Promise<void> {
+        try {
+            const { token, newPin, confirmPin } = req.body;
+
+            // Validate input
+            if (!token || !newPin || !confirmPin) {
+                sendError(res, 'Token, new PIN, and confirmation are required', 400);
+                return;
+            }
+
+            const result = await authService.resetPinWithToken(
+                token,
+                newPin,
+                confirmPin
+            );
+
+            sendSuccess(res, result, 'PIN reset successfully');
+        } catch (error: any) {
+            sendError(res, error.message, 400);
+        }
+    }
+
+    /**
      * Refresh access token
      */
     async refreshToken(req: Request, res: Response): Promise<void> {

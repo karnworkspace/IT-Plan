@@ -30,6 +30,14 @@ model User {
   lockedUntil       DateTime?
   lastLoginAt       DateTime?
 
+  // Password Reset
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
+  // PIN Reset
+  pinResetToken   String?
+  pinResetExpires DateTime?
+
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

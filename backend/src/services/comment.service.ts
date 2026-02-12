@@ -28,6 +28,7 @@ export class CommentService {
             email: true,
           },
         },
+        attachments: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -96,6 +97,7 @@ export class CommentService {
             email: true,
           },
         },
+        attachments: true,
       },
     });
   }

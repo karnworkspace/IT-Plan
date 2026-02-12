@@ -1,0 +1,44 @@
+/* GroupsPage Styles */
+
+.groups-layout {
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+.groups-main {
+    background: transparent;
+}
+
+.groups-page-header {
+    background: #f5f7fa;
+    padding: 32px 40px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.groups-content {
+    padding: 32px 40px;
+    background: transparent;
+    min-height: calc(100vh - 250px);
+}
+
+/* Header input styles */
+.groups-page-header .ant-input-affix-wrapper,
+.groups-page-header .ant-select-selector {
+    background: white !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 10px !important;
+}
+
+.groups-page-header .ant-input-affix-wrapper input::placeholder {
+    color: #bfbfbf;
+}
+
+@media (max-width: 768px) {
+    .groups-page-header {
+        padding: 24px 20px;
+    }
+
+    .groups-content {
+        padding: 20px;
+    }
+}

@@ -64,7 +64,7 @@ export const createProject = async (
 ) => {
   try {
     const userId = extractUserId(req);
-    const { name, description, color, icon, startDate, endDate } = req.body;
+    const { name, description, color, icon, status, startDate, endDate } = req.body;
 
     // Validation
     if (!name || (typeof name === 'string' && name.trim().length === 0)) {
@@ -75,11 +75,20 @@ export const createProject = async (
       return sendError(res, 'Project name must be less than 100 characters', 400);
     }
 
+    // Validate status if provided
+    if (status) {
+      const validStatuses = ['ACTIVE', 'DELAY', 'COMPLETED', 'HOLD', 'CANCELLED', 'POSTPONE', 'ARCHIVED'];
+      if (!validStatuses.includes(status)) {
+        return sendError(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
+      }
+    }
+
     const project = await projectService.createProject({
       name: typeof name === 'string' ? name.trim() : name,
       description: description ? (typeof description === 'string' ? description.trim() : description) : undefined,
       color,
       icon,
+      status: status || 'ACTIVE',
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       ownerId: userId,
@@ -112,6 +121,14 @@ export const updateProject = async (
       }
       if (nameStr.length > 100) {
         return sendError(res, 'Project name must be less than 100 characters', 400);
+      }
+    }
+
+    // Validate status if provided
+    if (status !== undefined) {
+      const validStatuses = ['ACTIVE', 'DELAY', 'COMPLETED', 'HOLD', 'CANCELLED', 'POSTPONE', 'ARCHIVED'];
+      if (!validStatuses.includes(status)) {
+        return sendError(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
       }
     }
 

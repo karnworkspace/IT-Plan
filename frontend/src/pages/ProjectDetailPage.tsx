@@ -42,8 +42,14 @@ import {
     ExclamationCircleOutlined,
     SyncOutlined,
     UserOutlined,
+    PauseCircleOutlined,
+    StopOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { exportTasks } from '../utils/exportExcel';
+import { exportTasksPDF } from '../utils/exportPDF';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;
@@ -65,6 +71,8 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.
     IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin /> },
     IN_REVIEW: { color: 'warning', label: 'In Review', icon: <ExclamationCircleOutlined /> },
     DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined /> },
+    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined /> },
+    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined /> },
 };
 
 import { TaskDetailModal } from './TaskDetailModal';
@@ -131,6 +139,8 @@ export const ProjectDetailPage: React.FC = () => {
             description: task.description,
             priority: task.priority,
             status: task.status,
+            assigneeId: task.assigneeId || undefined,
+            startDate: task.startDate ? dayjs(task.startDate) : null,
             dueDate: task.dueDate ? dayjs(task.dueDate) : null,
         });
         setTaskModalVisible(true);
@@ -163,6 +173,7 @@ export const ProjectDetailPage: React.FC = () => {
 
             const taskData = {
                 ...values,
+                startDate: values.startDate ? values.startDate.toISOString() : null,
                 dueDate: values.dueDate ? values.dueDate.toISOString() : null,
             };
 
@@ -237,6 +248,8 @@ export const ProjectDetailPage: React.FC = () => {
         IN_PROGRESS: tasks.filter(t => t.status === 'IN_PROGRESS'),
         IN_REVIEW: tasks.filter(t => t.status === 'IN_REVIEW'),
         DONE: tasks.filter(t => t.status === 'DONE'),
+        HOLD: tasks.filter(t => t.status === 'HOLD'),
+        CANCELLED: tasks.filter(t => t.status === 'CANCELLED'),
     };
 
     if (loading) {
@@ -299,15 +312,33 @@ export const ProjectDetailPage: React.FC = () => {
                             )}
                         </div>
 
-                        <Button
-                            type="primary"
-                            size="large"
-                            icon={<PlusOutlined />}
-                            onClick={handleCreateTask}
-                            className="create-task-btn"
-                        >
-                            New Task
-                        </Button>
+                        <Space>
+                            <Button
+                                size="large"
+                                icon={<DownloadOutlined />}
+                                onClick={() => exportTasks(filteredTasks, project.name)}
+                                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: 12 }}
+                            >
+                                Export Excel
+                            </Button>
+                            <Button
+                                size="large"
+                                icon={<FilePdfOutlined />}
+                                onClick={() => exportTasksPDF(filteredTasks, project.name)}
+                                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: 12 }}
+                            >
+                                Save PDF
+                            </Button>
+                            <Button
+                                type="primary"
+                                size="large"
+                                icon={<PlusOutlined />}
+                                onClick={handleCreateTask}
+                                className="create-task-btn"
+                            >
+                                New Task
+                            </Button>
+                        </Space>
                     </div>
 
                     {/* Timeline & Countdown Section */}
@@ -331,13 +362,13 @@ export const ProjectDetailPage: React.FC = () => {
                                 <Col xs={24} sm={8}>
                                     <Card bordered={false} className="timeline-card due-date" style={{ background: '#e6f7ff', border: '1px solid #91d5ff' }}>
                                         <Statistic
-                                            title={<span style={{ color: '#096dd9', fontWeight: 600 }}><ClockCircleOutlined /> Target Deadline</span>}
+                                            title={<span style={{ color: '#096dd9', fontWeight: 600 }}><ClockCircleOutlined /> Target Finish</span>}
                                             value={
                                                 project.endDate
                                                     ? dayjs(project.endDate).format('DD MMM YYYY')
                                                     : (tasks.some(t => t.dueDate)
                                                         ? dayjs(Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime()))).format('DD MMM YYYY')
-                                                        : 'No deadline set')
+                                                        : 'No finish date set')
                                             }
                                             valueStyle={{ color: '#096dd9', fontSize: '1.2rem', fontWeight: 'bold' }}
                                         />
@@ -467,20 +498,33 @@ export const ProjectDetailPage: React.FC = () => {
                                                                 </Text>
                                                             )}
                                                             <div className="task-footer">
-                                                                {task.dueDate && (
-                                                                    <Tooltip title="Due Date">
-                                                                        <Space size={4}>
-                                                                            <CalendarOutlined />
-                                                                            <Text type="secondary" style={{ fontSize: 12 }}>
-                                                                                {dayjs(task.dueDate).format('MMM D')}
-                                                                            </Text>
-                                                                        </Space>
-                                                                    </Tooltip>
-                                                                )}
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                                                                    {task.dueDate && (
+                                                                        <Tooltip title={`Finish: ${dayjs(task.dueDate).format('MMM D, YYYY')}`}>
+                                                                            <Space size={4}>
+                                                                                <CalendarOutlined />
+                                                                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                                                                    {dayjs(task.dueDate).format('MMM D')}
+                                                                                </Text>
+                                                                            </Space>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                    {task.dueDate && task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                        const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                        if (daysLeft < 0) {
+                                                                            return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                        } else if (daysLeft <= 3) {
+                                                                            return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>Due soon</Tag>;
+                                                                        }
+                                                                        return null;
+                                                                    })()}
+                                                                </div>
                                                                 {task.assignee && (
-                                                                    <Avatar size="small" icon={<UserOutlined />}>
-                                                                        {task.assignee.name?.[0]}
-                                                                    </Avatar>
+                                                                    <Tooltip title={task.assignee.name}>
+                                                                        <Avatar size="small" icon={<UserOutlined />}>
+                                                                            {task.assignee.name?.[0]}
+                                                                        </Avatar>
+                                                                    </Tooltip>
                                                                 )}
                                                             </div>
                                                         </Card>
@@ -542,9 +586,17 @@ export const ProjectDetailPage: React.FC = () => {
                                                         ))}
                                                     </Select>
                                                     {task.dueDate && (
-                                                        <Text type="secondary">
-                                                            <CalendarOutlined /> {dayjs(task.dueDate).format('MMM D, YYYY')}
-                                                        </Text>
+                                                        <Space size={4}>
+                                                            <Text type="secondary">
+                                                                <CalendarOutlined /> {dayjs(task.dueDate).format('MMM D, YYYY')}
+                                                            </Text>
+                                                            {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                if (daysLeft < 0) return <Tag color="red">Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                if (daysLeft <= 3) return <Tag color="orange">Due soon</Tag>;
+                                                                return <Tag color="green">Ahead</Tag>;
+                                                            })()}
+                                                        </Space>
                                                     )}
                                                 </div>
                                             </div>
@@ -624,9 +676,31 @@ export const ProjectDetailPage: React.FC = () => {
                         </Col>
                     </Row>
 
-                    <Form.Item name="dueDate" label="Due Date">
-                        <DatePicker style={{ width: '100%' }} />
+                    <Form.Item name="assigneeId" label="Assignee">
+                        <Select placeholder="Select assignee" allowClear showSearch optionFilterProp="children">
+                            {project?.members?.map(member => (
+                                <Option key={member.user.id} value={member.user.id}>
+                                    <Space>
+                                        <Avatar size="small" icon={<UserOutlined />}>{member.user.name?.[0]}</Avatar>
+                                        {member.user.name}
+                                    </Space>
+                                </Option>
+                            ))}
+                        </Select>
                     </Form.Item>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="startDate" label="Start Date">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="dueDate" label="Finish Date">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
 

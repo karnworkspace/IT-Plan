@@ -10,6 +10,8 @@ import { ProjectsPage } from './pages/ProjectsPage';
 import { MyTasksPage } from './pages/MyTasksPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { TimelinePage } from './pages/TimelinePage';
+import { GroupsPage } from './pages/GroupsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -70,6 +72,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/timeline"
+            element={
+              <ProtectedRoute>
+                <TimelinePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups"
+            element={
+              <ProtectedRoute>
+                <GroupsPage />
               </ProtectedRoute>
             }
           />

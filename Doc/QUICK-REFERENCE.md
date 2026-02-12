@@ -12,9 +12,9 @@ Doc/PROJECT-PROGRESS.md  ← เริ่มที่นี่!
 ```
 
 ### 2. เข้าใจสถานะปัจจุบัน
-- ✅ Frontend: **เสร็จสมบูรณ์ 100%**
-- ✅ Backend: **เสร็จสมบูรณ์ 100%** (Auth APIs)
-- ⏳ Integration: **ยังไม่เริ่ม 0%**
+- ✅ Core System: **เสร็จสมบูรณ์ 100%** (Deployed UAT)
+- ✅ User Feedback: **100%** (18/18 items complete)
+- ✅ Tests: **64/64 PASSED**
 
 ### 3. รัน Project
 
@@ -180,16 +180,16 @@ cd frontend && npm run dev
 
 ---
 
-## ❌ Features ที่ยังไม่มี
+## ✅ User Feedback Features (2026-02-08 ~ 2026-02-10)
 
-- ✅ Frontend-Backend Integration (เสร็จแล้ว)
-- ✅ Project CRUD APIs (เสร็จแล้ว - 2026-01-22)
-- ⏳ Task CRUD APIs
-- ⏳ Projects List (เชื่อมกับ real API)
-- ⏳ Task Detail (full)
-- ⏳ Analytics (full)
-- ⏳ Notifications
-- ⏳ File upload
+- ✅ UI Contrast Fix + Forgot Password/PIN
+- ✅ Task: Start/Finish Date, Assignee Update, Status (HOLD, CANCELLED)
+- ✅ Project: 7 Statuses, Multi-Select Filter, Dashboard Clickable
+- ✅ Card/List Toggle, Sorting, Label: Deadline → Finish
+- ✅ Sub-tasks, Timeline/Gantt, Groups
+- ✅ Image Attachment in Comments (multer upload)
+- ✅ Export Excel (xlsx@0.18.5, Projects + Tasks)
+- ✅ Save as PDF (jspdf + html2canvas, Projects + Tasks)
 
 ---
 
@@ -290,5 +290,5 @@ curl -X GET "http://localhost:3000/api/v1/projects" \
 
 ---
 
-**Last Updated:** 2026-01-22 16:00
-**Status:** Project APIs Complete, Ready for Task APIs Development
+**Last Updated:** 2026-02-10
+**Status:** ✅ All Complete | Core System 100% | User Feedback 100% (18/18) | Tests 64/64 PASSED

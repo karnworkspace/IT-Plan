@@ -18,6 +18,8 @@ import {
     Card,
     Popconfirm,
     Slider,
+    Upload,
+    Image,
 } from 'antd';
 import {
     ClockCircleOutlined,
@@ -32,13 +34,20 @@ import {
     PlusOutlined,
     MessageOutlined,
     HistoryOutlined,
+    PauseCircleOutlined,
+    StopOutlined,
+    PaperClipOutlined,
+    PictureOutlined,
 } from '@ant-design/icons';
+import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { taskService, type Task } from '../services/taskService';
-import { commentService, type Comment } from '../services/commentService';
+import { projectService } from '../services/projectService';
+import { commentService, type Comment, type Attachment } from '../services/commentService';
 import { dailyUpdateService, type DailyUpdate } from '../services/dailyUpdateService';
 import { useAuthStore } from '../store/authStore';
+import { SubTaskList } from '../components/SubTaskList';
 import './TaskDetailModal.css';
 
 // Extend dayjs
@@ -69,6 +78,8 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.
     IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin /> },
     IN_REVIEW: { color: 'warning', label: 'In Review', icon: <ExclamationCircleOutlined /> },
     DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined /> },
+    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined /> },
+    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined /> },
 };
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -82,6 +93,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const [task, setTask] = useState<Task | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
+    const [projectMembers, setProjectMembers] = useState<{ id: string; name: string; email: string }[]>([]);
 
     // Edit mode states
     const [isEditing, setIsEditing] = useState(false);
@@ -90,6 +102,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     // New comment state
     const [newComment, setNewComment] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
+    const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
     // New update state
     const [showUpdateForm, setShowUpdateForm] = useState(false);
@@ -121,12 +134,24 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             setComments(commentsData);
             setUpdates(updatesData);
 
+            // Load project members for assignee dropdown
+            if (taskData.projectId) {
+                try {
+                    const projectData = await projectService.getProject(taskData.projectId);
+                    if (projectData.members) {
+                        setProjectMembers(projectData.members.map(m => m.user));
+                    }
+                } catch { /* ignore member load failure */ }
+            }
+
             // Setup edit form
             editForm.setFieldsValue({
                 title: taskData.title,
                 description: taskData.description,
                 status: taskData.status,
                 priority: taskData.priority,
+                assigneeId: taskData.assigneeId || undefined,
+                startDate: taskData.startDate ? dayjs(taskData.startDate) : null,
                 dueDate: taskData.dueDate ? dayjs(taskData.dueDate) : null,
             });
         } catch (error) {
@@ -144,6 +169,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             const values = await editForm.validateFields();
             const updatedTask = await taskService.updateTask(task.id, {
                 ...values,
+                startDate: values.startDate ? values.startDate.toISOString() : null,
                 dueDate: values.dueDate ? values.dueDate.toISOString() : null,
             });
 
@@ -157,19 +183,34 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     };
 
     const handleAddComment = async () => {
-        if (!task || !newComment.trim()) return;
+        if (!task || (!newComment.trim() && pendingFiles.length === 0)) return;
 
         try {
             setSubmittingComment(true);
-            const comment = await commentService.createComment(task.id, { content: newComment });
+            const content = newComment.trim() || (pendingFiles.length > 0 ? '(image)' : '');
+            const comment = await commentService.createComment(task.id, { content });
+
+            // Upload images if any
+            if (pendingFiles.length > 0) {
+                const attachments = await commentService.uploadImages(comment.id, pendingFiles);
+                comment.attachments = attachments;
+            }
+
             setComments([comment, ...comments]);
             setNewComment('');
+            setPendingFiles([]);
             message.success('Comment added');
         } catch (error) {
             message.error('Failed to add comment');
         } finally {
             setSubmittingComment(false);
         }
+    };
+
+    const getImageUrl = (att: Attachment) => {
+        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:3000';
+        const filename = att.path.split('/').pop() || att.path.split('\\').pop();
+        return `${baseUrl}/uploads/${filename}`;
     };
 
     const handleDeleteComment = async (commentId: string) => {
@@ -256,7 +297,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 <Form.Item name="title" style={{ marginBottom: 12 }}>
                                     <Input size="large" />
                                 </Form.Item>
-                                <Space>
+                                <Space wrap>
                                     <Form.Item name="priority" style={{ marginBottom: 0, width: 120 }}>
                                         <Select>
                                             {Object.keys(PRIORITY_CONFIG).map(key => (
@@ -270,6 +311,21 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                                 <Option key={key} value={key}>{STATUS_CONFIG[key].label}</Option>
                                             ))}
                                         </Select>
+                                    </Form.Item>
+                                    <Form.Item name="assigneeId" style={{ marginBottom: 0, width: 180 }}>
+                                        <Select placeholder="Assignee" allowClear showSearch optionFilterProp="children">
+                                            {projectMembers.map(member => (
+                                                <Option key={member.id} value={member.id}>{member.name}</Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                </Space>
+                                <Space style={{ marginTop: 12 }}>
+                                    <Form.Item name="startDate" style={{ marginBottom: 0 }}>
+                                        <DatePicker placeholder="Start Date" />
+                                    </Form.Item>
+                                    <Form.Item name="dueDate" style={{ marginBottom: 0 }}>
+                                        <DatePicker placeholder="Finish Date" />
                                     </Form.Item>
                                 </Space>
                             </Form>
@@ -321,14 +377,31 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     </Space>
                                 </div>
                                 <div className="meta-item">
-                                    <Text type="secondary">Due Date</Text>
+                                    <Text type="secondary">Start Date</Text>
+                                    <Space style={{ marginTop: 4 }}>
+                                        <CalendarOutlined />
+                                        <Text>
+                                            {task.startDate
+                                                ? dayjs(task.startDate).format('MMM D, YYYY')
+                                                : 'Not set'}
+                                        </Text>
+                                    </Space>
+                                </div>
+                                <div className="meta-item">
+                                    <Text type="secondary">Finish Date</Text>
                                     <Space style={{ marginTop: 4 }}>
                                         <CalendarOutlined />
                                         <Text>
                                             {task.dueDate
                                                 ? dayjs(task.dueDate).format('MMM D, YYYY')
-                                                : 'No due date'}
+                                                : 'Not set'}
                                         </Text>
+                                        {task.dueDate && task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                            const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                            if (daysLeft < 0) return <Tag color="red">Delay {Math.abs(daysLeft)}d</Tag>;
+                                            if (daysLeft <= 3) return <Tag color="orange">Due soon</Tag>;
+                                            return <Tag color="green">Ahead</Tag>;
+                                        })()}
                                     </Space>
                                 </div>
                                 <div className="meta-item">
@@ -337,6 +410,17 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         {dayjs(task.createdAt).format('MMM D, YYYY')}
                                     </Text>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Sub-tasks Section */}
+                        {!isEditing && (
+                            <div className="section" style={{ marginTop: 16 }}>
+                                <SubTaskList
+                                    parentTask={task}
+                                    subTasks={task.subTasks || []}
+                                    onRefresh={() => taskId && loadTaskData(taskId)}
+                                />
                             </div>
                         )}
 
@@ -452,6 +536,23 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                                         description={
                                                             <div className="comment-content">
                                                                 <Text>{comment.content}</Text>
+                                                                {comment.attachments && comment.attachments.length > 0 && (
+                                                                    <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                                        <Image.PreviewGroup>
+                                                                            {comment.attachments.map(att => (
+                                                                                <Image
+                                                                                    key={att.id}
+                                                                                    src={getImageUrl(att)}
+                                                                                    alt={att.filename}
+                                                                                    width={120}
+                                                                                    height={90}
+                                                                                    style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
+                                                                                    fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iOTAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSI2MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWEiIGZvbnQtc2l6ZT0iMTIiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=="
+                                                                                />
+                                                                            ))}
+                                                                        </Image.PreviewGroup>
+                                                                    </div>
+                                                                )}
                                                                 {user && user.id === comment.userId && (
                                                                     <Popconfirm
                                                                         title="Delete comment?"
@@ -481,17 +582,46 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="Write a comment..."
                                         rows={2}
-                                        style={{ marginBottom: 12 }}
+                                        style={{ marginBottom: 8 }}
                                     />
-                                    <Button
-                                        type="primary"
-                                        icon={<SendOutlined />}
-                                        onClick={handleAddComment}
-                                        loading={submittingComment}
-                                        disabled={!newComment.trim()}
-                                    >
-                                        Post Comment
-                                    </Button>
+                                    {pendingFiles.length > 0 && (
+                                        <div style={{ marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            {pendingFiles.map((file, idx) => (
+                                                <Tag
+                                                    key={idx}
+                                                    closable
+                                                    onClose={() => setPendingFiles(prev => prev.filter((_, i) => i !== idx))}
+                                                    icon={<PictureOutlined />}
+                                                >
+                                                    {file.name.length > 20 ? file.name.slice(0, 17) + '...' : file.name}
+                                                </Tag>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <Space>
+                                        <Upload
+                                            beforeUpload={(file) => {
+                                                setPendingFiles(prev => [...prev, file]);
+                                                return false;
+                                            }}
+                                            showUploadList={false}
+                                            accept="image/jpeg,image/png,image/gif,image/webp"
+                                            multiple
+                                        >
+                                            <Button icon={<PaperClipOutlined />}>
+                                                Attach Image
+                                            </Button>
+                                        </Upload>
+                                        <Button
+                                            type="primary"
+                                            icon={<SendOutlined />}
+                                            onClick={handleAddComment}
+                                            loading={submittingComment}
+                                            disabled={!newComment.trim() && pendingFiles.length === 0}
+                                        >
+                                            Post Comment
+                                        </Button>
+                                    </Space>
                                 </div>
                             </TabPane>
                         </Tabs>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { taskService, type Task } from '../services/taskService';
 import { Sidebar } from '../components/Sidebar';
+import dayjs from 'dayjs';
 import {
     Layout,
     Card,
@@ -20,6 +21,8 @@ import {
     CalendarOutlined,
     ExclamationCircleOutlined,
     FolderOutlined,
+    PauseCircleOutlined,
+    StopOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './MyTasksPage.css';
@@ -86,6 +89,10 @@ export const MyTasksPage: React.FC = () => {
                 return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
             case 'BLOCKED':
                 return <ExclamationCircleOutlined style={{ color: '#f5222d' }} />;
+            case 'HOLD':
+                return <PauseCircleOutlined style={{ color: '#fa8c16' }} />;
+            case 'CANCELLED':
+                return <StopOutlined style={{ color: '#8c8c8c' }} />;
             default:
                 return <CheckCircleOutlined />;
         }
@@ -133,6 +140,8 @@ export const MyTasksPage: React.FC = () => {
         IN_REVIEW: filteredTasks.filter(t => t.status === 'IN_REVIEW'),
         DONE: filteredTasks.filter(t => t.status === 'DONE'),
         BLOCKED: filteredTasks.filter(t => t.status === 'BLOCKED'),
+        HOLD: filteredTasks.filter(t => t.status === 'HOLD'),
+        CANCELLED: filteredTasks.filter(t => t.status === 'CANCELLED'),
     };
 
     return (
@@ -160,6 +169,8 @@ export const MyTasksPage: React.FC = () => {
                                         <Checkbox value="IN_REVIEW">In Review</Checkbox>
                                         <Checkbox value="DONE">Done</Checkbox>
                                         <Checkbox value="BLOCKED">Blocked</Checkbox>
+                                        <Checkbox value="HOLD">Hold</Checkbox>
+                                        <Checkbox value="CANCELLED">Cancelled</Checkbox>
                                     </Checkbox.Group>
                                 </div>
 
@@ -252,9 +263,17 @@ export const MyTasksPage: React.FC = () => {
                                                                 {task.title}
                                                             </Text>
                                                             {task.dueDate && (
-                                                                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-                                                                    <CalendarOutlined /> Due: {new Date(task.dueDate).toLocaleDateString()}
-                                                                </Text>
+                                                                <Space size={4} style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                                                        <CalendarOutlined /> Finish: {dayjs(task.dueDate).format('DD MMM YYYY')}
+                                                                    </Text>
+                                                                    {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                        const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                        if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                        if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
+                                                                        return null;
+                                                                    })()}
+                                                                </Space>
                                                             )}
                                                         </div>
                                                         <Tag color={getPriorityColor(task.priority)} style={{ marginLeft: 8 }}>

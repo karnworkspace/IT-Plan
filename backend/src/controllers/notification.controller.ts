@@ -82,7 +82,7 @@ export const createNotification = async (req: Request, res: Response, next: Next
     };
 
     const notification = await notificationService.createNotification(notificationData);
-    return sendSuccess(res, { notification }, '201');
+    return sendSuccess(res, { notification }, undefined, 201);
   } catch (error) {
     next(error);
   }

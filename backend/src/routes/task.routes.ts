@@ -8,6 +8,7 @@ import {
   updateTaskStatus,
   getTaskStats,
   getMyTasks,
+  getSubTasks,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 
@@ -26,6 +27,7 @@ router.get('/my-tasks', getMyTasks);
 
 // Individual task routes
 router.get('/tasks/:id', getTask);
+router.get('/tasks/:id/subtasks', getSubTasks);
 router.put('/tasks/:id', updateTask);
 router.delete('/tasks/:id', deleteTask);
 router.patch('/tasks/:id/status', updateTaskStatus);

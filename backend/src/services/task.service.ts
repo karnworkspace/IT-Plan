@@ -12,8 +12,10 @@ export interface CreateTaskInput {
   assigneeId?: string;
   createdById: string;
   priority?: string;
+  status?: string;
   dueDate?: Date;
   startDate?: Date;
+  parentTaskId?: string;
 }
 
 export interface UpdateTaskInput {
@@ -63,8 +65,8 @@ export class TaskService {
       limit = 20,
     } = filters;
 
-    // Build where clause
-    const where: any = { projectId };
+    // Build where clause — only top-level tasks by default
+    const where: any = { projectId, parentTaskId: null };
 
     if (status) where.status = status;
     if (assigneeId) where.assigneeId = assigneeId;
@@ -106,6 +108,7 @@ export class TaskService {
           select: {
             comments: true,
             dailyUpdates: true,
+            subTasks: true,
           },
         },
       },
@@ -153,6 +156,23 @@ export class TaskService {
             name: true,
           },
         },
+        parentTask: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        subTasks: {
+          include: {
+            assignee: {
+              select: { id: true, name: true },
+            },
+            _count: {
+              select: { subTasks: true },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
         comments: {
           orderBy: {
             createdAt: 'desc',
@@ -167,6 +187,7 @@ export class TaskService {
           select: {
             comments: true,
             dailyUpdates: true,
+            subTasks: true,
           },
         },
       },
@@ -189,8 +210,9 @@ export class TaskService {
         priority: data.priority || 'MEDIUM',
         dueDate: data.dueDate || null,
         startDate: data.startDate || null,
-        status: 'TODO',
+        status: data.status || 'TODO',
         progress: 0,
+        parentTaskId: data.parentTaskId || null,
       },
       include: {
         project: {
@@ -518,6 +540,26 @@ export class TaskService {
   }
 
   /**
+   * Get sub-tasks of a parent task
+   */
+  async getSubTasks(parentTaskId: string): Promise<any[]> {
+    const subTasks = await prisma.task.findMany({
+      where: { parentTaskId },
+      include: {
+        assignee: {
+          select: { id: true, name: true, email: true },
+        },
+        _count: {
+          select: { subTasks: true, comments: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return subTasks;
+  }
+
+  /**
    * Get task statistics for a project
    */
   async getTaskStats(projectId: string): Promise<any> {
@@ -532,6 +574,8 @@ export class TaskService {
     const inReview = tasks.filter((t) => t.status === 'IN_REVIEW').length;
     const done = tasks.filter((t) => t.status === 'DONE').length;
     const blocked = tasks.filter((t) => t.status === 'BLOCKED').length;
+    const hold = tasks.filter((t) => t.status === 'HOLD').length;
+    const cancelled = tasks.filter((t) => t.status === 'CANCELLED').length;
 
     return {
       total_tasks: total,
@@ -540,6 +584,8 @@ export class TaskService {
       in_review_tasks: inReview,
       completed_tasks: done,
       blocked_tasks: blocked,
+      hold_tasks: hold,
+      cancelled_tasks: cancelled,
       completion_rate: total > 0 ? Math.round((done / total) * 100) : 0,
     };
   }

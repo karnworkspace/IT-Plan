@@ -7,6 +7,8 @@ import {
     CalendarOutlined,
     TeamOutlined,
     DashboardOutlined,
+    FieldTimeOutlined,
+    UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { NotificationPopover } from './NotificationPopover';
@@ -30,6 +32,8 @@ export const Sidebar: React.FC = () => {
         { path: '/projects', label: 'Projects', icon: <FolderOutlined /> },
         { path: '/my-tasks', label: 'My Tasks', icon: <CheckCircleOutlined /> },
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
+        { path: '/timeline', label: 'Timeline', icon: <FieldTimeOutlined /> },
+        { path: '/groups', label: 'Groups', icon: <UsergroupAddOutlined /> },
     ];
 
     return (

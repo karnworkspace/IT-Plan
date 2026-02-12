@@ -1,0 +1,39 @@
+/* TimelinePage Styles */
+
+.timeline-layout {
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+.timeline-main {
+    background: transparent;
+}
+
+.timeline-page-header {
+    background: #f5f7fa;
+    padding: 32px 40px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.timeline-content {
+    padding: 24px 40px;
+    background: transparent;
+    min-height: calc(100vh - 250px);
+}
+
+/* Select styling in header */
+.timeline-page-header .ant-select-selector {
+    background: white !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 10px !important;
+}
+
+@media (max-width: 768px) {
+    .timeline-page-header {
+        padding: 24px 20px;
+    }
+
+    .timeline-content {
+        padding: 16px;
+    }
+}

@@ -24,6 +24,7 @@ services:
     volumes:
       - ./backend/src:/app/src:delegated
       - ./backend/prisma:/app/prisma:delegated
+      - ./backend/uploads:/app/uploads:delegated
       - backend_node_modules:/app/node_modules
     networks:
       - taskflow-network

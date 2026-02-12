@@ -1,6 +1,16 @@
 import api from './api';
 
 // Types
+export interface Attachment {
+  id: string;
+  commentId: string;
+  filename: string;
+  path: string;
+  mimetype: string;
+  size: number;
+  createdAt: string;
+}
+
 export interface Comment {
   id: string;
   taskId: string;
@@ -13,6 +23,7 @@ export interface Comment {
     name: string;
     email: string;
   };
+  attachments?: Attachment[];
 }
 
 export interface CreateCommentInput {
@@ -69,6 +80,25 @@ export const commentService = {
    */
   async deleteComment(id: string): Promise<void> {
     await api.delete(`/comments/${id}`);
+  },
+
+  /**
+   * Upload images for a comment
+   */
+  async uploadImages(commentId: string, files: File[]): Promise<Attachment[]> {
+    const formData = new FormData();
+    files.forEach(file => formData.append('images', file));
+    const response = await api.post(`/comments/${commentId}/attachments`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data.attachments;
+  },
+
+  /**
+   * Delete attachment
+   */
+  async deleteAttachment(id: string): Promise<void> {
+    await api.delete(`/attachments/${id}`);
   },
 
   /**

@@ -105,7 +105,7 @@
 
 .project-stats .stat-card .ant-statistic-title {
     font-size: 13px;
-    color: #8c8c8c;
+    color: #595959;
 }
 
 .project-stats .stat-card .ant-statistic-content {
@@ -222,7 +222,7 @@
 }
 
 .task-footer .ant-space {
-    color: #8c8c8c;
+    color: #595959;
 }
 
 /* List View */

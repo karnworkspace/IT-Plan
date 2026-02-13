@@ -109,8 +109,14 @@ export const DashboardPage: React.FC = () => {
         }
     };
 
-    const StatusCard = ({ title, value, icon, color, suffix }: any) => (
-        <Card className="stat-card" bordered={false}>
+    const StatusCard = ({ title, value, icon, color, suffix, onClick }: any) => (
+        <Card
+            className="stat-card"
+            bordered={false}
+            hoverable={!!onClick}
+            onClick={onClick}
+            style={onClick ? { cursor: 'pointer' } : undefined}
+        >
             <Statistic
                 title={<Text type="secondary">{title}</Text>}
                 value={value}
@@ -158,6 +164,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
                                     color="#1890ff"
+                                    onClick={() => navigate('/projects')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
@@ -166,6 +173,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
                                     color="#fa8c16"
+                                    onClick={() => navigate('/my-tasks')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
@@ -174,6 +182,7 @@ export const DashboardPage: React.FC = () => {
                                     value={8} // Mock for demo
                                     icon={<TeamOutlined />}
                                     color="#52c41a"
+                                    onClick={() => navigate('/projects')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
@@ -183,6 +192,7 @@ export const DashboardPage: React.FC = () => {
                                     suffix="%"
                                     icon={<RocketOutlined />}
                                     color="#722ed1"
+                                    onClick={() => navigate('/projects')}
                                 />
                             </Col>
                         </Row>
@@ -207,7 +217,14 @@ export const DashboardPage: React.FC = () => {
                                                     <div className="project-icon" style={{ backgroundColor: project.color }}>
                                                         <FolderOutlined />
                                                     </div>
-                                                    <Tag color={project.status === 'ACTIVE' ? 'success' : 'default'}>
+                                                    <Tag color={
+                                                        project.status === 'ACTIVE' ? 'success' :
+                                                        project.status === 'DELAY' ? 'error' :
+                                                        project.status === 'COMPLETED' ? 'processing' :
+                                                        project.status === 'HOLD' ? 'orange' :
+                                                        project.status === 'POSTPONE' ? 'warning' :
+                                                        'default'
+                                                    }>
                                                         {project.status}
                                                     </Tag>
                                                 </div>
@@ -251,8 +268,8 @@ export const DashboardPage: React.FC = () => {
                                                     avatar={
                                                         <Avatar
                                                             style={{
-                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#f5f5f5',
-                                                                color: task.priority === 'URGENT' ? 'white' : '#8c8c8c'
+                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#e6f4ff',
+                                                                color: task.priority === 'URGENT' ? 'white' : '#1677ff'
                                                             }}
                                                             icon={<CheckCircleOutlined />}
                                                         />

@@ -38,3 +38,6 @@ coverage/
 
 # Excel temporary files
 ~$*
+
+# Data export files
+*_export.json

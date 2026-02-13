@@ -7,7 +7,7 @@ export interface Project {
   description?: string;
   color: string;
   icon?: string;
-  status: 'ACTIVE' | 'ARCHIVED' | 'COMPLETED';
+  status: 'ACTIVE' | 'DELAY' | 'COMPLETED' | 'HOLD' | 'CANCELLED' | 'POSTPONE' | 'ARCHIVED';
   startDate?: string;
   endDate?: string;
   ownerId: string;

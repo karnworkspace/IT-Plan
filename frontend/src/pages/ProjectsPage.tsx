@@ -24,6 +24,7 @@ import {
     Statistic,
     Dropdown,
     DatePicker,
+    Checkbox,
 } from 'antd';
 import dayjs from 'dayjs';
 import type { MenuProps } from 'antd';
@@ -38,7 +39,18 @@ import {
     MoreOutlined,
     EyeOutlined,
     ProjectOutlined,
+    PauseCircleOutlined,
+    StopOutlined,
+    WarningOutlined,
+    HourglassOutlined,
+    AppstoreOutlined,
+    BarsOutlined,
+    SortAscendingOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
 } from '@ant-design/icons';
+import { exportProjects } from '../utils/exportExcel';
+import { exportProjectsPDF } from '../utils/exportPDF';
 import './ProjectsPage.css';
 
 const { Content } = Layout;
@@ -74,12 +86,16 @@ export const ProjectsPage: React.FC = () => {
     const [projects, setProjects] = useState<ProjectWithStats[]>([]);
     const [filteredProjects, setFilteredProjects] = useState<ProjectWithStats[]>([]);
     const [searchText, setSearchText] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+    const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
     const [selectedProjectForMembers, setSelectedProjectForMembers] = useState<ProjectWithStats | null>(null);
+    const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
+        return (localStorage.getItem('projectsViewMode') as 'card' | 'list') || 'card';
+    });
+    const [sortBy, setSortBy] = useState<string>('name-asc');
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -96,12 +112,35 @@ export const ProjectsPage: React.FC = () => {
             );
         }
 
-        if (statusFilter) {
-            filtered = filtered.filter(p => p.status === statusFilter);
+        if (statusFilter.length > 0) {
+            filtered = filtered.filter(p => statusFilter.includes(p.status));
         }
 
+        // Sorting
+        filtered = [...filtered].sort((a, b) => {
+            switch (sortBy) {
+                case 'name-asc':
+                    return a.name.localeCompare(b.name);
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'date-newest':
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                case 'date-oldest':
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                case 'status':
+                    return a.status.localeCompare(b.status);
+                default:
+                    return 0;
+            }
+        });
+
         setFilteredProjects(filtered);
-    }, [projects, searchText, statusFilter]);
+    }, [projects, searchText, statusFilter, sortBy]);
+
+    const handleViewModeChange = (mode: 'card' | 'list') => {
+        setViewMode(mode);
+        localStorage.setItem('projectsViewMode', mode);
+    };
 
     const loadProjects = async () => {
         try {
@@ -207,10 +246,18 @@ export const ProjectsPage: React.FC = () => {
         switch (status) {
             case 'ACTIVE':
                 return { color: 'success', icon: <CheckCircleOutlined />, label: 'Active' };
-            case 'ARCHIVED':
-                return { color: 'default', icon: <ClockCircleOutlined />, label: 'Archived' };
+            case 'DELAY':
+                return { color: 'error', icon: <WarningOutlined />, label: 'Delay' };
             case 'COMPLETED':
                 return { color: 'processing', icon: <CheckCircleOutlined />, label: 'Completed' };
+            case 'HOLD':
+                return { color: 'orange', icon: <PauseCircleOutlined />, label: 'Hold' };
+            case 'CANCELLED':
+                return { color: 'default', icon: <StopOutlined />, label: 'Cancelled' };
+            case 'POSTPONE':
+                return { color: 'warning', icon: <HourglassOutlined />, label: 'Postpone' };
+            case 'ARCHIVED':
+                return { color: 'default', icon: <ClockCircleOutlined />, label: 'Archived' };
             default:
                 return { color: 'default', icon: null, label: status };
         }
@@ -249,6 +296,8 @@ export const ProjectsPage: React.FC = () => {
     const totalProjects = projects.length;
     const activeProjects = projects.filter(p => p.status === 'ACTIVE').length;
     const completedProjects = projects.filter(p => p.status === 'COMPLETED').length;
+    const delayProjects = projects.filter(p => p.status === 'DELAY').length;
+    const holdProjects = projects.filter(p => p.status === 'HOLD').length;
 
     return (
         <Layout className="projects-layout">
@@ -267,29 +316,47 @@ export const ProjectsPage: React.FC = () => {
                             </Text>
                         </div>
 
-                        <Button
-                            type="primary"
-                            size="large"
-                            icon={<PlusOutlined />}
-                            onClick={handleCreate}
-                            className="create-btn"
-                        >
-                            New Project
-                        </Button>
+                        <Space>
+                            <Button
+                                size="large"
+                                icon={<DownloadOutlined />}
+                                onClick={() => exportProjects(filteredProjects)}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Export Excel
+                            </Button>
+                            <Button
+                                size="large"
+                                icon={<FilePdfOutlined />}
+                                onClick={() => exportProjectsPDF(filteredProjects)}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Save PDF
+                            </Button>
+                            <Button
+                                type="primary"
+                                size="large"
+                                icon={<PlusOutlined />}
+                                onClick={handleCreate}
+                                className="create-btn"
+                            >
+                                New Project
+                            </Button>
+                        </Space>
                     </div>
 
                     {/* Stats Cards */}
                     <Row gutter={16} className="stats-row">
-                        <Col xs={8}>
+                        <Col xs={12} sm={6}>
                             <Card className="stat-card">
                                 <Statistic
-                                    title="Total Projects"
+                                    title="Total"
                                     value={totalProjects}
                                     prefix={<FolderOutlined />}
                                 />
                             </Card>
                         </Col>
-                        <Col xs={8}>
+                        <Col xs={12} sm={6}>
                             <Card className="stat-card active">
                                 <Statistic
                                     title="Active"
@@ -299,7 +366,17 @@ export const ProjectsPage: React.FC = () => {
                                 />
                             </Card>
                         </Col>
-                        <Col xs={8}>
+                        <Col xs={12} sm={6}>
+                            <Card className="stat-card">
+                                <Statistic
+                                    title="Delay"
+                                    value={delayProjects}
+                                    valueStyle={{ color: '#EF4444' }}
+                                    prefix={<WarningOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={12} sm={6}>
                             <Card className="stat-card completed">
                                 <Statistic
                                     title="Completed"
@@ -323,17 +400,48 @@ export const ProjectsPage: React.FC = () => {
                             size="large"
                         />
                         <Select
-                            placeholder="All Status"
-                            style={{ width: 150 }}
-                            allowClear
-                            value={statusFilter}
-                            onChange={setStatusFilter}
+                            value={sortBy}
+                            onChange={setSortBy}
+                            style={{ width: 180 }}
                             size="large"
+                            suffixIcon={<SortAscendingOutlined />}
                         >
-                            <Option value="ACTIVE">Active</Option>
-                            <Option value="ARCHIVED">Archived</Option>
-                            <Option value="COMPLETED">Completed</Option>
+                            <Option value="name-asc">Name (A → Z)</Option>
+                            <Option value="name-desc">Name (Z → A)</Option>
+                            <Option value="date-newest">Newest First</Option>
+                            <Option value="date-oldest">Oldest First</Option>
+                            <Option value="status">Status</Option>
                         </Select>
+                        <Button.Group size="large">
+                            <Tooltip title="Card View">
+                                <Button
+                                    type={viewMode === 'card' ? 'primary' : 'default'}
+                                    icon={<AppstoreOutlined />}
+                                    onClick={() => handleViewModeChange('card')}
+                                />
+                            </Tooltip>
+                            <Tooltip title="List View">
+                                <Button
+                                    type={viewMode === 'list' ? 'primary' : 'default'}
+                                    icon={<BarsOutlined />}
+                                    onClick={() => handleViewModeChange('list')}
+                                />
+                            </Tooltip>
+                        </Button.Group>
+                    </div>
+                    <div className="status-filter-section" style={{ padding: '0 24px 16px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        <Checkbox.Group
+                            value={statusFilter}
+                            onChange={(values) => setStatusFilter(values as string[])}
+                        >
+                            <Checkbox value="ACTIVE"><Tag color="success">Active</Tag></Checkbox>
+                            <Checkbox value="DELAY"><Tag color="error">Delay</Tag></Checkbox>
+                            <Checkbox value="COMPLETED"><Tag color="processing">Completed</Tag></Checkbox>
+                            <Checkbox value="HOLD"><Tag color="orange">Hold</Tag></Checkbox>
+                            <Checkbox value="CANCELLED"><Tag color="default">Cancelled</Tag></Checkbox>
+                            <Checkbox value="POSTPONE"><Tag color="warning">Postpone</Tag></Checkbox>
+                            <Checkbox value="ARCHIVED"><Tag color="default">Archived</Tag></Checkbox>
+                        </Checkbox.Group>
                     </div>
                 </div>
 
@@ -343,14 +451,14 @@ export const ProjectsPage: React.FC = () => {
                             <Card className="empty-state">
                                 <FolderOutlined style={{ fontSize: 80, color: '#d9d9d9' }} />
                                 <Title level={3} style={{ marginTop: 24, color: '#595959' }}>
-                                    {searchText || statusFilter ? 'No Matching Projects' : 'No Projects Yet'}
+                                    {searchText || statusFilter.length > 0 ? 'No Matching Projects' : 'No Projects Yet'}
                                 </Title>
                                 <Paragraph type="secondary" style={{ fontSize: 16 }}>
-                                    {searchText || statusFilter
+                                    {searchText || statusFilter.length > 0
                                         ? 'Try adjusting your search or filters'
                                         : 'Create your first project to start organizing your tasks'}
                                 </Paragraph>
-                                {!searchText && !statusFilter && (
+                                {!searchText && statusFilter.length === 0 && (
                                     <Button
                                         type="primary"
                                         size="large"
@@ -361,7 +469,7 @@ export const ProjectsPage: React.FC = () => {
                                     </Button>
                                 )}
                             </Card>
-                        ) : (
+                        ) : viewMode === 'card' ? (
                             <Row gutter={[20, 20]}>
                                 {filteredProjects.map((project) => {
                                     const statusConfig = getStatusConfig(project.status);
@@ -481,6 +589,81 @@ export const ProjectsPage: React.FC = () => {
                                     );
                                 })}
                             </Row>
+                        ) : (
+                            /* List View */
+                            <div className="project-list-view">
+                                {filteredProjects.map((project) => {
+                                    const statusConfig = getStatusConfig(project.status);
+                                    const totalTasks = project.stats?.total || project._count?.tasks || 0;
+                                    const completedTasks = project.stats?.completed || 0;
+                                    const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                                    const progress = project.stats?.progress ?? calculatedProgress;
+
+                                    return (
+                                        <Card
+                                            key={project.id}
+                                            className="project-list-item"
+                                            hoverable
+                                            onClick={() => handleViewProject(project.id)}
+                                            style={{ marginBottom: 12, borderRadius: 12, overflow: 'hidden' }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                                <div
+                                                    style={{
+                                                        width: 6,
+                                                        height: 56,
+                                                        borderRadius: 3,
+                                                        backgroundColor: project.color,
+                                                        flexShrink: 0,
+                                                    }}
+                                                />
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                                        <Text strong style={{ fontSize: 15 }} ellipsis>{project.name}</Text>
+                                                        <Tag icon={statusConfig.icon} color={statusConfig.color as string} style={{ marginRight: 0 }}>
+                                                            {statusConfig.label}
+                                                        </Tag>
+                                                    </div>
+                                                    <Text type="secondary" style={{ fontSize: 13 }} ellipsis>
+                                                        {project.description || 'No description'}
+                                                    </Text>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
+                                                    <Progress
+                                                        type="circle"
+                                                        percent={progress}
+                                                        size={40}
+                                                        strokeColor={project.color}
+                                                    />
+                                                    <Tooltip title={`${completedTasks}/${totalTasks} tasks`}>
+                                                        <Space style={{ color: '#666', fontSize: 13 }}>
+                                                            <CheckCircleOutlined />
+                                                            <span>{completedTasks}/{totalTasks}</span>
+                                                        </Space>
+                                                    </Tooltip>
+                                                    <Tooltip title={`${project.members?.length || 0} members`}>
+                                                        <Space style={{ color: '#666', fontSize: 13 }}>
+                                                            <TeamOutlined />
+                                                            <span>{project.members?.length || 0}</span>
+                                                        </Space>
+                                                    </Tooltip>
+                                                    <Dropdown
+                                                        menu={{ items: getProjectMenuItems(project) }}
+                                                        trigger={['click']}
+                                                        placement="bottomRight"
+                                                    >
+                                                        <Button
+                                                            type="text"
+                                                            icon={<MoreOutlined />}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    </Dropdown>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
                         )}
                     </Spin>
                 </Content>
@@ -553,16 +736,40 @@ export const ProjectsPage: React.FC = () => {
                                     Active
                                 </Space>
                             </Option>
-                            <Option value="ARCHIVED">
+                            <Option value="DELAY">
                                 <Space>
-                                    <Badge status="default" />
-                                    Archived
+                                    <Badge status="error" />
+                                    Delay
                                 </Space>
                             </Option>
                             <Option value="COMPLETED">
                                 <Space>
                                     <Badge status="processing" />
                                     Completed
+                                </Space>
+                            </Option>
+                            <Option value="HOLD">
+                                <Space>
+                                    <Badge color="orange" />
+                                    Hold
+                                </Space>
+                            </Option>
+                            <Option value="CANCELLED">
+                                <Space>
+                                    <Badge status="default" />
+                                    Cancelled
+                                </Space>
+                            </Option>
+                            <Option value="POSTPONE">
+                                <Space>
+                                    <Badge color="gold" />
+                                    Postpone
+                                </Space>
+                            </Option>
+                            <Option value="ARCHIVED">
+                                <Space>
+                                    <Badge status="default" />
+                                    Archived
                                 </Space>
                             </Option>
                         </Select>

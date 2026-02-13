@@ -1,28 +1,10 @@
-import rateLimit from 'express-rate-limit';
-
-// Skip rate limiting in test environment
-const isTestEnv = process.env.NODE_ENV === 'test';
+import { RequestHandler } from 'express';
 
 /**
- * Rate limiter for authentication endpoints
+ * Rate limiting disabled - internal use only
+ * Middleware pass-through (no-op)
  */
-export const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isTestEnv ? 1000 : 50, // Higher limit for testing, 50 for production
-    message: 'Too many authentication attempts, please try again later',
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: () => isTestEnv, // Skip in test environment
-});
+const noOp: RequestHandler = (_req, _res, next) => next();
 
-/**
- * Rate limiter for general API endpoints
- */
-export const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isTestEnv ? 1000 : 100, // Higher limit for testing
-    message: 'Too many requests, please try again later',
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: () => isTestEnv, // Skip in test environment
-});
+export const authLimiter = noOp;
+export const apiLimiter = noOp;

@@ -6,8 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Production: PostgreSQL (Neon)
+  // Docker dev: PostgreSQL (local container)
+  // Local dev without Docker: change to "sqlite" and use file:./prisma/dev.db
 }
 
 // ============================================
@@ -30,6 +33,14 @@ model User {
   lockedUntil       DateTime?
   lastLoginAt       DateTime?
 
+  // Password Reset
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
+  // PIN Reset
+  pinResetToken   String?
+  pinResetExpires DateTime?
+
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -43,6 +54,7 @@ model User {
   comments          Comment[]
   notifications     Notification[]
   activityLogs      ActivityLog[]
+  groupMembers      GroupMember[]
 
   @@map("users")
 }
@@ -87,6 +99,7 @@ model Project {
   tasks         Task[]
   notifications Notification[]
   activityLogs  ActivityLog[]
+  groupProjects GroupProject[]
 
   @@index([ownerId])
   @@map("projects")
@@ -124,6 +137,11 @@ model Task {
   assigneeId String?
   createdById String
 
+  // Sub-tasks (Multi-level)
+  parentTaskId String?
+  parentTask   Task?   @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subTasks     Task[]  @relation("SubTasks")
+
   // Dates
   dueDate   DateTime?
   startDate DateTime?
@@ -149,6 +167,7 @@ model Task {
   @@index([createdById])
   @@index([status])
   @@index([dueDate])
+  @@index([parentTaskId])
   @@map("tasks")
 }
 
@@ -182,10 +201,30 @@ model Comment {
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
 
   @@index([taskId])
   @@index([userId])
   @@map("comments")
+}
+
+// ============================================
+// Attachment Models (Image/File in Comments)
+// ============================================
+
+model Attachment {
+  id        String   @id @default(uuid())
+  commentId String
+  filename  String
+  path      String
+  mimetype  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+  @@map("attachments")
 }
 
 // ============================================
@@ -248,12 +287,60 @@ model ActivityLog {
 }
 
 // ============================================
+// Group Models (User Groups & Project Groups)
+// ============================================
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("USER_GROUP") // USER_GROUP, PROJECT_GROUP
+  color       String   @default("#1890ff")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  GroupMember[]
+  projects GroupProject[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id      String @id @default(uuid())
+  groupId String
+  userId  String
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model GroupProject {
+  id        String @id @default(uuid())
+  groupId   String
+  projectId String
+
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, projectId])
+  @@index([groupId])
+  @@index([projectId])
+  @@map("group_projects")
+}
+
+// ============================================
 // Type Constants (for TypeScript reference)
 // ============================================
 // UserRole: "ADMIN" | "MEMBER"
-// ProjectStatus: "ACTIVE" | "ARCHIVED" | "COMPLETED"
+// ProjectStatus: "ACTIVE" | "DELAY" | "COMPLETED" | "HOLD" | "CANCELLED" | "POSTPONE" | "ARCHIVED"
 // ProjectMemberRole: "OWNER" | "ADMIN" | "MEMBER"
-// TaskStatus: "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE" | "BLOCKED"
+// TaskStatus: "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE" | "BLOCKED" | "HOLD" | "CANCELLED"
 // Priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 // NotificationType: "TASK_ASSIGNED" | "TASK_DUE_SOON" | "TASK_OVERDUE" | "TASK_COMPLETED" | "COMMENT_ADDED" | "PROJECT_INVITE" | "DAILY_REMINDER"
 // ActivityType: "CREATED" | "UPDATED" | "DELETED" | "ASSIGNED" | "COMPLETED" | "COMMENTED"

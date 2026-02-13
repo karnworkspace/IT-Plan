@@ -69,7 +69,7 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
     };
 
     const comment = await commentService.createComment(commentData);
-    return sendSuccess(res, { comment }, '201');
+    return sendSuccess(res, { comment }, undefined, 201);
   } catch (error) {
     next(error);
   }

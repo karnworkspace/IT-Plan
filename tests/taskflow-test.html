@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow - Manual Test Sheet v1.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #222632;
+    --border: #2d3248;
+    --text: #e4e6ef;
+    --text-dim: #8b8fa7;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108,92,231,0.15);
+    --pass: #00b894;
+    --pass-bg: rgba(0,184,148,0.1);
+    --fail: #e17055;
+    --fail-bg: rgba(225,112,85,0.1);
+    --skip: #fdcb6e;
+    --skip-bg: rgba(253,203,110,0.1);
+    --pending: #636e82;
+    --info: #74b9ff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #22263a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+  }
+
+  .header-meta code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface-2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--info);
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .stat-chip .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .stat-chip.total .dot { background: var(--accent); }
+  .stat-chip.pass .dot { background: var(--pass); }
+  .stat-chip.fail .dot { background: var(--fail); }
+  .stat-chip.skip .dot { background: var(--skip); }
+  .stat-chip.pending .dot { background: var(--pending); }
+
+  .progress-bar-container {
+    flex: 1;
+    min-width: 200px;
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .progress-bar-container .bar-pass { background: var(--pass); transition: width 0.4s; }
+  .progress-bar-container .bar-fail { background: var(--fail); transition: width 0.4s; }
+  .progress-bar-container .bar-skip { background: var(--skip); transition: width 0.4s; }
+
+  /* Actions */
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .btn:hover { background: var(--border); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { opacity: 0.85; }
+  .btn.danger { border-color: var(--fail); color: var(--fail); }
+  .btn.danger:hover { background: var(--fail-bg); }
+
+  /* Filter */
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+  /* Main */
+  .main { max-width: 1400px; margin: 0 auto; padding: 24px 32px 80px; }
+
+  /* Test Accounts */
+  .accounts-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .accounts-bar strong { color: var(--info); }
+  .accounts-bar code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .section-header:hover { background: var(--surface-2); }
+
+  .section-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header h2 .num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  .section-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .section-stats .s-pass { color: var(--pass); }
+  .section-stats .s-fail { color: var(--fail); }
+
+  .section-chevron {
+    transition: transform 0.2s;
+    color: var(--text-dim);
+  }
+
+  .section.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  .section-body {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+  }
+
+  /* Sub-section */
+  .subsection-title {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Table */
+  .test-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .test-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+  }
+
+  .test-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(45,50,72,0.5);
+    vertical-align: top;
+  }
+
+  .test-table tr:hover td { background: rgba(108,92,231,0.03); }
+  .test-table tr.status-pass td { background: var(--pass-bg); }
+  .test-table tr.status-fail td { background: var(--fail-bg); }
+  .test-table tr.status-skip td { background: var(--skip-bg); }
+
+  .test-table .col-id { width: 70px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
+  .test-table .col-scenario { width: 22%; }
+  .test-table .col-user { width: 70px; }
+  .test-table .col-steps { width: 25%; font-size: 12px; color: var(--text-dim); }
+  .test-table .col-expected { width: 22%; font-size: 12px; }
+  .test-table .col-status { width: 100px; text-align: center; }
+  .test-table .col-note { width: 15%; }
+
+  /* User Badge */
+  .user-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .user-badge.member { background: rgba(116,185,255,0.15); color: var(--info); }
+  .user-badge.admin { background: rgba(108,92,231,0.15); color: var(--accent); }
+
+  /* Status Buttons */
+  .status-group {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+  }
+
+  .status-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-btn:hover { transform: scale(1.1); }
+  .status-btn.pass-btn:hover, .status-btn.pass-btn.active { background: var(--pass); border-color: var(--pass); color: #fff; }
+  .status-btn.fail-btn:hover, .status-btn.fail-btn.active { background: var(--fail); border-color: var(--fail); color: #fff; }
+  .status-btn.skip-btn:hover, .status-btn.skip-btn.active { background: var(--skip); border-color: var(--skip); color: #000; }
+
+  /* Note Input */
+  .note-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 6px;
+    resize: none;
+    transition: border-color 0.15s;
+    min-height: 28px;
+  }
+
+  .note-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  /* Steps formatting */
+  .step-list { list-style: none; counter-reset: step; }
+  .step-list li { counter-increment: step; padding-left: 18px; position: relative; margin-bottom: 2px; }
+  .step-list li::before {
+    content: counter(step) ".";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  /* Bug Report Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 600px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .modal h3 { font-size: 17px; margin-bottom: 16px; }
+
+  .modal-field { margin-bottom: 12px; }
+  .modal-field label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; font-weight: 600; }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .modal-field textarea { min-height: 80px; resize: vertical; }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: var(--accent); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* Summary Table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .summary-table th, .summary-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .summary-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    background: var(--surface);
+  }
+
+  .summary-table td.num { text-align: center; font-family: 'JetBrains Mono', monospace; }
+  .summary-table tr:last-child { font-weight: 700; background: var(--surface-2); }
+
+  /* Bug list */
+  .bug-list { margin-top: 24px; }
+  .bug-card {
+    background: var(--surface);
+    border: 1px solid var(--fail);
+    border-left: 4px solid var(--fail);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .bug-card .bug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .bug-card .bug-id { font-family: 'JetBrains Mono', monospace; color: var(--fail); font-weight: 700; }
+
+  .severity-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .severity-tag.critical { background: #d63031; color: #fff; }
+  .severity-tag.high { background: var(--fail); color: #fff; }
+  .severity-tag.medium { background: var(--skip); color: #000; }
+  .severity-tag.low { background: var(--info); color: #000; }
+
+  .bug-remove {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+  }
+
+  .bug-remove:hover { color: var(--fail); }
+
+  /* Tester info */
+  .tester-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+
+  .tester-section h3 { font-size: 14px; margin-bottom: 10px; color: var(--text-dim); }
+
+  .tester-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tester-row input {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .tester-row input:focus { outline: none; border-color: var(--accent); }
+
+  /* Print */
+  @media print {
+    .header { position: static; }
+    .btn, .header-actions, .filter-row { display: none !important; }
+    .status-btn { border: 1px solid #ccc !important; }
+    body { background: #fff; color: #000; }
+    .test-table td, .test-table th { border: 1px solid #ddd; }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header, .main { padding-left: 16px; padding-right: 16px; }
+    .test-table { font-size: 12px; }
+    .test-table .col-steps, .test-table .col-expected { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🧪 <span>TaskFlow</span> — Manual Test Sheet</h1>
+      <div class="header-meta">
+        <span>Version 1.0</span>
+        <span>Date: <code>2026-02-10</code></span>
+        <span>UAT: <code>https://frontend-beta-seven-60.vercel.app</code></span>
+      </div>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-chip total"><span class="dot"></span> ทั้งหมด <span id="stat-total">68</span></div>
+    <div class="stat-chip pass"><span class="dot"></span> ผ่าน <span id="stat-pass">0</span></div>
+    <div class="stat-chip fail"><span class="dot"></span> ไม่ผ่าน <span id="stat-fail">0</span></div>
+    <div class="stat-chip skip"><span class="dot"></span> ข้าม <span id="stat-skip">0</span></div>
+    <div class="stat-chip pending"><span class="dot"></span> รอทดสอบ <span id="stat-pending">68</span></div>
+    <div class="progress-bar-container">
+      <div class="bar-pass" id="bar-pass" style="width:0"></div>
+      <div class="bar-fail" id="bar-fail" style="width:0"></div>
+      <div class="bar-skip" id="bar-skip" style="width:0"></div>
+    </div>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="filterTests('all')">ทั้งหมด</button>
+    <button class="filter-btn" onclick="filterTests('pending')">⬜ รอทดสอบ</button>
+    <button class="filter-btn" onclick="filterTests('pass')">✅ ผ่าน</button>
+    <button class="filter-btn" onclick="filterTests('fail')">❌ ไม่ผ่าน</button>
+    <button class="filter-btn" onclick="filterTests('skip')">⏭ ข้าม</button>
+  </div>
+  <div class="header-actions">
+    <button class="btn primary" onclick="saveToLocal()">💾 บันทึก</button>
+    <button class="btn" onclick="loadFromLocal()">📂 โหลดข้อมูล</button>
+    <button class="btn" onclick="exportJSON()">📤 Export JSON</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="btn" onclick="window.print()">🖨 Print</button>
+    <button class="btn danger" onclick="resetAll()">🗑 Reset</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Tester Info -->
+  <div class="tester-section">
+    <h3>👤 ข้อมูลผู้ทดสอบ</h3>
+    <div class="tester-row">
+      <input type="text" id="tester-name" placeholder="ชื่อผู้ทดสอบ">
+      <input type="date" id="test-date" value="2026-02-12">
+      <input type="text" id="test-env" placeholder="Environment / Browser" value="Chrome - UAT">
+    </div>
+  </div>
+
+  <!-- Test Accounts -->
+  <div class="accounts-bar">
+    <div><strong>MEMBER:</strong> <code>tharab@sena.co.th</code> / <code>password123</code> / PIN: <code>123456</code></div>
+    <div><strong>ADMIN:</strong> <code>adinuna@sena.co.th</code> / <code>password123</code> / PIN: <code>123456</code></div>
+  </div>
+
+  <!-- Sections will be generated by JS -->
+  <div id="test-sections"></div>
+
+  <!-- Summary -->
+  <div class="section" style="margin-top:40px">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>📊 สรุปผลการทดสอบ</h2>
+      <span class="section-chevron">▼</span>
+    </div>
+    <div class="section-body" style="padding:16px">
+      <table class="summary-table" id="summary-table"></table>
+    </div>
+  </div>
+
+  <!-- Bug Reports -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>🐛 Bug Reports <span id="bug-count" style="color:var(--fail)"></span></h2>
+      <span class="section-chevron">▼</span>
+    </div>
+    <div class="section-body" style="padding:16px">
+      <button class="btn primary" onclick="openBugModal()">+ Report Bug</button>
+      <div class="bug-list" id="bug-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bug Modal -->
+<div class="modal-overlay" id="bugModal">
+  <div class="modal">
+    <h3>🐛 Report Bug</h3>
+    <div class="modal-field">
+      <label>Test Case #</label>
+      <input type="text" id="bug-tc" placeholder="เช่น 5.1.1">
+    </div>
+    <div class="modal-field">
+      <label>Severity</label>
+      <select id="bug-severity">
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium" selected>Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>User</label>
+      <select id="bug-user">
+        <option value="tharab">tharab (MEMBER)</option>
+        <option value="adinuna">adinuna (ADMIN)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Description</label>
+      <textarea id="bug-desc" placeholder="อธิบายปัญหาที่พบ"></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Steps to Reproduce</label>
+      <textarea id="bug-steps" placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Expected Result</label>
+      <input type="text" id="bug-expected" placeholder="ผลที่คาดหวัง">
+    </div>
+    <div class="modal-field">
+      <label>Actual Result</label>
+      <input type="text" id="bug-actual" placeholder="ผลที่เกิดขึ้นจริง">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeBugModal()">ยกเลิก</button>
+      <button class="btn primary" onclick="saveBug()">บันทึก Bug</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============== TEST DATA ==============
+const testData = [
+  {
+    id: 1, title: "Authentication (การเข้าสู่ระบบ)",
+    subs: [
+      { title: "1.1 Login ด้วย Email/Password", tests: [
+        { id:"1.1.1", scenario:"Login สำเร็จ (MEMBER)", user:"tharab", role:"member", steps:["เปิดหน้า Login","กรอก email: tharab@sena.co.th","กรอก password","กด Login"], expected:"เข้าสู่ Dashboard สำเร็จ, เห็นชื่อ \"ธรา\" ที่ sidebar" },
+        { id:"1.1.2", scenario:"Login สำเร็จ (ADMIN)", user:"adinuna", role:"admin", steps:["เปิดหน้า Login","กรอก email: adinuna@sena.co.th","กรอก password","กด Login"], expected:"เข้าสู่ Dashboard สำเร็จ, เห็นชื่อ \"อดินันท์\" ที่ sidebar" },
+      ]},
+      { title: "1.2 Login ด้วย PIN", tests: [
+        { id:"1.2.1", scenario:"Login PIN สำเร็จ", user:"tharab", role:"member", steps:["เปิดหน้า Login","เลือก tab \"PIN\"","กรอก email + PIN 6 หลัก","กด Login"], expected:"เข้าสู่ Dashboard สำเร็จ" },
+        { id:"1.2.2", scenario:"Login PIN ผิด", user:"tharab", role:"member", steps:["กรอก email ถูก + PIN ผิด","กด Login"], expected:"แสดง error \"Invalid PIN\"" },
+      ]},
+      { title: "1.3 Forgot Password", tests: [
+        { id:"1.3.1", scenario:"Reset password สำเร็จ", user:"tharab", role:"member", steps:["คลิก \"Forgot Password\"","กรอก email: tharab@sena.co.th","กรอก password ใหม่","กด Reset"], expected:"แสดง success, สามารถ login ด้วย password ใหม่ได้" },
+        { id:"1.3.2", scenario:"Reset password email ไม่มีในระบบ", user:"-", role:"member", steps:["คลิก \"Forgot Password\"","กรอก email ที่ไม่มี","กด Reset"], expected:"แสดง error \"User not found\"" },
+      ]},
+      { title: "1.4 Forgot PIN", tests: [
+        { id:"1.4.1", scenario:"Reset PIN สำเร็จ", user:"adinuna", role:"admin", steps:["คลิก \"Forgot PIN\"","กรอก email + password ยืนยันตัวตน","ตั้ง PIN ใหม่"], expected:"แสดง success, login ด้วย PIN ใหม่ได้" },
+        { id:"1.4.2", scenario:"Reset PIN password ไม่ถูก", user:"adinuna", role:"admin", steps:["คลิก \"Forgot PIN\"","กรอก email ถูก + password ผิด"], expected:"แสดง error ยืนยันตัวตนไม่ผ่าน" },
+      ]},
+      { title: "1.5 Logout", tests: [
+        { id:"1.5.1", scenario:"Logout สำเร็จ", user:"tharab", role:"member", steps:["กดปุ่ม \"Logout\" ที่ sidebar ล่าง"], expected:"กลับไปหน้า Login, ไม่สามารถเข้า /dashboard ได้โดยไม่ login" },
+        { id:"1.5.2", scenario:"Logout แล้วกด Back", user:"adinuna", role:"admin", steps:["Logout","กด Back ของ browser"], expected:"ไม่กลับเข้า Dashboard, redirect ไป Login" },
+      ]},
+    ]
+  },
+  {
+    id: 2, title: "Dashboard (หน้าหลัก)",
+    subs: [
+      { title: "2.1 แสดงข้อมูลสรุป", tests: [
+        { id:"2.1.1", scenario:"ดู Dashboard (MEMBER)", user:"tharab", role:"member", steps:["Login","ดูหน้า Dashboard"], expected:"เห็น 4 กล่อง: Active Projects, My Pending Tasks, Team Members, Completion Rate" },
+        { id:"2.1.2", scenario:"ดู Dashboard (ADMIN)", user:"adinuna", role:"admin", steps:["Login","ดูหน้า Dashboard"], expected:"เห็นข้อมูลเดียวกัน แต่จำนวนอาจต่างกัน (ADMIN เห็นทุก project)" },
+      ]},
+      { title: "2.2 กล่อง Dashboard คลิกได้", tests: [
+        { id:"2.2.1", scenario:"คลิก Active Projects", user:"tharab", role:"member", steps:["คลิกกล่อง \"Active Projects\""], expected:"นำทางไปหน้า /projects" },
+        { id:"2.2.2", scenario:"คลิก My Pending Tasks", user:"tharab", role:"member", steps:["คลิกกล่อง \"My Pending Tasks\""], expected:"นำทางไปหน้า /my-tasks" },
+      ]},
+    ]
+  },
+  {
+    id: 3, title: "Projects (โครงการ)",
+    subs: [
+      { title: "3.1 ดูรายการ Projects", tests: [
+        { id:"3.1.1", scenario:"ดูรายการ (MEMBER)", user:"tharab", role:"member", steps:["ไปหน้า Projects"], expected:"เห็นเฉพาะ projects ที่เป็น member" },
+        { id:"3.1.2", scenario:"ดูรายการ (ADMIN)", user:"adinuna", role:"admin", steps:["ไปหน้า Projects"], expected:"เห็น projects ทั้งหมดในระบบ" },
+      ]},
+      { title: "3.2 สร้าง Project ใหม่", tests: [
+        { id:"3.2.1", scenario:"สร้าง Project (ADMIN)", user:"adinuna", role:"admin", steps:["กด \"Create Project\"","กรอก: Name, Description, Status=ACTIVE","กด Save"], expected:"Project ใหม่แสดงในรายการ" },
+        { id:"3.2.2", scenario:"สร้าง Project สถานะ DELAY", user:"adinuna", role:"admin", steps:["กด \"Create Project\"","เลือก Status=DELAY","กด Save"], expected:"Project แสดงด้วย tag สีส้ม \"DELAY\"" },
+      ]},
+      { title: "3.3 แก้ไข Project", tests: [
+        { id:"3.3.1", scenario:"แก้ไขชื่อ Project", user:"adinuna", role:"admin", steps:["คลิก Edit บน project card","เปลี่ยนชื่อ","กด Save"], expected:"ชื่อเปลี่ยนตามที่แก้ไข" },
+        { id:"3.3.2", scenario:"เปลี่ยนสถานะเป็น HOLD", user:"adinuna", role:"admin", steps:["คลิก Edit","เปลี่ยน Status เป็น HOLD","กด Save"], expected:"แสดง tag \"HOLD\" สีเหลือง" },
+      ]},
+      { title: "3.4 กรอง Project (Multi-Select Filter)", tests: [
+        { id:"3.4.1", scenario:"กรองเฉพาะ ACTIVE", user:"tharab", role:"member", steps:["ติ๊ก checkbox \"ACTIVE\""], expected:"แสดงเฉพาะ projects ที่ status = ACTIVE" },
+        { id:"3.4.2", scenario:"กรองหลายสถานะ", user:"tharab", role:"member", steps:["ติ๊ก \"ACTIVE\" + \"DELAY\""], expected:"แสดง projects ที่เป็น ACTIVE หรือ DELAY" },
+      ]},
+      { title: "3.5 Toggle Card/List View", tests: [
+        { id:"3.5.1", scenario:"สลับไป List view", user:"tharab", role:"member", steps:["กดปุ่ม List icon (BarsOutlined)"], expected:"เปลี่ยนเป็น List view แบบแถว" },
+        { id:"3.5.2", scenario:"สลับกลับ Card view", user:"tharab", role:"member", steps:["กดปุ่ม Card icon (AppstoreOutlined)"], expected:"เปลี่ยนกลับเป็น Card view" },
+      ]},
+      { title: "3.6 Sorting", tests: [
+        { id:"3.6.1", scenario:"Sort ตามชื่อ A-Z", user:"tharab", role:"member", steps:["เลือก dropdown \"Name A-Z\""], expected:"Projects เรียงตามชื่อ A → Z" },
+        { id:"3.6.2", scenario:"Sort ตาม Newest", user:"tharab", role:"member", steps:["เลือก dropdown \"Newest\""], expected:"Projects ล่าสุดอยู่บนสุด" },
+      ]},
+      { title: "3.7 Export Excel (Projects)", tests: [
+        { id:"3.7.1", scenario:"Export ทุก Projects", user:"tharab", role:"member", steps:["กดปุ่ม \"Export Excel\" ที่หน้า Projects"], expected:"ดาวน์โหลดไฟล์ .xlsx, เปิดได้ใน Excel, มีข้อมูลครบ" },
+        { id:"3.7.2", scenario:"Export หลังกรอง", user:"tharab", role:"member", steps:["กรอง ACTIVE","กด Export Excel"], expected:"ไฟล์ .xlsx มีเฉพาะ projects ที่กรอง" },
+      ]},
+      { title: "3.8 Save as PDF (Projects)", tests: [
+        { id:"3.8.1", scenario:"Export PDF ทุก Projects", user:"tharab", role:"member", steps:["กดปุ่ม \"Save PDF\" ที่หน้า Projects"], expected:"ดาวน์โหลดไฟล์ .pdf, ภาษาไทยแสดงถูกต้อง" },
+        { id:"3.8.2", scenario:"ตรวจสอบเนื้อหา PDF", user:"tharab", role:"member", steps:["เปิดไฟล์ PDF ที่ดาวน์โหลด"], expected:"มี header, ตาราง, ข้อมูลครบ, วันที่เป็นภาษาไทย" },
+      ]},
+    ]
+  },
+  {
+    id: 4, title: "Project Detail (รายละเอียดโครงการ)",
+    subs: [
+      { title: "4.1 ดูรายละเอียด Project", tests: [
+        { id:"4.1.1", scenario:"เข้าดู Project Detail", user:"tharab", role:"member", steps:["คลิกที่ project card ใดก็ได้"], expected:"เห็นรายละเอียด: ชื่อ, description, สถานะ, รายการ tasks" },
+        { id:"4.1.2", scenario:"ดู Task list ใน Project", user:"adinuna", role:"admin", steps:["เข้า Project Detail"], expected:"เห็น tasks ทั้งหมดใน project, แสดง status tag แต่ละ task" },
+      ]},
+      { title: "4.2 Export Excel (Tasks ใน Project)", tests: [
+        { id:"4.2.1", scenario:"Export Tasks เป็น Excel", user:"tharab", role:"member", steps:["เข้า Project Detail","กด \"Export Excel\""], expected:"ดาวน์โหลด .xlsx มีข้อมูล tasks ครบ 10 columns" },
+        { id:"4.2.2", scenario:"Export Tasks เป็น PDF", user:"tharab", role:"member", steps:["เข้า Project Detail","กด \"Save PDF\""], expected:"ดาวน์โหลด .pdf ภาษาไทยถูกต้อง" },
+      ]},
+    ]
+  },
+  {
+    id: 5, title: "Tasks (งาน)",
+    subs: [
+      { title: "5.1 สร้าง Task ใหม่", tests: [
+        { id:"5.1.1", scenario:"สร้าง Task พร้อมวันที่", user:"adinuna", role:"admin", steps:["เข้า Project Detail","กด \"Add Task\"","กรอก: Title, Description, Status=TODO, Start/Finish Date, Assignee=ธรา"], expected:"Task ใหม่แสดงในรายการ, มีวันที่ Start/Finish" },
+        { id:"5.1.2", scenario:"สร้าง Task สถานะ IN_PROGRESS", user:"adinuna", role:"admin", steps:["กด \"Add Task\"","เลือก Status=IN_PROGRESS","กด Save"], expected:"Task แสดงด้วย tag \"IN_PROGRESS\" สีน้ำเงิน" },
+      ]},
+      { title: "5.2 แก้ไข Task", tests: [
+        { id:"5.2.1", scenario:"เปลี่ยน Assignee", user:"adinuna", role:"admin", steps:["คลิก Task","แก้ไข Assignee เป็นคนอื่น","กด Save"], expected:"Assignee เปลี่ยนตามที่เลือก" },
+        { id:"5.2.2", scenario:"เปลี่ยน Status เป็น DONE", user:"tharab", role:"member", steps:["คลิก Task ที่ได้รับมอบหมาย","เปลี่ยน Status เป็น DONE","กด Save"], expected:"Task แสดง tag \"DONE\" สีเขียว" },
+      ]},
+      { title: "5.3 Task Status ครบทุกสถานะ", tests: [
+        { id:"5.3.1", scenario:"เปลี่ยนเป็น HOLD", user:"adinuna", role:"admin", steps:["แก้ไข Task","เลือก Status=HOLD"], expected:"Tag \"HOLD\" แสดงถูกต้อง" },
+        { id:"5.3.2", scenario:"เปลี่ยนเป็น CANCELLED", user:"adinuna", role:"admin", steps:["แก้ไข Task","เลือก Status=CANCELLED"], expected:"Tag \"CANCELLED\" แสดงถูกต้อง" },
+      ]},
+      { title: "5.4 Sub-Tasks (งานย่อย)", tests: [
+        { id:"5.4.1", scenario:"สร้าง Sub-task", user:"adinuna", role:"admin", steps:["เปิด Task Detail","กด \"Add Sub-task\"","กรอกชื่อ sub-task","กด Save"], expected:"Sub-task แสดงใต้ parent task" },
+        { id:"5.4.2", scenario:"ดู Sub-tasks list", user:"tharab", role:"member", steps:["เปิด Task ที่มี sub-tasks"], expected:"เห็นรายการ sub-tasks พร้อม checkbox/status" },
+      ]},
+    ]
+  },
+  {
+    id: 6, title: "Task Detail Modal (รายละเอียดงาน)",
+    subs: [
+      { title: "6.1 ดู Task Detail", tests: [
+        { id:"6.1.1", scenario:"เปิด Task Detail", user:"tharab", role:"member", steps:["คลิกที่ชื่อ Task ใดก็ได้"], expected:"Modal เปิดขึ้น, เห็น: Title, Description, Status, Dates, Assignee, Comments" },
+        { id:"6.1.2", scenario:"ดู Ahead/Delay indicator", user:"tharab", role:"member", steps:["ดู Task ที่มี Finish Date"], expected:"แสดง Ahead (สีเขียว) หรือ Delay (สีแดง) ตามเวลา" },
+      ]},
+      { title: "6.2 Comment (ความคิดเห็น)", tests: [
+        { id:"6.2.1", scenario:"เพิ่ม Comment", user:"tharab", role:"member", steps:["เปิด Task Detail","พิมพ์ข้อความในช่อง Comment","กด Send"], expected:"Comment แสดงในรายการ พร้อมชื่อผู้เขียนและเวลา" },
+        { id:"6.2.2", scenario:"ดู Comments ของคนอื่น", user:"adinuna", role:"admin", steps:["เปิด Task เดียวกัน"], expected:"เห็น comment ที่ tharab เขียน" },
+      ]},
+      { title: "6.3 Image Attachment (แนบรูปภาพ)", tests: [
+        { id:"6.3.1", scenario:"แนบรูป 1 ไฟล์", user:"tharab", role:"member", steps:["เปิด Task Detail","คลิก Attach Image","เลือกรูป JPG/PNG (< 5MB)","พิมพ์ comment","กด Send"], expected:"Comment แสดงพร้อมรูปภาพ, คลิกดูรูปขยายได้" },
+        { id:"6.3.2", scenario:"แนบรูปหลายไฟล์", user:"adinuna", role:"admin", steps:["เปิด Task Detail","เลือกรูป 2-3 ไฟล์พร้อมกัน","กด Send"], expected:"แสดงรูปทั้งหมดที่แนบ" },
+      ]},
+      { title: "6.4 Daily Update", tests: [
+        { id:"6.4.1", scenario:"เพิ่ม Daily Update", user:"tharab", role:"member", steps:["เปิด Task Detail","เพิ่ม update: progress %, notes"], expected:"Update แสดงในรายการ พร้อมวันที่" },
+        { id:"6.4.2", scenario:"ดู Update history", user:"adinuna", role:"admin", steps:["เปิด Task เดียวกัน"], expected:"เห็น updates ทั้งหมดเรียงตามเวลา" },
+      ]},
+    ]
+  },
+  {
+    id: 7, title: "My Tasks (งานของฉัน)",
+    subs: [
+      { title: "7.1 ดูรายการ Tasks ของตัวเอง", tests: [
+        { id:"7.1.1", scenario:"ดู My Tasks (MEMBER)", user:"tharab", role:"member", steps:["คลิก \"My Tasks\" ที่ sidebar"], expected:"เห็นเฉพาะ tasks ที่ assign ให้ตัวเอง" },
+        { id:"7.1.2", scenario:"ดู My Tasks (ADMIN)", user:"adinuna", role:"admin", steps:["คลิก \"My Tasks\""], expected:"เห็น tasks ที่ assign ให้ตัวเอง (ไม่ใช่ทุก task)" },
+      ]},
+    ]
+  },
+  {
+    id: 8, title: "Calendar (ปฏิทิน)",
+    subs: [
+      { title: "8.1 ดูปฏิทิน", tests: [
+        { id:"8.1.1", scenario:"ดู Calendar view", user:"tharab", role:"member", steps:["คลิก \"Calendar\" ที่ sidebar"], expected:"เห็นปฏิทินแสดง tasks ตาม due date" },
+        { id:"8.1.2", scenario:"คลิก Task บนปฏิทิน", user:"tharab", role:"member", steps:["คลิกที่ task ในปฏิทิน"], expected:"เปิด Task Detail หรือนำทางไป task นั้น" },
+      ]},
+    ]
+  },
+  {
+    id: 9, title: "Timeline (ไทม์ไลน์)",
+    subs: [
+      { title: "9.1 ดู Timeline แบบ Multi-Project", tests: [
+        { id:"9.1.1", scenario:"ดู Timeline หลาย Projects", user:"adinuna", role:"admin", steps:["คลิก \"Timeline\" ที่ sidebar","เลือกหลาย projects"], expected:"เห็น Gantt chart แสดง tasks จากหลาย projects ซ้อนกัน" },
+        { id:"9.1.2", scenario:"ดู Timeline (MEMBER)", user:"tharab", role:"member", steps:["คลิก \"Timeline\"","เลือก project ที่เป็น member"], expected:"เห็น tasks ของ project นั้นบน timeline" },
+      ]},
+    ]
+  },
+  {
+    id: 10, title: "Groups (กลุ่ม)",
+    subs: [
+      { title: "10.1 สร้าง Group", tests: [
+        { id:"10.1.1", scenario:"สร้าง Group ใหม่", user:"adinuna", role:"admin", steps:["ไปหน้า Groups","กด \"Create Group\"","กรอกชื่อ + description","กด Save"], expected:"Group ใหม่แสดงในรายการ" },
+        { id:"10.1.2", scenario:"สร้าง Group (MEMBER)", user:"tharab", role:"member", steps:["ไปหน้า Groups","กด \"Create Group\"","กรอกข้อมูล","กด Save"], expected:"สร้างสำเร็จ หรือ ถูกจำกัดสิทธิ์ (ขึ้นกับ RBAC)" },
+      ]},
+      { title: "10.2 จัดการ Members ใน Group", tests: [
+        { id:"10.2.1", scenario:"เพิ่ม Member เข้า Group", user:"adinuna", role:"admin", steps:["เปิด Group","กด \"Add Member\"","เลือก user","กด Add"], expected:"User แสดงในรายการ members ของ group" },
+        { id:"10.2.2", scenario:"ลบ Member ออกจาก Group", user:"adinuna", role:"admin", steps:["เปิด Group","กด Remove ที่ member"], expected:"Member ถูกลบออก, ไม่แสดงในรายการ" },
+      ]},
+      { title: "10.3 จัดการ Projects ใน Group", tests: [
+        { id:"10.3.1", scenario:"เพิ่ม Project เข้า Group", user:"adinuna", role:"admin", steps:["เปิด Group","กด \"Add Project\"","เลือก project","กด Add"], expected:"Project แสดงในรายการ projects ของ group" },
+        { id:"10.3.2", scenario:"ลบ Project ออกจาก Group", user:"adinuna", role:"admin", steps:["เปิด Group","กด Remove ที่ project"], expected:"Project ถูกลบออกจาก group" },
+      ]},
+    ]
+  },
+  {
+    id: 11, title: "Notifications (การแจ้งเตือน)",
+    subs: [
+      { title: "11.1 ดูการแจ้งเตือน", tests: [
+        { id:"11.1.1", scenario:"ดู Notification popover", user:"tharab", role:"member", steps:["คลิกไอคอนกระดิ่งที่ sidebar"], expected:"เห็นรายการแจ้งเตือน (due soon, overdue, assignment)" },
+        { id:"11.1.2", scenario:"Mark as read", user:"tharab", role:"member", steps:["คลิกที่ notification"], expected:"Notification เปลี่ยนเป็นอ่านแล้ว, badge count ลดลง" },
+      ]},
+    ]
+  },
+  {
+    id: 12, title: "UI/UX ทั่วไป",
+    subs: [
+      { title: "12.1 Contrast & Readability", tests: [
+        { id:"12.1.1", scenario:"ตรวจ text contrast", user:"tharab", role:"member", steps:["ดูทุกหน้า"], expected:"ตัวอักษรอ่านง่าย ไม่มีสีดำบนสีเทาเข้ม" },
+        { id:"12.1.2", scenario:"Label \"Finish\" แทน \"Deadline\"", user:"tharab", role:"member", steps:["ดูหน้า Task Detail, Create Task"], expected:"แสดง \"Finish\" ไม่ใช่ \"Deadline\"" },
+      ]},
+      { title: "12.2 Responsive & Navigation", tests: [
+        { id:"12.2.1", scenario:"Sidebar navigation", user:"tharab", role:"member", steps:["คลิกทุก menu: Dashboard, Projects, My Tasks, Calendar, Timeline, Groups"], expected:"ทุกหน้าเปิดได้ถูกต้อง, highlight menu ที่ active" },
+        { id:"12.2.2", scenario:"Rate limiting", user:"tharab", role:"member", steps:["กด refresh รัวๆ 10 ครั้งภายใน 5 วินาที"], expected:"ไม่โดน rate limit block, ยังใช้งานได้ปกติ" },
+      ]},
+    ]
+  },
+];
+
+// ============== STATE ==============
+let testStates = {}; // { "1.1.1": { status: "pass"|"fail"|"skip"|"pending", note: "" } }
+let bugs = [];
+
+// Init states
+testData.forEach(sec => sec.subs.forEach(sub => sub.tests.forEach(t => {
+  testStates[t.id] = { status: "pending", note: "" };
+})));
+
+// ============== RENDER ==============
+function render() {
+  const container = document.getElementById('test-sections');
+  container.innerHTML = '';
+
+  testData.forEach(section => {
+    const secDiv = document.createElement('div');
+    secDiv.className = 'section';
+    secDiv.id = `section-${section.id}`;
+
+    const totalTests = section.subs.reduce((a, s) => a + s.tests.length, 0);
+    const passCount = section.subs.reduce((a, s) => a + s.tests.filter(t => testStates[t.id].status === 'pass').length, 0);
+    const failCount = section.subs.reduce((a, s) => a + s.tests.filter(t => testStates[t.id].status === 'fail').length, 0);
+
+    secDiv.innerHTML = `
+      <div class="section-header" onclick="toggleSection(this)">
+        <h2><span class="num">${section.id}</span> ${section.title}</h2>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="section-stats">
+            <span>${totalTests} cases</span>
+            ${passCount ? `<span class="s-pass">✅ ${passCount}</span>` : ''}
+            ${failCount ? `<span class="s-fail">❌ ${failCount}</span>` : ''}
+          </div>
+          <span class="section-chevron">▼</span>
+        </div>
+      </div>
+      <div class="section-body"></div>
+    `;
+
+    const body = secDiv.querySelector('.section-body');
+
+    section.subs.forEach(sub => {
+      body.innerHTML += `<div class="subsection-title">${sub.title}</div>`;
+      let tableHTML = `<table class="test-table">
+        <thead><tr>
+          <th class="col-id">#</th>
+          <th class="col-scenario">Scenario</th>
+          <th class="col-user">User</th>
+          <th class="col-steps">ขั้นตอน</th>
+          <th class="col-expected">Expected Result</th>
+          <th class="col-status">Status</th>
+          <th class="col-note">หมายเหตุ</th>
+        </tr></thead><tbody>`;
+
+      sub.tests.forEach(t => {
+        const state = testStates[t.id];
+        const rowClass = state.status !== 'pending' ? `status-${state.status}` : '';
+        const stepsHTML = t.steps.map(s => `<li>${s}</li>`).join('');
+
+        tableHTML += `<tr class="${rowClass}" data-testid="${t.id}">
+          <td class="col-id">${t.id}</td>
+          <td class="col-scenario">${t.scenario}</td>
+          <td class="col-user"><span class="user-badge ${t.role}">${t.user}</span></td>
+          <td class="col-steps"><ol class="step-list">${stepsHTML}</ol></td>
+          <td class="col-expected">${t.expected}</td>
+          <td class="col-status">
+            <div class="status-group">
+              <button class="status-btn pass-btn ${state.status==='pass'?'active':''}" onclick="setStatus('${t.id}','pass')" title="ผ่าน">✓</button>
+              <button class="status-btn fail-btn ${state.status==='fail'?'active':''}" onclick="setStatus('${t.id}','fail')" title="ไม่ผ่าน">✗</button>
+              <button class="status-btn skip-btn ${state.status==='skip'?'active':''}" onclick="setStatus('${t.id}','skip')" title="ข้าม">–</button>
+            </div>
+          </td>
+          <td class="col-note"><textarea class="note-input" placeholder="..." onchange="setNote('${t.id}', this.value)">${state.note}</textarea></td>
+        </tr>`;
+      });
+
+      tableHTML += '</tbody></table>';
+      body.innerHTML += tableHTML;
+    });
+
+    container.appendChild(secDiv);
+  });
+
+  updateStats();
+  renderSummary();
+  renderBugs();
+}
+
+// ============== ACTIONS ==============
+function setStatus(id, status) {
+  if (testStates[id].status === status) {
+    testStates[id].status = 'pending';
+  } else {
+    testStates[id].status = status;
+  }
+  render();
+  autoSave();
+}
+
+function setNote(id, note) {
+  testStates[id].note = note;
+  autoSave();
+}
+
+function toggleSection(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+function filterTests(filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.querySelectorAll('.test-table tr[data-testid]').forEach(row => {
+    const id = row.dataset.testid;
+    const status = testStates[id].status;
+    if (filter === 'all') { row.style.display = ''; }
+    else { row.style.display = status === filter ? '' : 'none'; }
+  });
+}
+
+function updateStats() {
+  const all = Object.values(testStates);
+  const total = all.length;
+  const pass = all.filter(s => s.status === 'pass').length;
+  const fail = all.filter(s => s.status === 'fail').length;
+  const skip = all.filter(s => s.status === 'skip').length;
+  const pending = total - pass - fail - skip;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pass').textContent = pass;
+  document.getElementById('stat-fail').textContent = fail;
+  document.getElementById('stat-skip').textContent = skip;
+  document.getElementById('stat-pending').textContent = pending;
+
+  document.getElementById('bar-pass').style.width = (pass/total*100)+'%';
+  document.getElementById('bar-fail').style.width = (fail/total*100)+'%';
+  document.getElementById('bar-skip').style.width = (skip/total*100)+'%';
+}
+
+function renderSummary() {
+  const table = document.getElementById('summary-table');
+  let html = `<thead><tr><th>Section</th><th>จำนวน</th><th>✅ ผ่าน</th><th>❌ ไม่ผ่าน</th><th>⏭ ข้าม</th><th>⬜ รอ</th></tr></thead><tbody>`;
+  let totals = { total:0, pass:0, fail:0, skip:0, pending:0 };
+
+  testData.forEach(sec => {
+    const tests = sec.subs.flatMap(s => s.tests);
+    const total = tests.length;
+    const pass = tests.filter(t => testStates[t.id].status==='pass').length;
+    const fail = tests.filter(t => testStates[t.id].status==='fail').length;
+    const skip = tests.filter(t => testStates[t.id].status==='skip').length;
+    const pending = total - pass - fail - skip;
+    totals.total+=total; totals.pass+=pass; totals.fail+=fail; totals.skip+=skip; totals.pending+=pending;
+    html += `<tr><td>${sec.id}. ${sec.title}</td><td class="num">${total}</td><td class="num" style="color:var(--pass)">${pass||'-'}</td><td class="num" style="color:var(--fail)">${fail||'-'}</td><td class="num" style="color:var(--skip)">${skip||'-'}</td><td class="num">${pending||'-'}</td></tr>`;
+  });
+
+  html += `<tr><td><strong>รวม</strong></td><td class="num"><strong>${totals.total}</strong></td><td class="num" style="color:var(--pass)"><strong>${totals.pass}</strong></td><td class="num" style="color:var(--fail)"><strong>${totals.fail}</strong></td><td class="num" style="color:var(--skip)"><strong>${totals.skip}</strong></td><td class="num"><strong>${totals.pending}</strong></td></tr>`;
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+// ============== BUG REPORTS ==============
+function openBugModal() { document.getElementById('bugModal').classList.add('show'); }
+function closeBugModal() { document.getElementById('bugModal').classList.remove('show'); }
+
+function saveBug() {
+  const bug = {
+    id: 'BUG-' + String(bugs.length+1).padStart(3,'0'),
+    tc: document.getElementById('bug-tc').value,
+    severity: document.getElementById('bug-severity').value,
+    user: document.getElementById('bug-user').value,
+    desc: document.getElementById('bug-desc').value,
+    steps: document.getElementById('bug-steps').value,
+    expected: document.getElementById('bug-expected').value,
+    actual: document.getElementById('bug-actual').value,
+    date: new Date().toLocaleString('th-TH'),
+  };
+  bugs.push(bug);
+  closeBugModal();
+  // Reset form
+  ['bug-tc','bug-desc','bug-steps','bug-expected','bug-actual'].forEach(id => document.getElementById(id).value='');
+  renderBugs();
+  autoSave();
+}
+
+function removeBug(idx) {
+  bugs.splice(idx, 1);
+  renderBugs();
+  autoSave();
+}
+
+function renderBugs() {
+  const list = document.getElementById('bug-list');
+  document.getElementById('bug-count').textContent = bugs.length ? `(${bugs.length})` : '';
+  if (!bugs.length) { list.innerHTML = '<p style="color:var(--text-dim);font-size:13px;margin-top:12px">ยังไม่มี bug report</p>'; return; }
+  list.innerHTML = bugs.map((b, i) => `
+    <div class="bug-card">
+      <div class="bug-header">
+        <div><span class="bug-id">${b.id}</span> — TC: ${b.tc} — <span class="severity-tag ${b.severity}">${b.severity.toUpperCase()}</span></div>
+        <button class="bug-remove" onclick="removeBug(${i})" title="ลบ">✕</button>
+      </div>
+      <div style="margin-top:6px"><strong>User:</strong> ${b.user} | <strong>Date:</strong> ${b.date}</div>
+      <div style="margin-top:4px"><strong>Description:</strong> ${b.desc}</div>
+      ${b.steps ? `<div style="margin-top:4px;white-space:pre-wrap"><strong>Steps:</strong>\n${b.steps}</div>` : ''}
+      <div style="margin-top:4px"><strong>Expected:</strong> ${b.expected}</div>
+      <div style="margin-top:4px"><strong>Actual:</strong> ${b.actual}</div>
+    </div>
+  `).join('');
+}
+
+// ============== PERSISTENCE ==============
+const STORAGE_KEY = 'taskflow_test_v1';
+
+function autoSave() {
+  const data = {
+    testStates,
+    bugs,
+    tester: document.getElementById('tester-name')?.value || '',
+    testDate: document.getElementById('test-date')?.value || '',
+    testEnv: document.getElementById('test-env')?.value || '',
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function saveToLocal() {
+  autoSave();
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:20px;right:20px;background:var(--pass);color:#fff;padding:10px 20px;border-radius:8px;z-index:999;font-size:14px;font-weight:600;';
+  toast.textContent = '✅ บันทึกสำเร็จ!';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+}
+
+function loadFromLocal() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) { alert('ไม่พบข้อมูลที่บันทึกไว้'); return; }
+  const data = JSON.parse(raw);
+  if (data.testStates) testStates = data.testStates;
+  if (data.bugs) bugs = data.bugs;
+  if (data.tester) document.getElementById('tester-name').value = data.tester;
+  if (data.testDate) document.getElementById('test-date').value = data.testDate;
+  if (data.testEnv) document.getElementById('test-env').value = data.testEnv;
+  render();
+}
+
+function exportJSON() {
+  autoSave();
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `taskflow-test-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.testStates) testStates = data.testStates;
+      if (data.bugs) bugs = data.bugs;
+      if (data.tester) document.getElementById('tester-name').value = data.tester;
+      if (data.testDate) document.getElementById('test-date').value = data.testDate;
+      if (data.testEnv) document.getElementById('test-env').value = data.testEnv;
+      render();
+      alert('Import สำเร็จ!');
+    } catch { alert('ไฟล์ไม่ถูกต้อง'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function resetAll() {
+  if (!confirm('ยืนยันการ Reset ข้อมูลทั้งหมด? (ข้อมูลที่ยังไม่ได้ Export จะหายไป)')) return;
+  testData.forEach(sec => sec.subs.forEach(sub => sub.tests.forEach(t => {
+    testStates[t.id] = { status: 'pending', note: '' };
+  })));
+  bugs = [];
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+}
+
+// ============== INIT ==============
+window.addEventListener('DOMContentLoaded', () => {
+  render();
+  // Auto-load if saved data exists
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) loadFromLocal();
+});
+</script>
+</body>
+</html>

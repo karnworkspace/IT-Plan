@@ -1,7 +1,7 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-01-27 14:25
-**Status:** ✅ Deployed to Vercel (UAT) - Production Ready (Phase 9)
+**Last Updated:** 2026-02-12 (Phase 11 - Manual Test Round 1 Bug Fixes)
+**Status:** ✅ Deployed to Vercel (UAT) - Manual Test Bug Fixes Applied
 **Live URLs:**
 - Frontend: https://frontend-beta-seven-60.vercel.app
 - Backend: https://backend-five-iota-42.vercel.app
@@ -579,6 +579,100 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 ---
 
+### Phase 10: User Feedback Implementation (100%) ✅ COMPLETE (2026-02-08 ~ 2026-02-10)
+
+**อ้างอิง:** `userreq/ACTION-ITEMS.md` (30 feedback points → 25 action items)
+
+#### Phase 1: Critical Fixes ✅ (2026-02-08)
+- ✅ UI Contrast Issues — ปรับสีตัวอักษรให้อ่านง่ายขึ้น
+- ✅ Forgot Password/PIN — Implement forgot password/PIN APIs + UI flow
+- ✅ Rate Limiting Optimization — เพิ่ม limit สำหรับ authenticated users
+
+#### Phase 2: Task Management Enhancements ✅ (2026-02-10)
+- ✅ Start Date & Finish Date — ใช้ startDate + dueDate fields ที่มีอยู่แล้ว, เพิ่ม date pickers
+- ✅ Update Assignee & Due Date — เพิ่ม validation + dropdown/picker ใน Edit Task UI
+- ✅ Task Status Options — เพิ่ม HOLD, CANCELLED + Ahead/Delay calculation
+- ✅ Bug Fix: sendSuccess status code (4 controllers)
+
+#### Phase 3: Project Status & Filtering ✅ (2026-02-10)
+- ✅ Project Status — 7 values: ACTIVE, DELAY, COMPLETED, HOLD, CANCELLED, POSTPONE, ARCHIVED
+- ✅ Checkbox Multi-Select Filter — Checkbox.Group multi-select
+- ✅ Dashboard Boxes Clickable — navigate to relevant pages on click
+
+#### Phase 4: Views & UI Improvements ✅ (2026-02-10)
+- ✅ Toggle Card/List View — Card ↔ List toggle with localStorage preference
+- ✅ Sorting Options — Name A-Z/Z-A, Newest, Oldest, Status
+- ✅ Label Change: Deadline → Finish
+
+#### Phase 5: New Features ✅ (100% - 6/6 done)
+- ✅ 5.1 Sub-tasks — parent-child Task relation, SubTaskList component
+- ✅ 5.2 Timeline/Gantt View — Multi-project TimelinePage
+- ✅ 5.3 User Groups & Project Groups — Group model + CRUD + Groups page
+- ✅ 5.4 Export Excel (2026-02-10)
+  - Library: xlsx@0.18.5
+  - Utils: exportExcel.ts (exportToExcel, exportProjects, exportTasks)
+  - UI: Export Excel buttons ใน ProjectsPage + ProjectDetailPage
+- ✅ 5.5 Save as PDF (2026-02-10)
+  - Libraries: jspdf@4.1.0 + jspdf-autotable@5.0.7 + html2canvas@1.4.1
+  - Utils: exportPDF.ts (exportProjectsPDF, exportTasksPDF)
+  - UI: Save PDF buttons ใน ProjectsPage + ProjectDetailPage
+- ✅ 5.6 Image Attachment in Notes (2026-02-10)
+  - Backend: Attachment model (Prisma), multer upload (images only, max 5MB, max 5 files)
+  - Services: attachment.service.ts, upload.controller.ts, upload.routes.ts
+  - Frontend: Attach Image button ใน comment, pending files Tag, clickable image preview
+  - APIs: POST/GET /comments/:commentId/attachments, DELETE /attachments/:id
+  - Docker: uploads volume mount
+
+#### Phase 6: Performance & Polish ✅ (2026-02-08)
+- ✅ Rate Limiting Optimization
+
+**Round Test Results (2026-02-10):**
+- `phase2-roundtest.test.ts`: 35/35 PASSED
+- `task-management.test.ts`: 29/29 PASSED
+- **Total: 64/64 tests PASSED (100%) — no regression**
+
+---
+
+### Phase 11: Manual Test Round 1 — Bug Fixes (2026-02-12) ✅
+
+**อ้างอิง:** `tests/manualtest.md` (68 test cases) + `tests/TaskFlow_ManualTest_Report.xlsx`
+**Tracking:** `tests/fix-aftertest1.md`
+
+#### Manual Test Results Summary
+| หมวด | ทดสอบ | ผ่าน | % |
+|------|--------|------|---|
+| Login & Auth | 5/6 | 5/5 | 100% |
+| Dashboard | 5/5 | 5/5 | 100% |
+| Projects | 7/9 | 7/7 | 100% |
+| Tasks | 6/8 | 6/6 | 100% |
+| Task Detail | 5/6 | 4/5 | 80% |
+| Comments | 2/4 | 1/2 | 50% |
+| Daily Updates | 2/4 | 2/2 | 100% |
+| Timeline | 3/3 | 3/3 | 100% |
+| Notifications | 2/2 | 2/2 | 100% |
+| Groups | 2/5 | 2/2 | 100% |
+| UI/UX | 3/3 | 3/3 | 100% |
+| **รวม** | **39/68** | **37/39** | **95%** |
+
+#### Bug Fixes ✅
+1. **Bug#1: PIN Login ไม่แสดง error message** [FIXED]
+   - แก้ `frontend/src/services/api.ts` — เพิ่ม `isAuthRequest` check ให้ response interceptor skip refresh token สำหรับ auth endpoints
+
+2. **Bug#2: Post Comment ไม่ทำงาน** [FIXED]
+   - แก้ `frontend/src/pages/TaskDetailModal.tsx` — ใช้ functional state updater `setComments(prev => [...])` แทน stale closure
+
+3. **Bug#3: Delete member ลบ group** [FIXED ก่อนหน้า]
+
+#### Improvements ✅
+4. **Docker dev ใช้ PostgreSQL** [FIXED]
+   - แก้ `docker-compose.yml` — เพิ่ม PostgreSQL service ให้ dev ตรงกับ production
+
+5. **Admin name "OHM"** [SCRIPT CREATED]
+   - สร้าง `backend/scripts/fix-admin-name.ts` — เปลี่ยน "OHM" → "อดินันท์ (OHM)"
+   - ต้อง run บน production: `npx ts-node scripts/fix-admin-name.ts`
+
+---
+
 ## 🎯 Recommended Next Actions
 
 ### Immediate (High Priority)
@@ -611,17 +705,15 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
    - ✅ Real-time data loading
 
 ### Short Term (Medium Priority)
-7. **Complete Frontend Pages**
-   - ⏳ Projects List (connect to real API)
-   - ⏳ Task Detail (connect to real APIs)
-   - ⏳ Notifications Component
-   - ⏳ Analytics
+7. ✅ **Phase 5.4: Export Excel** - DONE
+8. ✅ **Phase 5.5: Save as PDF** - DONE
 
-### Long Term (Low Priority)
-5. **Advanced Features**
-   - Real-time notifications
-   - File uploads
-   - Team collaboration
+### Long Term (Low Priority / Optional)
+9. **Advanced Features**
+   - Real-time notifications (WebSocket)
+   - Email notifications (Forgot Password/PIN)
+   - WCAG AA accessibility audit
+   - Caching strategies
 
 ---
 
@@ -654,9 +746,11 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 ## 🔍 Known Issues / Notes
 
 1. ~~**No Backend** - Fixed~~ ✅ Backend complete
-2. **Mock Data** - Dashboard uses mock data, replace with API calls
-3. **SQLite Limitations** - Using String instead of Enum/Json for SQLite compatibility
+2. ~~**Mock Data**~~ ✅ Dashboard connected to real API
+3. ~~**SQLite Limitations**~~ ✅ Docker dev switched to PostgreSQL (2026-02-12)
 4. **Prisma Version** - Using 5.10.2 (7.x available but requires migration)
+5. **Admin Name** - ต้อง run `scripts/fix-admin-name.ts` บน production เพื่อเปลี่ยน "OHM" → "อดินันท์ (OHM)"
+6. **29 Untested Cases** - Manual test ยังเหลือ 29/68 test cases ที่ยังไม่ได้ทดสอบ
 
 ---
 
@@ -689,9 +783,9 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 ---
 
-**Status:** ✅ Deployed to Production (UAT) | All Tests Passing (65/65)
-**Completion:** Frontend 100% | Backend 100% | Integration 100% | Testing 100% | Deployment 100% | **Overall 100%**
-**Last Updated:** 2026-01-27 14:25
+**Status:** ✅ Deployed to Production (UAT) | Manual Test Bug Fixes Applied | Tests 64/64 PASSED
+**Completion:** Core System 100% | User Feedback 100% | Manual Test 95% (37/39) | **Overall 100%**
+**Last Updated:** 2026-02-12
 
 ### 🌐 Live Environment (UAT)
 - **Frontend:** https://frontend-beta-seven-60.vercel.app

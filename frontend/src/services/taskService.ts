@@ -5,11 +5,12 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED';
+  status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED' | 'HOLD' | 'CANCELLED';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   projectId: string;
   assigneeId?: string;
   createdById: string;
+  parentTaskId?: string;
   dueDate?: string;
   startDate?: string;
   progress: number;
@@ -25,6 +26,16 @@ export interface Task {
     name: string;
     color?: string;
   };
+  parentTask?: {
+    id: string;
+    title: string;
+  };
+  subTasks?: Task[];
+  _count?: {
+    subTasks?: number;
+    comments?: number;
+    dailyUpdates?: number;
+  };
 }
 
 export interface CreateTaskInput {
@@ -36,6 +47,7 @@ export interface CreateTaskInput {
   dueDate?: string;
   startDate?: string;
   progress?: number;
+  parentTaskId?: string;
 }
 
 export interface UpdateTaskInput {
@@ -151,6 +163,14 @@ export const taskService = {
   async updateTaskStatus(id: string, data: { status?: string; progress?: number }): Promise<Task> {
     const response = await api.patch(`/tasks/${id}/status`, data);
     return response.data.data.task;
+  },
+
+  /**
+   * Get sub-tasks
+   */
+  async getSubTasks(taskId: string): Promise<Task[]> {
+    const response = await api.get(`/tasks/${taskId}/subtasks`);
+    return response.data.data.subTasks;
   },
 
   /**

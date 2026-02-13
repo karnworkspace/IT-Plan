@@ -2,7 +2,28 @@
 # Usage: docker-compose up -d
 
 services:
-  # Backend API (Express + Prisma + SQLite)
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: taskflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-taskflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taskflow123}
+      POSTGRES_DB: ${POSTGRES_DB:-taskflow_dev}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow -d taskflow_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taskflow-network
+
+  # Backend API (Express + Prisma + PostgreSQL)
   backend:
     build:
       context: ./backend
@@ -13,7 +34,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      DATABASE_URL: file:./prisma/dev.db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-taskflow}:${POSTGRES_PASSWORD:-taskflow123}@db:5432/${POSTGRES_DB:-taskflow_dev}?schema=public
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-your-super-secret-jwt-key-change-this}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
@@ -24,7 +45,11 @@ services:
     volumes:
       - ./backend/src:/app/src:delegated
       - ./backend/prisma:/app/prisma:delegated
+      - ./backend/uploads:/app/uploads:delegated
       - backend_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - taskflow-network
     command: >
@@ -43,7 +68,7 @@ services:
     container_name: taskflow-frontend
     restart: unless-stopped
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api/v1}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api/v1}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     volumes:
@@ -57,6 +82,8 @@ services:
       - taskflow-network
 
 volumes:
+  postgres_data:
+    name: taskflow_postgres_data
   backend_node_modules:
     name: taskflow_backend_modules
   frontend_node_modules:

@@ -34,3 +34,7 @@ prisma/migrations/
 
 /src/generated/prisma
 .vercel
+
+# Uploaded files (keep directory, ignore content)
+uploads/*
+!uploads/.gitkeep

@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import path from 'path';
 import { config } from './config';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
@@ -16,6 +17,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files as static
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);

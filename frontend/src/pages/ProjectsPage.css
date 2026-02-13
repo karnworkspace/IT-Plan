@@ -2,7 +2,7 @@
 
 .projects-layout {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    background: #ffffff;
 }
 
 .projects-main-layout {
@@ -11,9 +11,10 @@
 
 /* Page Header */
 .projects-page-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: #f5f7fa;
     padding: 32px 40px;
     margin: 0;
+    border-bottom: 1px solid #e8e8e8;
 }
 
 .header-content {
@@ -24,7 +25,7 @@
 }
 
 .header-title-section .page-title {
-    color: white !important;
+    color: #1a1a2e !important;
     margin: 0 0 8px 0 !important;
     font-weight: 600;
 }
@@ -34,7 +35,7 @@
 }
 
 .page-subtitle {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: #8c8c8c !important;
     font-size: 15px;
 }
 
@@ -62,19 +63,19 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    border: 1px solid #f0f0f0;
     border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .stat-card .ant-statistic-title {
-    color: rgba(255, 255, 255, 0.7);
+    color: #8c8c8c;
     font-size: 13px;
 }
 
 .stat-card .ant-statistic-content {
-    color: white;
+    color: #1a1a2e;
 }
 
 .stat-card .ant-statistic-content-prefix {
@@ -89,28 +90,13 @@
 
 .filters-section .ant-input-affix-wrapper,
 .filters-section .ant-select-selector {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: white !important;
+    border: 1px solid #d9d9d9 !important;
     border-radius: 10px !important;
-    color: white;
-}
-
-.filters-section .ant-input-affix-wrapper input,
-.filters-section .ant-input-affix-wrapper .ant-input-prefix {
-    color: white !important;
 }
 
 .filters-section .ant-input-affix-wrapper input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.filters-section .ant-select-selection-placeholder,
-.filters-section .ant-select-selection-item {
-    color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.filters-section .ant-select-arrow {
-    color: rgba(255, 255, 255, 0.5);
+    color: #bfbfbf;
 }
 
 /* Content Area */
@@ -237,12 +223,12 @@
 }
 
 .footer-stat {
-    color: #8c8c8c;
+    color: #595959;
     font-size: 13px;
 }
 
 .footer-stat .anticon {
-    color: #bfbfbf;
+    color: #8c8c8c;
 }
 
 /* Project Modal */
@@ -327,6 +313,29 @@
     .create-btn {
         width: 100%;
     }
+}
+
+/* List View */
+.project-list-view .project-list-item .ant-card-body {
+    padding: 12px 16px;
+}
+
+/* Status Filter Checkboxes */
+.status-filter-section .ant-checkbox-wrapper {
+    color: #595959;
+}
+
+/* View Toggle Buttons in header */
+.filters-section .ant-btn-group .ant-btn {
+    background: white;
+    border-color: #d9d9d9;
+    color: #595959;
+}
+
+.filters-section .ant-btn-group .ant-btn-primary {
+    background: #1890ff;
+    border-color: #1890ff;
+    color: white;
 }
 
 /* Animations */

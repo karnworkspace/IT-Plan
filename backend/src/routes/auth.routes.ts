@@ -48,6 +48,34 @@ router.post('/change-pin', authenticate, authController.changePin);
 router.post('/reset-pin', authenticate, authController.resetPin);
 
 /**
+ * @route   POST /api/v1/auth/forgot-password
+ * @desc    Request password reset
+ * @access  Public
+ */
+router.post('/forgot-password', authLimiter, authController.forgotPassword);
+
+/**
+ * @route   POST /api/v1/auth/reset-password
+ * @desc    Reset password with token
+ * @access  Public
+ */
+router.post('/reset-password', authLimiter, authController.resetPassword);
+
+/**
+ * @route   POST /api/v1/auth/forgot-pin
+ * @desc    Request PIN reset
+ * @access  Public
+ */
+router.post('/forgot-pin', authLimiter, authController.forgotPin);
+
+/**
+ * @route   POST /api/v1/auth/reset-pin-token
+ * @desc    Reset PIN with token
+ * @access  Public
+ */
+router.post('/reset-pin-token', authLimiter, authController.resetPinWithToken);
+
+/**
  * @route   POST /api/v1/auth/refresh
  * @desc    Refresh access token
  * @access  Public

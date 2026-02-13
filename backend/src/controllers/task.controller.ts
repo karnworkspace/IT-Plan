@@ -63,7 +63,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     const userId = extractUserId(req);
 
     // Validation
-    const { title, description, assigneeId, priority, dueDate, startDate } = req.body;
+    const { title, description, assigneeId, priority, dueDate, startDate, status, parentTaskId } = req.body;
 
     if (!title) {
       return sendError(res, 'Title is required', 400);
@@ -77,7 +77,12 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       return sendError(res, 'Description must be less than 2000 characters', 400);
     }
 
-    // Validate status (not needed for create, defaults to TODO)
+    // Validate status if provided
+    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
+    if (status && !validStatuses.includes(status)) {
+      return sendError(res, 'Invalid status value', 400);
+    }
+
     // Validate priority if provided
     const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
     if (priority && !validPriorities.includes(priority)) {
@@ -120,12 +125,14 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       createdById: userId,
       assigneeId,
       priority,
+      status,
       startDate: startDateObj,
       dueDate: dueDateObj,
+      parentTaskId,
     };
 
     const task = await taskService.createTask(taskData);
-    return sendSuccess(res, { task }, '201');
+    return sendSuccess(res, { task }, undefined, 201);
   } catch (error) {
     next(error);
   }
@@ -151,7 +158,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     }
 
     // Validate status if provided
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED'];
+    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
     if (status && !validStatuses.includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
@@ -253,7 +260,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Status is required', 400);
     }
 
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED'];
+    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
     if (!validStatuses.includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
@@ -293,6 +300,21 @@ export const getMyTasks = async (req: Request, res: Response, next: NextFunction
 
     const result = await taskService.getMyTasks(authReq.user, filters);
     return sendSuccess(res, { tasks: result.data, pagination: result.pagination }, '200');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get sub-tasks of a parent task
+ */
+export const getSubTasks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params as { id: string };
+
+    const subTasks = await taskService.getSubTasks(id);
+
+    return sendSuccess(res, { subTasks });
   } catch (error) {
     next(error);
   }

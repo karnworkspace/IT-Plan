@@ -8,6 +8,7 @@ export interface CreateProjectInput {
   description?: string;
   color?: string;
   icon?: string;
+  status?: string;
   startDate?: Date;
   endDate?: Date;
   ownerId: string;
@@ -163,6 +164,7 @@ export class ProjectService {
           description: data.description,
           color: data.color || '#1890ff',
           icon: data.icon,
+          status: data.status || 'ACTIVE',
           startDate: data.startDate,
           endDate: data.endDate,
           ownerId: data.ownerId,

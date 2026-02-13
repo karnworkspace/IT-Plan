@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import prisma from '../config/database';
 import { config } from '../config';
 import {
@@ -10,6 +11,9 @@ import {
     generateRefreshToken,
     verifyRefreshToken,
 } from '../utils/auth';
+
+// Token expiry time (1 hour)
+const RESET_TOKEN_EXPIRY = 60 * 60 * 1000;
 
 export class AuthService {
     /**
@@ -353,6 +357,197 @@ export class AuthService {
             data: {
                 pinHash: null,
                 pinSetAt: null,
+            },
+        });
+
+        return { message: 'PIN reset successfully' };
+    }
+
+    /**
+     * Request password reset - generates token and returns it
+     * In production, this would send an email instead
+     */
+    async requestPasswordReset(email: string) {
+        // Find user by email
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            // For security, don't reveal if email exists
+            return { message: 'If an account exists with this email, a reset link has been sent' };
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY);
+
+        // Store token in database
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                passwordResetToken: hashedToken,
+                passwordResetExpires: expiresAt,
+            },
+        });
+
+        // In production, send email here
+        // For UAT, return the token directly
+        return {
+            message: 'Password reset token generated',
+            resetToken, // Only return this in UAT/dev mode
+            expiresAt,
+        };
+    }
+
+    /**
+     * Reset password with token
+     */
+    async resetPasswordWithToken(
+        token: string,
+        newPassword: string,
+        confirmPassword: string
+    ) {
+        // Validate passwords match
+        if (newPassword !== confirmPassword) {
+            throw new Error('Passwords do not match');
+        }
+
+        // Validate password length
+        if (!newPassword || newPassword.length < 6) {
+            throw new Error('Password must be at least 6 characters');
+        }
+
+        // Hash the token for comparison
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        // Find user with valid token
+        const user = await prisma.user.findFirst({
+            where: {
+                passwordResetToken: hashedToken,
+                passwordResetExpires: {
+                    gt: new Date(),
+                },
+            },
+        });
+
+        if (!user) {
+            throw new Error('Invalid or expired reset token');
+        }
+
+        // Hash new password
+        const hashedPassword = await hashPassword(newPassword);
+
+        // Update password and clear reset token
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                passwordResetToken: null,
+                passwordResetExpires: null,
+                // Reset login attempts
+                loginAttempts: 0,
+                lockedUntil: null,
+            },
+        });
+
+        return { message: 'Password reset successfully' };
+    }
+
+    /**
+     * Request PIN reset - generates token and returns it
+     * In production, this would send an email instead
+     */
+    async requestPinReset(email: string) {
+        // Find user by email
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            // For security, don't reveal if email exists
+            return { message: 'If an account exists with this email, a reset link has been sent' };
+        }
+
+        // Check if PIN is set
+        if (!user.pinHash) {
+            throw new Error('PIN is not set for this account');
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY);
+
+        // Store token in database
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                pinResetToken: hashedToken,
+                pinResetExpires: expiresAt,
+            },
+        });
+
+        // In production, send email here
+        // For UAT, return the token directly
+        return {
+            message: 'PIN reset token generated',
+            resetToken, // Only return this in UAT/dev mode
+            expiresAt,
+        };
+    }
+
+    /**
+     * Reset PIN with token
+     */
+    async resetPinWithToken(
+        token: string,
+        newPin: string,
+        confirmPin: string
+    ) {
+        // Validate PINs match
+        if (newPin !== confirmPin) {
+            throw new Error('PINs do not match');
+        }
+
+        // Validate PIN format
+        const validation = validatePin(newPin);
+        if (!validation.valid) {
+            throw new Error(validation.error || 'Invalid PIN');
+        }
+
+        // Hash the token for comparison
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        // Find user with valid token
+        const user = await prisma.user.findFirst({
+            where: {
+                pinResetToken: hashedToken,
+                pinResetExpires: {
+                    gt: new Date(),
+                },
+            },
+        });
+
+        if (!user) {
+            throw new Error('Invalid or expired reset token');
+        }
+
+        // Hash new PIN
+        const newPinHash = await hashPin(newPin);
+
+        // Update PIN and clear reset token
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                pinHash: newPinHash,
+                pinSetAt: new Date(),
+                pinResetToken: null,
+                pinResetExpires: null,
+                // Reset login attempts
+                loginAttempts: 0,
+                lockedUntil: null,
             },
         });
 

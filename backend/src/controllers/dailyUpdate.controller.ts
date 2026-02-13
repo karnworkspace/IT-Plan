@@ -79,7 +79,7 @@ export const createDailyUpdate = async (req: Request, res: Response, next: NextF
     };
 
     const update = await dailyUpdateService.createDailyUpdate(updateData, userId);
-    return sendSuccess(res, { update }, '201');
+    return sendSuccess(res, { update }, undefined, 201);
   } catch (error) {
     next(error);
   }

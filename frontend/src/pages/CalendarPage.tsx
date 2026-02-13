@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { taskService, type Task } from '../services/taskService';
-import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
@@ -9,67 +8,55 @@ import {
     Typography,
     Space,
     Tag,
-    Button,
-    Select,
+    Badge,
     Modal,
     message,
     Spin,
+    Progress,
+    Tooltip,
 } from 'antd';
 import {
     CalendarOutlined,
-    ClockCircleOutlined,
-    CheckCircleOutlined,
+    FolderOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 import './CalendarPage.css';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
-const { Option } = Select;
+
+// Status config (consistent with other pages)
+const STATUS_CONFIG: Record<string, { color: string; label: string; tagColor: string }> = {
+    TODO: { color: '#8c8c8c', label: 'To Do', tagColor: 'default' },
+    IN_PROGRESS: { color: '#1890ff', label: 'In Progress', tagColor: 'processing' },
+    DONE: { color: '#52c41a', label: 'Done', tagColor: 'success' },
+    HOLD: { color: '#fa8c16', label: 'Hold', tagColor: 'warning' },
+    CANCELLED: { color: '#595959', label: 'Cancelled', tagColor: 'error' },
+};
+
+const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
+    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
+    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
+    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
+};
 
 export const CalendarPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [selectedProject, setSelectedProject] = useState<string | undefined>(undefined);
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
-    // Load projects on mount
     useEffect(() => {
-        loadProjects();
+        loadTasks();
     }, []);
 
-    // Load tasks when project is selected
-    useEffect(() => {
-        if (selectedProject) {
-            loadTasks(selectedProject);
-        }
-    }, [selectedProject]);
-
-    const loadProjects = async () => {
+    const loadTasks = async () => {
         try {
             setLoading(true);
-            const projectsResponse = await projectService.getProjects({ pageSize: 100 });
-            setProjects(projectsResponse.projects);
-
-            // Auto-select first project
-            if (projectsResponse.projects.length > 0) {
-                setSelectedProject(projectsResponse.projects[0].id);
-            }
-        } catch (error) {
-            message.error('Failed to load projects');
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadTasks = async (projectId: string) => {
-        try {
-            setLoading(true);
-            const tasksResponse = await taskService.getTasks(projectId, { pageSize: 100 });
-            setTasks(tasksResponse.tasks);
+            const response = await taskService.getMyTasks({ pageSize: 500 });
+            setTasks(response.tasks);
         } catch (error) {
             message.error('Failed to load tasks');
             console.error(error);
@@ -78,174 +65,180 @@ export const CalendarPage: React.FC = () => {
         }
     };
 
-    const handleProjectChange = (value: string) => {
-        setSelectedProject(value);
-    };
-
-    const handleTaskClick = (date: Dayjs) => {
-        const dateStr = date.format('YYYY-MM-DD');
-        const tasksForDate = tasks.filter(task => {
+    // Build a map: dateStr -> Task[]
+    const tasksByDate = useMemo(() => {
+        const map: Record<string, Task[]> = {};
+        tasks.forEach(task => {
             if (task.dueDate) {
-                const taskDate = new Date(task.dueDate);
-                const formattedTaskDate = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}-${String(taskDate.getDate()).padStart(2, '0')}`;
-                return formattedTaskDate === dateStr;
+                const d = new Date(task.dueDate);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (!map[key]) map[key] = [];
+                map[key].push(task);
             }
-            return false;
         });
+        return map;
+    }, [tasks]);
 
-        if (tasksForDate.length === 1) {
-            setSelectedTask(tasksForDate[0]);
+    // Stats
+    const totalWithDue = tasks.filter(t => t.dueDate).length;
+    const overdueCount = tasks.filter(t => {
+        if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
+        return new Date(t.dueDate) < new Date(new Date().toDateString());
+    }).length;
+
+    const handleDateSelect = (date: Dayjs) => {
+        const dateStr = date.format('YYYY-MM-DD');
+        const tasksForDate = tasksByDate[dateStr];
+        if (tasksForDate && tasksForDate.length > 0) {
+            setSelectedDate(dateStr);
             setIsModalVisible(true);
-        } else if (tasksForDate.length > 1) {
-            message.info(`Found ${tasksForDate.length} tasks on this date`);
         }
     };
 
     const dateCellRender = (date: Dayjs) => {
         const dateStr = date.format('YYYY-MM-DD');
-        const tasksForDate = tasks.filter(task => {
-            if (task.dueDate) {
-                const taskDate = new Date(task.dueDate);
-                const formattedTaskDate = `${taskDate.getFullYear()}-${String(taskDate.getMonth() + 1).padStart(2, '0')}-${String(taskDate.getDate()).padStart(2, '0')}`;
-                return formattedTaskDate === dateStr;
-            }
-            return false;
-        });
+        const tasksForDate = tasksByDate[dateStr] || [];
+        if (tasksForDate.length === 0) return null;
 
         return (
-            <div className="calendar-date-cell">
-                {tasksForDate.slice(0, 2).map(task => (
-                    <div key={task.id} className="task-dot" style={{ backgroundColor: getTaskColor(task.status) }} />
-                ))}
-                {tasksForDate.length > 2 && (
-                    <div className="task-count">+{tasksForDate.length - 2}</div>
+            <div className="cal-cell-tasks">
+                {tasksForDate.slice(0, 3).map(task => {
+                    const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                    return (
+                        <Tooltip key={task.id} title={`${task.title} (${statusCfg.label})`}>
+                            <div
+                                className="cal-task-bar"
+                                style={{ borderLeftColor: statusCfg.color }}
+                            >
+                                <span className="cal-task-bar-title">{task.title}</span>
+                            </div>
+                        </Tooltip>
+                    );
+                })}
+                {tasksForDate.length > 3 && (
+                    <div className="cal-task-more">+{tasksForDate.length - 3} more</div>
                 )}
             </div>
         );
     };
 
-    const getTaskColor = (status: string) => {
-        switch (status) {
-            case 'TODO':
-                return '#8c8c8c';
-            case 'IN_PROGRESS':
-                return '#1890ff';
-            case 'IN_REVIEW':
-                return '#fa8c16';
-            case 'DONE':
-                return '#52c41a';
-            case 'BLOCKED':
-                return '#f5222d';
-            default:
-                return '#d9d9d9';
-        }
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'TODO':
-                return <ClockCircleOutlined style={{ color: '#8c8c8c' }} />;
-            case 'IN_PROGRESS':
-                return <ClockCircleOutlined style={{ color: '#1890ff' }} />;
-            case 'IN_REVIEW':
-                return <ClockCircleOutlined style={{ color: '#fa8c16' }} />;
-            case 'DONE':
-                return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
-            case 'BLOCKED':
-                return <ClockCircleOutlined style={{ color: '#f5222d' }} />;
-            default:
-                return <ClockCircleOutlined />;
-        }
-    };
+    const selectedTasks = selectedDate ? (tasksByDate[selectedDate] || []) : [];
 
     return (
         <Layout className="calendar-layout">
             <Sidebar />
 
             <Layout>
-                <Header className="calendar-header">
-                    <Title level={3}>Calendar</Title>
-                    <Space>
-                        <Select
-                            placeholder="Select Project"
-                            style={{ width: 200 }}
-                            allowClear
-                            value={selectedProject}
-                            onChange={handleProjectChange}
-                        >
-                            {projects.map(project => (
-                                <Option key={project.id} value={project.id}>
-                                    {project.name}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Space>
-                </Header>
-
                 <Content className="calendar-content">
+                    <div className="calendar-page-header">
+                        <div>
+                            <Title level={3} style={{ margin: 0 }}>Calendar</Title>
+                            <Text type="secondary">Tasks from all your projects</Text>
+                        </div>
+                        <Space size="middle">
+                            <div className="cal-legend-item">
+                                <span className="cal-legend-dot" style={{ background: '#8c8c8c' }} />
+                                <span>To Do</span>
+                            </div>
+                            <div className="cal-legend-item">
+                                <span className="cal-legend-dot" style={{ background: '#1890ff' }} />
+                                <span>In Progress</span>
+                            </div>
+                            <div className="cal-legend-item">
+                                <span className="cal-legend-dot" style={{ background: '#52c41a' }} />
+                                <span>Done</span>
+                            </div>
+                            <div className="cal-legend-item">
+                                <span className="cal-legend-dot" style={{ background: '#fa8c16' }} />
+                                <span>Hold</span>
+                            </div>
+                        </Space>
+                    </div>
+
+                    {/* Stats summary */}
+                    <div className="cal-stats-row">
+                        <div className="cal-stat-item">
+                            <CalendarOutlined style={{ fontSize: 18, color: '#667eea' }} />
+                            <div>
+                                <div className="cal-stat-value">{totalWithDue}</div>
+                                <div className="cal-stat-label">Tasks with due date</div>
+                            </div>
+                        </div>
+                        <div className="cal-stat-item cal-stat-overdue">
+                            <CalendarOutlined style={{ fontSize: 18, color: '#cf1322' }} />
+                            <div>
+                                <div className="cal-stat-value" style={{ color: overdueCount > 0 ? '#cf1322' : undefined }}>{overdueCount}</div>
+                                <div className="cal-stat-label">Overdue</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <Spin spinning={loading}>
                         <Card className="calendar-card">
                             <Calendar
                                 cellRender={dateCellRender}
-                                onSelect={handleTaskClick}
+                                onSelect={handleDateSelect}
                             />
                         </Card>
                     </Spin>
                 </Content>
             </Layout>
 
+            {/* Tasks for selected date modal */}
             <Modal
-                title="Task Details"
+                title={
+                    <Space>
+                        <CalendarOutlined />
+                        <span>Tasks on {selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
+                        <Badge count={selectedTasks.length} style={{ backgroundColor: '#667eea' }} />
+                    </Space>
+                }
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
-                footer={[
-                    <Button key="close" onClick={() => setIsModalVisible(false)}>
-                        Close
-                    </Button>,
-                ]}
+                footer={null}
+                width={560}
             >
-                {selectedTask && (
-                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                        <div>
-                            <Text strong style={{ display: 'block', marginBottom: 8 }}>
-                                {selectedTask.title}
-                            </Text>
-                            <Space>
-                                {getStatusIcon(selectedTask.status)}
-                                <Tag>{selectedTask.status.replace(/_/g, ' ')}</Tag>
-                            </Space>
-                        </div>
-
-                        {selectedTask.description && (
-                            <div>
-                                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                                    Description
-                                </Text>
-                                <Text>{selectedTask.description}</Text>
+                <div className="cal-modal-tasks">
+                    {selectedTasks.map(task => {
+                        const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                        const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                        return (
+                            <div key={task.id} className="cal-modal-task-card">
+                                <div className="cal-modal-task-color" style={{ background: statusCfg.color }} />
+                                <div className="cal-modal-task-body">
+                                    {task.project && (
+                                        <div className="cal-modal-task-project">
+                                            <FolderOutlined />
+                                            <span>{task.project.name}</span>
+                                        </div>
+                                    )}
+                                    <div className="cal-modal-task-title">{task.title}</div>
+                                    <div className="cal-modal-task-meta">
+                                        <Tag color={statusCfg.tagColor}>{statusCfg.label}</Tag>
+                                        <span
+                                            className="cal-modal-priority-badge"
+                                            style={{
+                                                color: priorityCfg.color,
+                                                background: priorityCfg.bg,
+                                                border: `1px solid ${priorityCfg.color}30`,
+                                            }}
+                                        >
+                                            {priorityCfg.label}
+                                        </span>
+                                        {task.assignee && (
+                                            <span className="cal-modal-task-assignee">
+                                                <UserOutlined /> {task.assignee.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {task.progress > 0 && (
+                                        <Progress percent={task.progress} size="small" strokeColor={statusCfg.color} />
+                                    )}
+                                </div>
                             </div>
-                        )}
-
-                        {selectedTask.dueDate && (
-                            <div>
-                                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                                    Due Date
-                                </Text>
-                                <Text>
-                                    <CalendarOutlined /> {new Date(selectedTask.dueDate).toLocaleDateString()}
-                                </Text>
-                            </div>
-                        )}
-
-                        {selectedTask.assignee && (
-                            <div>
-                                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                                    Assignee
-                                </Text>
-                                <Text>{selectedTask.assignee.name}</Text>
-                            </div>
-                        )}
-                    </Space>
-                )}
+                        );
+                    })}
+                </div>
             </Modal>
         </Layout>
     );

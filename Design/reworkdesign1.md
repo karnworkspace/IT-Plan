@@ -58,7 +58,43 @@
   - **Optimistic UI update** — เมื่อลาก card ย้ายคอลัมน์ จะอัปเดต UI ทันที แล้วเรียก API ตามหลัง ถ้า fail จะ rollback กลับ
   - **แก้ "Failed to update project status"** — Backend `updateProject` เดิมให้เฉพาะ project owner เท่านั้น แก้ให้ ADMIN role สามารถอัปเดตได้ด้วย
 
-### 5. Docker Database Restore จาก Production
+### 5. My Tasks Page — Kanban Board + Stats + New Task + Export
+- **สถานะ:** [x] เสร็จแล้ว
+- **ไฟล์:** `MyTasksPage.tsx`, `MyTasksPage.css`
+- **รายละเอียด:**
+  - เปลี่ยนจาก Grid View เป็น **Kanban Board** — 5 คอลัมน์: To Do, In Progress, Done, Hold, Cancelled
+  - **Drag & Drop** ย้าย task ระหว่างคอลัมน์ (Optimistic UI + API update)
+  - เพิ่ม **Stats Cards** แสดงจำนวน task แต่ละ status (สี pastel ตาม status)
+  - เพิ่มปุ่ม **+New Task** — Modal สร้าง task ใหม่ (เลือก project, title, priority, status, due date)
+  - เพิ่มปุ่ม **Export Excel** และ **Save PDF**
+  - Priority แสดงเป็น **rounded badge** บน card (Urgent=แดง, High=ส้ม, Medium=เหลือง, Low=เขียว)
+  - Card แสดง: color bar + project name + title (2 lines) + priority badge + due date + progress
+  - ลบ status BLOCKED และ IN_REVIEW ออก
+
+### 6. Project Detail Page — Board View Redesign
+- **สถานะ:** [x] เสร็จแล้ว
+- **ไฟล์:** `ProjectDetailPage.tsx`, `ProjectDetailPage.css`
+- **รายละเอียด:**
+  - Board View ใหม่แบบ Kanban เหมือน MyTasks/Projects — column headers: จุดสี + title + badge count
+  - Card style: color bar + title + priority badge + due date + assignee tag + progress bar
+  - ลบ status IN_REVIEW ออก (เหลือ 5 คอลัมน์: To Do, In Progress, Done, Hold, Cancelled)
+  - เพิ่ม `Progress` import (แก้ blank page bug)
+
+### 7. Calendar Page — ปรับปรุง UI + ใช้ MyTasks API
+- **สถานะ:** [x] เสร็จแล้ว
+- **ไฟล์:** `CalendarPage.tsx`, `CalendarPage.css`
+- **รายละเอียด:**
+  - เปลี่ยนจากดึง tasks เฉพาะ 1 project → ใช้ **MyTasks API** ดึง tasks จากทุก project
+  - ลบ Project Selector dropdown (ไม่ต้องเลือก project แล้ว)
+  - แสดง task เป็น **แถบสี (task bar) พร้อมชื่อ** แทนจุดเล็กๆ — สีซ้ายตาม status
+  - แสดงสูงสุด 3 tasks/วัน + `+N more`
+  - Hover tooltip แสดงชื่อ task + status
+  - คลิกวันที่เปิด **Modal แสดง task list** (project name, title, status tag, priority badge, assignee, progress)
+  - เพิ่ม **Stats**: จำนวน tasks ที่มี due date + จำนวน overdue
+  - เพิ่ม **Legend** สีตาม status (To Do, In Progress, Done, Hold)
+  - ลบ status IN_REVIEW, BLOCKED ออก
+
+### 8. Docker Database Restore จาก Production
 - **สถานะ:** [x] เสร็จแล้ว
 - **สาเหตุ:** Docker container `taskflow-db` ถูก recreate ใหม่ (จาก `docker compose up --remove-orphans`) ทำให้ข้อมูลหาย
 - **วิธีแก้:**
@@ -82,6 +118,7 @@
 
 - [ ] ทดสอบ Board View drag-and-drop end-to-end หลัง DB restore
 - [ ] ทดสอบ Drag & Drop บน Docker environment ว่าอัปเดต status สำเร็จ
+- [ ] ทดสอบ Calendar แสดง tasks จากทุก project ถูกต้อง
 
 ---
 

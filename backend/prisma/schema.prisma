@@ -6,8 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Production: PostgreSQL (Neon)
+  // Docker dev: PostgreSQL (local container)
+  // Local dev without Docker: change to "sqlite" and use file:./prisma/dev.db
 }
 
 // ============================================

@@ -196,11 +196,12 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 comment.attachments = attachments;
             }
 
-            setComments([comment, ...comments]);
+            setComments(prev => [comment, ...prev]);
             setNewComment('');
             setPendingFiles([]);
             message.success('Comment added');
         } catch (error) {
+            console.error('Comment error:', error);
             message.error('Failed to add comment');
         } finally {
             setSubmittingComment(false);
@@ -235,7 +236,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 status: values.status,
             });
 
-            setUpdates([update, ...updates]);
+            setUpdates(prev => [update, ...prev]);
 
             // If status changed in update, reflect in task
             if (values.status !== task.status) {

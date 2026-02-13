@@ -1,7 +1,7 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-02-10 (Phase 10 - User Feedback Implementation)
-**Status:** ✅ Deployed to Vercel (UAT) - All User Feedback Phases Complete (18/18)
+**Last Updated:** 2026-02-12 (Phase 11 - Manual Test Round 1 Bug Fixes)
+**Status:** ✅ Deployed to Vercel (UAT) - Manual Test Bug Fixes Applied
 **Live URLs:**
 - Frontend: https://frontend-beta-seven-60.vercel.app
 - Backend: https://backend-five-iota-42.vercel.app
@@ -633,6 +633,46 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 ---
 
+### Phase 11: Manual Test Round 1 — Bug Fixes (2026-02-12) ✅
+
+**อ้างอิง:** `tests/manualtest.md` (68 test cases) + `tests/TaskFlow_ManualTest_Report.xlsx`
+**Tracking:** `tests/fix-aftertest1.md`
+
+#### Manual Test Results Summary
+| หมวด | ทดสอบ | ผ่าน | % |
+|------|--------|------|---|
+| Login & Auth | 5/6 | 5/5 | 100% |
+| Dashboard | 5/5 | 5/5 | 100% |
+| Projects | 7/9 | 7/7 | 100% |
+| Tasks | 6/8 | 6/6 | 100% |
+| Task Detail | 5/6 | 4/5 | 80% |
+| Comments | 2/4 | 1/2 | 50% |
+| Daily Updates | 2/4 | 2/2 | 100% |
+| Timeline | 3/3 | 3/3 | 100% |
+| Notifications | 2/2 | 2/2 | 100% |
+| Groups | 2/5 | 2/2 | 100% |
+| UI/UX | 3/3 | 3/3 | 100% |
+| **รวม** | **39/68** | **37/39** | **95%** |
+
+#### Bug Fixes ✅
+1. **Bug#1: PIN Login ไม่แสดง error message** [FIXED]
+   - แก้ `frontend/src/services/api.ts` — เพิ่ม `isAuthRequest` check ให้ response interceptor skip refresh token สำหรับ auth endpoints
+
+2. **Bug#2: Post Comment ไม่ทำงาน** [FIXED]
+   - แก้ `frontend/src/pages/TaskDetailModal.tsx` — ใช้ functional state updater `setComments(prev => [...])` แทน stale closure
+
+3. **Bug#3: Delete member ลบ group** [FIXED ก่อนหน้า]
+
+#### Improvements ✅
+4. **Docker dev ใช้ PostgreSQL** [FIXED]
+   - แก้ `docker-compose.yml` — เพิ่ม PostgreSQL service ให้ dev ตรงกับ production
+
+5. **Admin name "OHM"** [SCRIPT CREATED]
+   - สร้าง `backend/scripts/fix-admin-name.ts` — เปลี่ยน "OHM" → "อดินันท์ (OHM)"
+   - ต้อง run บน production: `npx ts-node scripts/fix-admin-name.ts`
+
+---
+
 ## 🎯 Recommended Next Actions
 
 ### Immediate (High Priority)
@@ -706,9 +746,11 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 ## 🔍 Known Issues / Notes
 
 1. ~~**No Backend** - Fixed~~ ✅ Backend complete
-2. **Mock Data** - Dashboard uses mock data, replace with API calls
-3. **SQLite Limitations** - Using String instead of Enum/Json for SQLite compatibility
+2. ~~**Mock Data**~~ ✅ Dashboard connected to real API
+3. ~~**SQLite Limitations**~~ ✅ Docker dev switched to PostgreSQL (2026-02-12)
 4. **Prisma Version** - Using 5.10.2 (7.x available but requires migration)
+5. **Admin Name** - ต้อง run `scripts/fix-admin-name.ts` บน production เพื่อเปลี่ยน "OHM" → "อดินันท์ (OHM)"
+6. **29 Untested Cases** - Manual test ยังเหลือ 29/68 test cases ที่ยังไม่ได้ทดสอบ
 
 ---
 
@@ -741,9 +783,9 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 ---
 
-**Status:** ✅ Deployed to Production (UAT) | All User Feedback Complete (18/18) | Tests 64/64 PASSED
-**Completion:** Core System 100% | User Feedback 100% | **Overall 100%**
-**Last Updated:** 2026-02-10
+**Status:** ✅ Deployed to Production (UAT) | Manual Test Bug Fixes Applied | Tests 64/64 PASSED
+**Completion:** Core System 100% | User Feedback 100% | Manual Test 95% (37/39) | **Overall 100%**
+**Last Updated:** 2026-02-12
 
 ### 🌐 Live Environment (UAT)
 - **Frontend:** https://frontend-beta-seven-60.vercel.app

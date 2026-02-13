@@ -324,12 +324,20 @@ export const GroupsPage: React.FC = () => {
                                                                 />
                                                             </Tooltip>
                                                             <Popconfirm
-                                                                title="Delete this group?"
-                                                                onConfirm={(e) => { e?.stopPropagation(); handleDelete(group.id); }}
+                                                                title="Are you sure to delete this group?"
+                                                                onConfirm={(e) => {
+                                                                    e?.stopPropagation();
+                                                                    handleDelete(group.id);
+                                                                }}
                                                                 onCancel={(e) => e?.stopPropagation()}
+                                                                okText="Delete"
+                                                                cancelText="Cancel"
                                                             >
                                                                 <Button
-                                                                    type="text" size="small" danger icon={<DeleteOutlined />}
+                                                                    type="text"
+                                                                    size="small"
+                                                                    danger
+                                                                    icon={<DeleteOutlined />}
                                                                     onClick={(e) => e.stopPropagation()}
                                                                 />
                                                             </Popconfirm>
@@ -436,8 +444,24 @@ export const GroupsPage: React.FC = () => {
                                 renderItem={member => (
                                     <List.Item
                                         actions={[
-                                            <Popconfirm key="remove" title="Remove member?" onConfirm={() => handleRemoveMember(member.user.id)}>
-                                                <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+                                            <Popconfirm
+                                                key="remove"
+                                                title="Are you sure to remove this member?"
+                                                onConfirm={(e) => {
+                                                    e?.stopPropagation();
+                                                    handleRemoveMember(member.user.id);
+                                                }}
+                                                onCancel={(e) => e?.stopPropagation()}
+                                                okText="Remove"
+                                                cancelText="Cancel"
+                                            >
+                                                <Button
+                                                    type="text"
+                                                    size="small"
+                                                    danger
+                                                    icon={<DeleteOutlined />}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
                                             </Popconfirm>
                                         ]}
                                     >

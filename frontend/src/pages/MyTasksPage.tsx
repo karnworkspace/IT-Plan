@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { taskService, type Task } from '../services/taskService';
+import { projectService } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import dayjs from 'dayjs';
 import {
@@ -12,32 +13,63 @@ import {
     Tag,
     Progress,
     Checkbox,
+    Badge,
+    Button,
+    Modal,
+    Form,
+    Input,
+    Select,
+    DatePicker,
+    Statistic,
     message,
     Spin,
 } from 'antd';
 import {
-    CheckCircleOutlined,
-    ClockCircleOutlined,
     CalendarOutlined,
-    ExclamationCircleOutlined,
     FolderOutlined,
+    CheckCircleOutlined,
+    SyncOutlined,
     PauseCircleOutlined,
     StopOutlined,
+    PlusOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
 } from '@ant-design/icons';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
+import { exportTasks } from '../utils/exportExcel';
+import { exportTasksPDF } from '../utils/exportPDF';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
+// Status columns config (ไม่มี BLOCKED, IN_REVIEW)
+const STATUS_COLUMNS: { key: string; label: string; color: string; dotColor: string }[] = [
+    { key: 'TODO', label: 'To Do', color: '#8c8c8c', dotColor: '#8c8c8c' },
+    { key: 'IN_PROGRESS', label: 'In Progress', color: '#1890ff', dotColor: '#1890ff' },
+    { key: 'DONE', label: 'Done', color: '#52c41a', dotColor: '#52c41a' },
+    { key: 'HOLD', label: 'Hold', color: '#fa8c16', dotColor: '#fa8c16' },
+    { key: 'CANCELLED', label: 'Cancelled', color: '#8c8c8c', dotColor: '#595959' },
+];
+
+// Priority config
+const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
+    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
+    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
+    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
+};
+
 export const MyTasksPage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [projects, setProjects] = useState<any[]>([]);
+    const [form] = Form.useForm();
 
-    // Load my tasks on mount
     useEffect(() => {
         loadMyTasks();
     }, []);
@@ -45,7 +77,7 @@ export const MyTasksPage: React.FC = () => {
     const loadMyTasks = async () => {
         try {
             setLoading(true);
-            const response = await taskService.getMyTasks({ pageSize: 100 });
+            const response = await taskService.getMyTasks({ pageSize: 200 });
             setTasks(response.tasks || []);
         } catch (error) {
             message.error('Failed to load tasks');
@@ -55,93 +87,104 @@ export const MyTasksPage: React.FC = () => {
         }
     };
 
-    const handleStatusFilter = (checkedValues: string[]) => {
-        setStatusFilter(checkedValues);
-    };
-
     const handlePriorityFilter = (checkedValues: string[]) => {
         setPriorityFilter(checkedValues);
     };
 
-    const getPriorityColor = (priority: string) => {
-        switch (priority) {
-            case 'HIGH':
-            case 'URGENT':
-                return 'red';
-            case 'MEDIUM':
-                return 'orange';
-            case 'LOW':
-                return 'green';
-            default:
-                return 'default';
-        }
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'TODO':
-                return <CheckCircleOutlined style={{ color: '#8c8c8c' }} />;
-            case 'IN_PROGRESS':
-                return <ClockCircleOutlined style={{ color: '#1890ff' }} />;
-            case 'IN_REVIEW':
-                return <ClockCircleOutlined style={{ color: '#fa8c16' }} />;
-            case 'DONE':
-                return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
-            case 'BLOCKED':
-                return <ExclamationCircleOutlined style={{ color: '#f5222d' }} />;
-            case 'HOLD':
-                return <PauseCircleOutlined style={{ color: '#fa8c16' }} />;
-            case 'CANCELLED':
-                return <StopOutlined style={{ color: '#8c8c8c' }} />;
-            default:
-                return <CheckCircleOutlined />;
-        }
-    };
-
+    // Filter tasks
     const filteredTasks = tasks.filter(task => {
-        // Filter by status
-        if (statusFilter.length > 0 && !statusFilter.includes(task.status)) {
-            return false;
-        }
-        // Filter by priority
         if (priorityFilter.length > 0 && !priorityFilter.includes(task.priority)) {
             return false;
         }
         return true;
     });
 
-    // Sort by priority first: URGENT > HIGH > MEDIUM > LOW
-    // Then by due date (closest due date first)
+    // Stats counts
+    const todoCount = filteredTasks.filter(t => t.status === 'TODO').length;
+    const inProgressCount = filteredTasks.filter(t => t.status === 'IN_PROGRESS').length;
+    const doneCount = filteredTasks.filter(t => t.status === 'DONE').length;
+    const holdCount = filteredTasks.filter(t => t.status === 'HOLD').length;
+    const cancelledCount = filteredTasks.filter(t => t.status === 'CANCELLED').length;
+
+    // Sort within each column by priority (URGENT first)
     const priorityOrder = ['URGENT', 'HIGH', 'MEDIUM', 'LOW'];
-    const sortedTasks = [...filteredTasks].sort((a, b) => {
-        const aIndex = priorityOrder.indexOf(a.priority);
-        const bIndex = priorityOrder.indexOf(b.priority);
-
-        // First sort by priority
-        if (aIndex !== bIndex) {
-            return aIndex - bIndex;
-        }
-
-        // If priority is same, sort by due date (closest first)
-        if (a.dueDate && b.dueDate) {
-            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        }
-
-        // If one has due date and other doesn't, the one with due date comes first
+    const sortByPriority = (a: Task, b: Task) => {
+        const aIdx = priorityOrder.indexOf(a.priority);
+        const bIdx = priorityOrder.indexOf(b.priority);
+        if (aIdx !== bIdx) return aIdx - bIdx;
+        if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         if (a.dueDate) return -1;
         if (b.dueDate) return 1;
-
         return 0;
-    });
+    };
 
-    const taskGroups = {
-        TODO: filteredTasks.filter(t => t.status === 'TODO'),
-        IN_PROGRESS: filteredTasks.filter(t => t.status === 'IN_PROGRESS'),
-        IN_REVIEW: filteredTasks.filter(t => t.status === 'IN_REVIEW'),
-        DONE: filteredTasks.filter(t => t.status === 'DONE'),
-        BLOCKED: filteredTasks.filter(t => t.status === 'BLOCKED'),
-        HOLD: filteredTasks.filter(t => t.status === 'HOLD'),
-        CANCELLED: filteredTasks.filter(t => t.status === 'CANCELLED'),
+    // Group tasks by status
+    const getTasksByStatus = (status: string) =>
+        filteredTasks.filter(t => t.status === status).sort(sortByPriority);
+
+    // Drag and drop handler
+    const handleDragEnd = async (result: DropResult) => {
+        const { draggableId, destination } = result;
+        if (!destination) return;
+
+        const newStatus = destination.droppableId;
+        const task = tasks.find(t => t.id === draggableId);
+        if (!task || task.status === newStatus) return;
+
+        // Optimistic update
+        const oldTasks = [...tasks];
+        setTasks(prev => prev.map(t =>
+            t.id === draggableId
+                ? { ...t, status: newStatus as Task['status'], progress: newStatus === 'DONE' ? 100 : t.progress }
+                : t
+        ));
+
+        try {
+            await taskService.updateTaskStatus(draggableId, {
+                status: newStatus,
+                progress: newStatus === 'DONE' ? 100 : task.progress,
+            });
+            message.success(`Task moved to ${newStatus.replace(/_/g, ' ')}`);
+        } catch (error) {
+            setTasks(oldTasks);
+            message.error('Failed to update task status');
+            console.error(error);
+        }
+    };
+
+    // New Task handlers
+    const handleNewTask = async () => {
+        try {
+            const res = await projectService.getProjects({ pageSize: 100 });
+            setProjects(res.projects || []);
+        } catch {
+            message.error('Failed to load projects');
+        }
+        form.resetFields();
+        setIsModalVisible(true);
+    };
+
+    const handleCreateTask = async () => {
+        try {
+            const values = await form.validateFields();
+            const payload: any = {
+                title: values.title,
+                description: values.description,
+                priority: values.priority || 'MEDIUM',
+                status: values.status || 'TODO',
+            };
+            if (values.dueDate) {
+                payload.dueDate = values.dueDate.toISOString();
+            }
+            await taskService.createTask(values.projectId, payload);
+            message.success('Task created');
+            setIsModalVisible(false);
+            loadMyTasks();
+        } catch (error: any) {
+            if (error?.errorFields) return; // form validation
+            message.error('Failed to create task');
+            console.error(error);
+        }
     };
 
     return (
@@ -150,30 +193,110 @@ export const MyTasksPage: React.FC = () => {
 
             <Layout>
                 <Header className="my-tasks-header">
-                    <Title level={3}>My Tasks</Title>
-                    <Text type="secondary">Tasks assigned to or created by you</Text>
+                    <div className="my-tasks-header-content">
+                        <div>
+                            <Title level={3} style={{ margin: 0 }}>My Tasks</Title>
+                            <Text type="secondary">Tasks assigned to or created by you</Text>
+                        </div>
+                        <Space>
+                            <Button
+                                size="large"
+                                icon={<DownloadOutlined />}
+                                onClick={() => exportTasks(filteredTasks, 'MyTasks')}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Export Excel
+                            </Button>
+                            <Button
+                                size="large"
+                                icon={<FilePdfOutlined />}
+                                onClick={() => exportTasksPDF(filteredTasks, 'MyTasks')}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Save PDF
+                            </Button>
+                            <Button
+                                type="primary"
+                                size="large"
+                                icon={<PlusOutlined />}
+                                onClick={handleNewTask}
+                                className="create-task-btn"
+                            >
+                                New Task
+                            </Button>
+                        </Space>
+                    </div>
                 </Header>
 
                 <Content className="my-tasks-content">
                     <Spin spinning={loading}>
+                        {/* Stats Cards */}
+                        <Row gutter={16} className="mytasks-stats-row">
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-total">
+                                    <Statistic
+                                        title="Total"
+                                        value={filteredTasks.length}
+                                        valueStyle={{ color: '#1a1a2e' }}
+                                        prefix={<FolderOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-todo">
+                                    <Statistic
+                                        title="To Do"
+                                        value={todoCount}
+                                        valueStyle={{ color: '#1a1a2e' }}
+                                        prefix={<CheckCircleOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-inprogress">
+                                    <Statistic
+                                        title="In Progress"
+                                        value={inProgressCount}
+                                        valueStyle={{ color: '#1890ff' }}
+                                        prefix={<SyncOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-done">
+                                    <Statistic
+                                        title="Done"
+                                        value={doneCount}
+                                        valueStyle={{ color: '#1a1a2e' }}
+                                        prefix={<CheckCircleOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-hold">
+                                    <Statistic
+                                        title="Hold"
+                                        value={holdCount}
+                                        valueStyle={{ color: '#1a1a2e' }}
+                                        prefix={<PauseCircleOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                            <Col xs={12} sm={4}>
+                                <Card className="mytasks-stat-card mytasks-stat-cancelled">
+                                    <Statistic
+                                        title="Cancelled"
+                                        value={cancelledCount}
+                                        valueStyle={{ color: '#1a1a2e' }}
+                                        prefix={<StopOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        {/* Priority Filter */}
                         <Card className="filters-card" style={{ marginBottom: 16 }}>
                             <Space size="large" wrap>
-                                <div>
-                                    <Text strong style={{ marginBottom: 8, display: 'block' }}>Status</Text>
-                                    <Checkbox.Group
-                                        value={statusFilter}
-                                        onChange={handleStatusFilter}
-                                    >
-                                        <Checkbox value="TODO">To Do</Checkbox>
-                                        <Checkbox value="IN_PROGRESS">In Progress</Checkbox>
-                                        <Checkbox value="IN_REVIEW">In Review</Checkbox>
-                                        <Checkbox value="DONE">Done</Checkbox>
-                                        <Checkbox value="BLOCKED">Blocked</Checkbox>
-                                        <Checkbox value="HOLD">Hold</Checkbox>
-                                        <Checkbox value="CANCELLED">Cancelled</Checkbox>
-                                    </Checkbox.Group>
-                                </div>
-
                                 <div>
                                     <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
                                     <Checkbox.Group
@@ -189,122 +312,171 @@ export const MyTasksPage: React.FC = () => {
                             </Space>
                         </Card>
 
-                        {filteredTasks.length === 0 ? (
-                            <Card className="empty-state">
-                                <CheckCircleOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />
-                                <Title level={4} style={{ marginTop: 16 }}>No Tasks Found</Title>
-                                <Text type="secondary">
-                                    {statusFilter.length > 0 || priorityFilter.length > 0
-                                        ? 'Try adjusting your filters'
-                                        : 'Create your first task to get started'}
-                                </Text>
-                            </Card>
-                        ) : (
-                            <div style={{ marginTop: 24 }}>
-                                {/* Status Header */}
-                                <Row gutter={[16, 16]}>
-                                    {Object.entries(taskGroups).map(([status, tasks]) =>
-                                        tasks.length > 0 ? (
-                                            <Col key={status} span={24}>
-                                                <Card
-                                                    className="status-header-card"
-                                                    style={{ marginBottom: 16 }}
-                                                >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                        {getStatusIcon(status)}
-                                                        <Title level={4} style={{ margin: 0 }}>
-                                                            {status.replace(/_/g, ' ')}
-                                                        </Title>
-                                                        <Tag>{tasks.length} tasks</Tag>
-                                                    </div>
-                                                </Card>
-                                            </Col>
-                                        ) : null
-                                    )}
-                                </Row>
+                        {/* Kanban Board */}
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <div className="mytasks-board">
+                                {STATUS_COLUMNS.map(col => {
+                                    const columnTasks = getTasksByStatus(col.key);
+                                    return (
+                                        <div key={col.key} className="mytasks-column">
+                                            {/* Column Header */}
+                                            <div className="mytasks-column-header">
+                                                <span className="mytasks-column-dot" style={{ background: col.dotColor }} />
+                                                <span className="mytasks-column-title">{col.label}</span>
+                                                <Badge
+                                                    count={columnTasks.length}
+                                                    showZero
+                                                    style={{ backgroundColor: col.color }}
+                                                />
+                                            </div>
 
-                                {/* Tasks Grid - Sorted by Priority */}
-                                <Row gutter={[16, 16]}>
-                                    {sortedTasks.map(task => (
-                                        <Col xs={24} sm={12} md={8} lg={6} xl={4} key={task.id}>
-                                            <Card
-                                                className="task-card"
-                                                hoverable
-                                                style={{ overflow: 'hidden' }}
-                                                bodyStyle={{ padding: 0 }}
-                                                onClick={() => navigate(`/projects/${task.projectId}`)}
-                                            >
-                                                {/* Project Header */}
-                                                <div style={{
-                                                    padding: '8px 12px',
-                                                    background: task.project?.color || '#1890ff',
-                                                    color: '#fff',
-                                                    fontSize: '12px',
-                                                    fontWeight: 600,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px'
-                                                }}>
-                                                    <FolderOutlined />
-                                                    <span style={{
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis'
-                                                    }}>
-                                                        {task.project?.name || 'Unknown Project'}
-                                                    </span>
-                                                </div>
+                                            {/* Droppable Area */}
+                                            <Droppable droppableId={col.key}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.droppableProps}
+                                                        className={`mytasks-column-content ${snapshot.isDraggingOver ? 'mytasks-column-over' : ''}`}
+                                                    >
+                                                        {columnTasks.length === 0 && (
+                                                            <div className="mytasks-empty">No tasks</div>
+                                                        )}
+                                                        {columnTasks.map((task, index) => {
+                                                            const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                                                            return (
+                                                                <Draggable key={task.id} draggableId={task.id} index={index}>
+                                                                    {(dragProvided, dragSnapshot) => (
+                                                                        <div
+                                                                            ref={dragProvided.innerRef}
+                                                                            {...dragProvided.draggableProps}
+                                                                            {...dragProvided.dragHandleProps}
+                                                                            className={`mytasks-card ${dragSnapshot.isDragging ? 'mytasks-card-dragging' : ''}`}
+                                                                            onClick={() => !dragSnapshot.isDragging && navigate(`/projects/${task.projectId}`)}
+                                                                        >
+                                                                            {/* Project Color Bar */}
+                                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
 
-                                                {/* Card Content */}
-                                                <div style={{ padding: '16px' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                                                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                                                            <Text strong style={{ display: 'block', fontSize: 14, marginBottom: 4 }} ellipsis={{ tooltip: true }}>
-                                                                {task.title}
-                                                            </Text>
-                                                            {task.dueDate && (
-                                                                <Space size={4} style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                                                        <CalendarOutlined /> Finish: {dayjs(task.dueDate).format('DD MMM YYYY')}
-                                                                    </Text>
-                                                                    {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
-                                                                        const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
-                                                                        if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
-                                                                        if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
-                                                                        return null;
-                                                                    })()}
-                                                                </Space>
-                                                            )}
-                                                        </div>
-                                                        <Tag color={getPriorityColor(task.priority)} style={{ marginLeft: 8 }}>
-                                                            {task.priority}
-                                                        </Tag>
-                                                    </div>
+                                                                            <div className="mytasks-card-body">
+                                                                                {/* Project Name */}
+                                                                                <div className="mytasks-card-project">
+                                                                                    <FolderOutlined />
+                                                                                    <span>{task.project?.name || 'Unknown'}</span>
+                                                                                </div>
 
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <Space size="small">
-                                                            <Tag color="blue" style={{ margin: 0 }}>
-                                                                {getStatusIcon(task.status)} {task.status.replace(/_/g, ' ')}
-                                                            </Tag>
-                                                        </Space>
-                                                        <Progress
-                                                            percent={task.progress}
-                                                            size="small"
-                                                            style={{ width: 60 }}
-                                                            showInfo={false}
-                                                            strokeColor={task.project?.color}
-                                                        />
+                                                                                {/* Task Title */}
+                                                                                <div className="mytasks-card-title">
+                                                                                    {task.title}
+                                                                                </div>
+
+                                                                                {/* Priority Badge */}
+                                                                                <span
+                                                                                    className="mytasks-priority-badge"
+                                                                                    style={{ color: pConfig.color, background: pConfig.bg, borderColor: pConfig.color }}
+                                                                                >
+                                                                                    {pConfig.label}
+                                                                                </span>
+
+                                                                                {/* Due Date */}
+                                                                                {task.dueDate && (
+                                                                                    <div className="mytasks-card-due">
+                                                                                        <CalendarOutlined />
+                                                                                        <span>{dayjs(task.dueDate).format('DD MMM YYYY')}</span>
+                                                                                        {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                                            const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                                            if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                                            if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
+                                                                                            return null;
+                                                                                        })()}
+                                                                                    </div>
+                                                                                )}
+
+                                                                                {/* Progress */}
+                                                                                <div className="mytasks-card-progress">
+                                                                                    <Progress
+                                                                                        percent={task.progress}
+                                                                                        size="small"
+                                                                                        showInfo={false}
+                                                                                        strokeColor={task.project?.color || '#1890ff'}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </Draggable>
+                                                            );
+                                                        })}
+                                                        {provided.placeholder}
                                                     </div>
-                                                </div>
-                                            </Card>
-                                        </Col>
-                                    ))}
-                                </Row>
+                                                )}
+                                            </Droppable>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        )}
+                        </DragDropContext>
                     </Spin>
                 </Content>
             </Layout>
+
+            {/* New Task Modal */}
+            <Modal
+                title={<Space><PlusOutlined /> Create New Task</Space>}
+                open={isModalVisible}
+                onOk={handleCreateTask}
+                onCancel={() => setIsModalVisible(false)}
+                okText="Create"
+                cancelText="Cancel"
+                width={520}
+            >
+                <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+                    <Form.Item
+                        name="projectId"
+                        label="Project"
+                        rules={[{ required: true, message: 'Please select a project' }]}
+                    >
+                        <Select placeholder="Select project" showSearch optionFilterProp="children">
+                            {projects.map((p: any) => (
+                                <Select.Option key={p.id} value={p.id}>
+                                    {p.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item
+                        name="title"
+                        label="Task Title"
+                        rules={[{ required: true, message: 'Please enter task title' }]}
+                    >
+                        <Input placeholder="Enter task title" />
+                    </Form.Item>
+                    <Form.Item name="description" label="Description">
+                        <Input.TextArea rows={3} placeholder="Description (optional)" />
+                    </Form.Item>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="priority" label="Priority" initialValue="MEDIUM">
+                                <Select>
+                                    <Select.Option value="URGENT">Urgent</Select.Option>
+                                    <Select.Option value="HIGH">High</Select.Option>
+                                    <Select.Option value="MEDIUM">Medium</Select.Option>
+                                    <Select.Option value="LOW">Low</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="status" label="Status" initialValue="TODO">
+                                <Select>
+                                    <Select.Option value="TODO">To Do</Select.Option>
+                                    <Select.Option value="IN_PROGRESS">In Progress</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item name="dueDate" label="Due Date">
+                        <DatePicker style={{ width: '100%' }} />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </Layout>
     );
 };

@@ -222,7 +222,6 @@ export const DashboardPage: React.FC = () => {
                                                         project.status === 'DELAY' ? 'error' :
                                                         project.status === 'COMPLETED' ? 'processing' :
                                                         project.status === 'HOLD' ? 'orange' :
-                                                        project.status === 'POSTPONE' ? 'warning' :
                                                         'default'
                                                     }>
                                                         {project.status}

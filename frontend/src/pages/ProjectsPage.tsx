@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import {
@@ -25,6 +26,7 @@ import {
     Dropdown,
     DatePicker,
     Checkbox,
+    Pagination,
 } from 'antd';
 import dayjs from 'dayjs';
 import type { MenuProps } from 'antd';
@@ -35,16 +37,15 @@ import {
     FolderOutlined,
     TeamOutlined,
     CheckCircleOutlined,
-    ClockCircleOutlined,
     MoreOutlined,
     EyeOutlined,
     ProjectOutlined,
     PauseCircleOutlined,
     StopOutlined,
     WarningOutlined,
-    HourglassOutlined,
     AppstoreOutlined,
     BarsOutlined,
+    InsertRowLeftOutlined,
     SortAscendingOutlined,
     DownloadOutlined,
     FilePdfOutlined,
@@ -92,10 +93,12 @@ export const ProjectsPage: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
     const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
     const [selectedProjectForMembers, setSelectedProjectForMembers] = useState<ProjectWithStats | null>(null);
-    const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
-        return (localStorage.getItem('projectsViewMode') as 'card' | 'list') || 'card';
+    const [viewMode, setViewMode] = useState<'card' | 'list' | 'board'>(() => {
+        return (localStorage.getItem('projectsViewMode') as 'card' | 'list' | 'board') || 'card';
     });
     const [sortBy, setSortBy] = useState<string>('name-asc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 9;
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -135,9 +138,10 @@ export const ProjectsPage: React.FC = () => {
         });
 
         setFilteredProjects(filtered);
+        setCurrentPage(1);
     }, [projects, searchText, statusFilter, sortBy]);
 
-    const handleViewModeChange = (mode: 'card' | 'list') => {
+    const handleViewModeChange = (mode: 'card' | 'list' | 'board') => {
         setViewMode(mode);
         localStorage.setItem('projectsViewMode', mode);
     };
@@ -254,10 +258,6 @@ export const ProjectsPage: React.FC = () => {
                 return { color: 'orange', icon: <PauseCircleOutlined />, label: 'Hold' };
             case 'CANCELLED':
                 return { color: 'default', icon: <StopOutlined />, label: 'Cancelled' };
-            case 'POSTPONE':
-                return { color: 'warning', icon: <HourglassOutlined />, label: 'Postpone' };
-            case 'ARCHIVED':
-                return { color: 'default', icon: <ClockCircleOutlined />, label: 'Archived' };
             default:
                 return { color: 'default', icon: null, label: status };
         }
@@ -292,12 +292,40 @@ export const ProjectsPage: React.FC = () => {
         },
     ];
 
+    const BOARD_COLUMNS = [
+        { status: 'ACTIVE', label: 'Active', dotColor: '#52c41a' },
+        { status: 'DELAY', label: 'Delay', dotColor: '#ff4d4f' },
+        { status: 'COMPLETED', label: 'Completed', dotColor: '#1890ff' },
+        { status: 'HOLD', label: 'Hold', dotColor: '#fa8c16' },
+        { status: 'CANCELLED', label: 'Cancelled', dotColor: '#8c8c8c' },
+    ];
+
+    const handleDragEnd = async (result: DropResult) => {
+        const { draggableId, destination } = result;
+        if (!destination) return;
+        const newStatus = destination.droppableId as Project['status'];
+        const project = projects.find(p => p.id === draggableId);
+        if (!project || project.status === newStatus) return;
+
+        // Optimistic update
+        setProjects(prev => prev.map(p => p.id === draggableId ? { ...p, status: newStatus } : p));
+        try {
+            await projectService.updateProject(draggableId, { status: newStatus });
+            message.success(`Moved "${project.name}" to ${newStatus}`);
+        } catch {
+            // Revert on error
+            setProjects(prev => prev.map(p => p.id === draggableId ? { ...p, status: project.status } : p));
+            message.error('Failed to update project status');
+        }
+    };
+
     // Calculate stats
     const totalProjects = projects.length;
     const activeProjects = projects.filter(p => p.status === 'ACTIVE').length;
     const completedProjects = projects.filter(p => p.status === 'COMPLETED').length;
     const delayProjects = projects.filter(p => p.status === 'DELAY').length;
     const holdProjects = projects.filter(p => p.status === 'HOLD').length;
+    const cancelledProjects = projects.filter(p => p.status === 'CANCELLED').length;
 
     return (
         <Layout className="projects-layout">
@@ -347,42 +375,63 @@ export const ProjectsPage: React.FC = () => {
 
                     {/* Stats Cards */}
                     <Row gutter={16} className="stats-row">
-                        <Col xs={12} sm={6}>
-                            <Card className="stat-card">
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-total">
                                 <Statistic
                                     title="Total"
                                     value={totalProjects}
+                                    valueStyle={{ color: '#1a1a2e' }}
                                     prefix={<FolderOutlined />}
                                 />
                             </Card>
                         </Col>
-                        <Col xs={12} sm={6}>
-                            <Card className="stat-card active">
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-active">
                                 <Statistic
                                     title="Active"
                                     value={activeProjects}
-                                    valueStyle={{ color: '#10B981' }}
+                                    valueStyle={{ color: '#1a1a2e' }}
                                     prefix={<CheckCircleOutlined />}
                                 />
                             </Card>
                         </Col>
-                        <Col xs={12} sm={6}>
-                            <Card className="stat-card">
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-delay">
                                 <Statistic
                                     title="Delay"
                                     value={delayProjects}
-                                    valueStyle={{ color: '#EF4444' }}
+                                    valueStyle={{ color: '#CF1322' }}
                                     prefix={<WarningOutlined />}
                                 />
                             </Card>
                         </Col>
-                        <Col xs={12} sm={6}>
-                            <Card className="stat-card completed">
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-completed">
                                 <Statistic
                                     title="Completed"
                                     value={completedProjects}
-                                    valueStyle={{ color: '#3B82F6' }}
+                                    valueStyle={{ color: '#1a1a2e' }}
                                     prefix={<CheckCircleOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-hold">
+                                <Statistic
+                                    title="Hold"
+                                    value={holdProjects}
+                                    valueStyle={{ color: '#1a1a2e' }}
+                                    prefix={<PauseCircleOutlined />}
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={12} sm={4}>
+                            <Card className="stat-card stat-cancelled">
+                                <Statistic
+                                    title="Cancelled"
+                                    value={cancelledProjects}
+                                    valueStyle={{ color: '#1a1a2e' }}
+                                    prefix={<StopOutlined />}
                                 />
                             </Card>
                         </Col>
@@ -420,6 +469,13 @@ export const ProjectsPage: React.FC = () => {
                                     onClick={() => handleViewModeChange('card')}
                                 />
                             </Tooltip>
+                            <Tooltip title="Board View">
+                                <Button
+                                    type={viewMode === 'board' ? 'primary' : 'default'}
+                                    icon={<InsertRowLeftOutlined />}
+                                    onClick={() => handleViewModeChange('board')}
+                                />
+                            </Tooltip>
                             <Tooltip title="List View">
                                 <Button
                                     type={viewMode === 'list' ? 'primary' : 'default'}
@@ -439,8 +495,6 @@ export const ProjectsPage: React.FC = () => {
                             <Checkbox value="COMPLETED"><Tag color="processing">Completed</Tag></Checkbox>
                             <Checkbox value="HOLD"><Tag color="orange">Hold</Tag></Checkbox>
                             <Checkbox value="CANCELLED"><Tag color="default">Cancelled</Tag></Checkbox>
-                            <Checkbox value="POSTPONE"><Tag color="warning">Postpone</Tag></Checkbox>
-                            <Checkbox value="ARCHIVED"><Tag color="default">Archived</Tag></Checkbox>
                         </Checkbox.Group>
                     </div>
                 </div>
@@ -470,125 +524,183 @@ export const ProjectsPage: React.FC = () => {
                                 )}
                             </Card>
                         ) : viewMode === 'card' ? (
-                            <Row gutter={[20, 20]}>
-                                {filteredProjects.map((project) => {
-                                    const statusConfig = getStatusConfig(project.status);
-                                    const totalTasks = project.stats?.total || project._count?.tasks || 0;
-                                    const completedTasks = project.stats?.completed || 0;
+                            <>
+                                <Row gutter={[16, 16]}>
+                                    {filteredProjects
+                                        .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                                        .map((project) => {
+                                        const statusConfig = getStatusConfig(project.status);
+                                        const totalTasks = project.stats?.total || project._count?.tasks || 0;
+                                        const completedTasks = project.stats?.completed || 0;
+                                        const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                                        const progress = project.stats?.progress ?? calculatedProgress;
 
-                                    // Calculate progress if not provided
-                                    const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                                    const progress = project.stats?.progress ?? calculatedProgress;
-
-                                    return (
-                                        <Col xs={24} sm={12} lg={8} xl={6} key={project.id}>
-                                            <Card
-                                                className="project-card"
-                                                hoverable
-                                                onClick={() => handleViewProject(project.id)}
-                                            >
-                                                {/* Color Bar */}
-                                                <div
-                                                    className="project-color-bar"
-                                                    style={{ backgroundColor: project.color }}
-                                                />
-
-                                                {/* Card Header */}
-                                                <div className="project-card-header">
-                                                    <Tag
-                                                        icon={statusConfig.icon}
-                                                        color={statusConfig.color as string}
-                                                    >
-                                                        {statusConfig.label}
-                                                    </Tag>
-                                                    <Dropdown
-                                                        menu={{ items: getProjectMenuItems(project) }}
-                                                        trigger={['click']}
-                                                        placement="bottomRight"
-                                                    >
-                                                        <Button
-                                                            type="text"
-                                                            icon={<MoreOutlined />}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            className="more-btn"
-                                                        />
-                                                    </Dropdown>
-                                                </div>
-
-                                                {/* Project Info */}
-                                                <div className="project-info">
-                                                    <Title level={4} ellipsis={{ rows: 1 }} className="project-name">
-                                                        {project.name}
-                                                    </Title>
-
-                                                    {project.description && (
-                                                        <Paragraph
-                                                            type="secondary"
-                                                            ellipsis={{ rows: 2 }}
-                                                            className="project-description"
-                                                        >
-                                                            {project.description}
-                                                        </Paragraph>
-                                                    )}
-                                                </div>
-
-                                                {/* Progress Section */}
-                                                <div className="project-progress">
-                                                    <div className="progress-header">
-                                                        <Text type="secondary">Progress</Text>
-                                                        <Text strong>{progress}%</Text>
-                                                    </div>
-                                                    <Progress
-                                                        percent={progress}
-                                                        showInfo={false}
-                                                        strokeColor={{
-                                                            '0%': project.color,
-                                                            '100%': project.color,
-                                                        }}
-                                                        trailColor="#f0f0f0"
+                                        return (
+                                            <Col xs={24} sm={12} md={8} lg={8} xl={8} key={project.id}>
+                                                <Card
+                                                    className="project-card compact"
+                                                    hoverable
+                                                    onClick={() => handleViewProject(project.id)}
+                                                >
+                                                    {/* Color Bar */}
+                                                    <div
+                                                        className="project-color-bar"
+                                                        style={{ backgroundColor: project.color }}
                                                     />
-                                                </div>
 
-                                                {/* Stats Footer */}
-                                                <div className="project-footer">
-                                                    <Tooltip title={`${completedTasks} of ${totalTasks} tasks completed`}>
-                                                        <Space className="footer-stat">
-                                                            <CheckCircleOutlined />
-                                                            <Text>{completedTasks}/{totalTasks}</Text>
-                                                        </Space>
-                                                    </Tooltip>
-
-                                                    <Tooltip title={`${project.members?.length || 0} members - Click to view`}>
-                                                        <div
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleShowMembers(project);
-                                                            }}
-                                                            style={{
-                                                                cursor: 'pointer',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '6px',
-                                                                padding: '4px 10px',
-                                                                borderRadius: '16px',
-                                                                backgroundColor: 'rgba(0,0,0,0.04)',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.08)'}
-                                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
+                                                    {/* Card Header */}
+                                                    <div className="project-card-header">
+                                                        <Tag
+                                                            icon={statusConfig.icon}
+                                                            color={statusConfig.color as string}
+                                                            style={{ fontSize: 11 }}
                                                         >
-                                                            <TeamOutlined style={{ fontSize: '14px', color: '#666' }} />
-                                                            <Text style={{ fontSize: '13px', color: '#666' }}>{project.members?.length || 0}</Text>
+                                                            {statusConfig.label}
+                                                        </Tag>
+                                                        <Dropdown
+                                                            menu={{ items: getProjectMenuItems(project) }}
+                                                            trigger={['click']}
+                                                            placement="bottomRight"
+                                                        >
+                                                            <Button
+                                                                type="text"
+                                                                size="small"
+                                                                icon={<MoreOutlined />}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="more-btn"
+                                                            />
+                                                        </Dropdown>
+                                                    </div>
+
+                                                    {/* Project Info */}
+                                                    <div className="project-info">
+                                                        <Text strong ellipsis className="project-name">
+                                                            {project.name}
+                                                        </Text>
+                                                    </div>
+
+                                                    {/* Progress Section */}
+                                                    <div className="project-progress">
+                                                        <div className="progress-header">
+                                                            <Text type="secondary">{progress}%</Text>
+                                                            <Text type="secondary" style={{ fontSize: 11 }}>{completedTasks}/{totalTasks}</Text>
                                                         </div>
-                                                    </Tooltip>
+                                                        <Progress
+                                                            percent={progress}
+                                                            showInfo={false}
+                                                            size="small"
+                                                            strokeColor={project.color}
+                                                            trailColor="#f0f0f0"
+                                                        />
+                                                    </div>
 
-
+                                                    {/* Stats Footer */}
+                                                    <div className="project-footer">
+                                                        <Space className="footer-stat" size={4}>
+                                                            <TeamOutlined />
+                                                            <Text>{project.members?.length || 0}</Text>
+                                                        </Space>
+                                                    </div>
+                                                </Card>
+                                            </Col>
+                                        );
+                                    })}
+                                </Row>
+                                {filteredProjects.length > pageSize && (
+                                    <div className="projects-pagination">
+                                        <Pagination
+                                            current={currentPage}
+                                            total={filteredProjects.length}
+                                            pageSize={pageSize}
+                                            onChange={(page) => setCurrentPage(page)}
+                                            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} projects`}
+                                            showSizeChanger={false}
+                                        />
+                                    </div>
+                                )}
+                            </>
+                        ) : viewMode === 'board' ? (
+                            /* Board View (Kanban) with Drag & Drop */
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <div className="projects-board">
+                                    {BOARD_COLUMNS.map(col => {
+                                        const columnProjects = filteredProjects.filter(p => p.status === col.status);
+                                        return (
+                                            <div className="board-column" key={col.status}>
+                                                <div className="board-column-header">
+                                                    <span className="board-dot" style={{ backgroundColor: col.dotColor }} />
+                                                    <span className="board-column-title">{col.label}</span>
+                                                    <Badge count={columnProjects.length} showZero style={{ backgroundColor: col.dotColor }} />
                                                 </div>
-                                            </Card>
-                                        </Col>
-                                    );
-                                })}
-                            </Row>
+                                                <Droppable droppableId={col.status}>
+                                                    {(provided, snapshot) => (
+                                                        <div
+                                                            className={`board-column-content ${snapshot.isDraggingOver ? 'board-column-over' : ''}`}
+                                                            ref={provided.innerRef}
+                                                            {...provided.droppableProps}
+                                                        >
+                                                            {columnProjects.length === 0 && !snapshot.isDraggingOver && (
+                                                                <div className="board-empty">No projects</div>
+                                                            )}
+                                                            {columnProjects.map((project, index) => {
+                                                                const totalTasks = project.stats?.total || project._count?.tasks || 0;
+                                                                const completedTasks = project.stats?.completed || 0;
+                                                                const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                                                                const progress = project.stats?.progress ?? calculatedProgress;
+
+                                                                return (
+                                                                    <Draggable key={project.id} draggableId={project.id} index={index}>
+                                                                        {(provided, snapshot) => (
+                                                                            <div
+                                                                                ref={provided.innerRef}
+                                                                                {...provided.draggableProps}
+                                                                                {...provided.dragHandleProps}
+                                                                                className={`board-project-card ${snapshot.isDragging ? 'board-card-dragging' : ''}`}
+                                                                                onClick={() => handleViewProject(project.id)}
+                                                                            >
+                                                                                <div className="board-card-color" style={{ backgroundColor: project.color }} />
+                                                                                <div className="board-card-body">
+                                                                                    <div className="board-card-title">{project.name}</div>
+                                                                                    <div className="board-card-progress">
+                                                                                        <Progress
+                                                                                            percent={progress}
+                                                                                            size="small"
+                                                                                            strokeColor={project.color}
+                                                                                            format={(p) => `${p}%`}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="board-card-members">
+                                                                                        {project.members?.slice(0, 3).map((m: any) => (
+                                                                                            <span key={m.id} className="board-member-tag">
+                                                                                                {m.user?.name || 'Unknown'}
+                                                                                            </span>
+                                                                                        ))}
+                                                                                        {(project.members?.length || 0) > 3 && (
+                                                                                            <span className="board-member-tag board-member-more">
+                                                                                                +{project.members.length - 3}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="board-card-footer">
+                                                                                        <span className="board-card-stat">
+                                                                                            {completedTasks}/{totalTasks} tasks
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </Draggable>
+                                                                );
+                                                            })}
+                                                            {provided.placeholder}
+                                                        </div>
+                                                    )}
+                                                </Droppable>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </DragDropContext>
                         ) : (
                             /* List View */
                             <div className="project-list-view">
@@ -758,18 +870,6 @@ export const ProjectsPage: React.FC = () => {
                                 <Space>
                                     <Badge status="default" />
                                     Cancelled
-                                </Space>
-                            </Option>
-                            <Option value="POSTPONE">
-                                <Space>
-                                    <Badge color="gold" />
-                                    Postpone
-                                </Space>
-                            </Option>
-                            <Option value="ARCHIVED">
-                                <Space>
-                                    <Badge status="default" />
-                                    Archived
                                 </Space>
                             </Option>
                         </Select>

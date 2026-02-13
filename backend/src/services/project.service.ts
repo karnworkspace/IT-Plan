@@ -197,7 +197,7 @@ export class ProjectService {
    * Update project
    */
   async updateProject(id: string, data: UpdateProjectInput, userId: string): Promise<any | null> {
-    // Check if user is owner
+    // Check if user is owner or ADMIN
     const project = await prisma.project.findUnique({
       where: { id },
     });
@@ -206,7 +206,9 @@ export class ProjectService {
       return null;
     }
 
-    if (project.ownerId !== userId) {
+    // Allow owner, ADMIN, or OWNER role
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (project.ownerId !== userId && user?.role !== 'ADMIN' && user?.role !== 'OWNER') {
       throw new Error('You do not have permission to update this project');
     }
 

@@ -266,7 +266,7 @@ export class TaskService {
    * Update task
    */
   async updateTask(id: string, data: UpdateTaskInput, userId: string): Promise<any | null> {
-    // Check if user has permission (assignee, creator, or project owner)
+    // Check if user has permission (assignee, creator, project owner, or ADMIN)
     const existingTask = await prisma.task.findUnique({
       where: { id },
       include: {
@@ -281,8 +281,10 @@ export class TaskService {
     const isAssignee = existingTask.assigneeId === userId;
     const isCreator = existingTask.createdById === userId;
     const isProjectOwner = existingTask.project.ownerId === userId;
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER';
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    if (!isAssignee && !isCreator && !isProjectOwner && !isAdmin) {
       throw new Error('You do not have permission to update this task');
     }
 
@@ -397,8 +399,10 @@ export class TaskService {
     const isAssignee = existingTask.assigneeId === userId;
     const isCreator = existingTask.createdById === userId;
     const isProjectOwner = existingTask.project.ownerId === userId;
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER';
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    if (!isAssignee && !isCreator && !isProjectOwner && !isAdmin) {
       throw new Error('You do not have permission to update this task');
     }
 

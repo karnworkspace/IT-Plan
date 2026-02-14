@@ -1,8 +1,8 @@
-/* DashboardPage Styles */
+/* DashboardPage Styles — Minimal UI V1 */
 
 .dashboard-layout {
     min-height: 100vh;
-    background: #f5f7fa;
+    background: #F8FAFC;
 }
 
 .dashboard-main {
@@ -11,7 +11,7 @@
 
 .dashboard-content {
     padding: 32px 40px;
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     width: 100%;
 }
@@ -23,13 +23,38 @@
     margin-bottom: 32px;
 }
 
-/* Stats: uses shared.css .stat-card */
+/* ==========================================
+   Stat Card Inner Layout
+   ========================================== */
 
-/* Layout Grid */
+.stat-card-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.2;
+}
+
+/* ==========================================
+   Layout Grid
+   ========================================== */
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 32px;
+    gap: 24px;
 }
 
 .section-header {
@@ -39,79 +64,231 @@
     margin-bottom: 16px;
 }
 
-/* Project Cards */
-.project-summary-card {
+.view-all-link {
+    background: none;
+    border: none;
+    color: #3B82F6;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.view-all-link:hover {
+    color: #2563EB;
+    text-decoration: underline;
+}
+
+/* ==========================================
+   Project Cards V2
+   ========================================== */
+
+.project-card-v2 {
+    background: white;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
-    border: 1px solid #f0f0f0;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
     height: 100%;
 }
 
-.card-header {
+.project-card-v2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: #CBD5E1;
+}
+
+.project-card-v2 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    margin-bottom: 16px;
 }
 
-.project-icon {
+.project-icon-v2 {
     width: 40px;
     height: 40px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 20px;
 }
 
-.mt-4 {
-    margin-top: 16px;
+.project-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1E293B;
+    margin: 0 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.mb-2 {
-    margin-bottom: 8px;
+.project-card-id {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0 0 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.flex {
+.project-card-progress {
+    margin-top: auto;
+}
+
+.progress-header {
     display: flex;
-}
-
-.justify-between {
     justify-content: space-between;
+    margin-bottom: 6px;
 }
 
-.mt-8 {
-    margin-top: 32px;
+.progress-label {
+    font-size: 12px;
+    color: #64748B;
 }
 
-/* My Tasks List */
+.progress-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1E293B;
+}
+
+/* ==========================================
+   Task Priority Icons
+   ========================================== */
+
+.task-priority-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.task-priority-icon.priority-urgent {
+    background: #FEE2E2;
+    color: #EF4444;
+}
+
+.task-priority-icon.priority-normal {
+    background: #DBEAFE;
+    color: #3B82F6;
+}
+
+/* ==========================================
+   My Tasks List
+   ========================================== */
+
 .tasks-list-card {
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.divider-dot {
-    width: 4px;
-    height: 4px;
-    background: #d9d9d9;
-    border-radius: 50%;
-    margin: 0 8px;
-    display: inline-block;
+.empty-state {
+    text-align: center;
+    padding: 32px;
+    color: #94A3B8;
+    font-size: 14px;
 }
 
-/* Activity Feed */
-.activity-card {
+/* ==========================================
+   Activity Feed — Custom Timeline
+   ========================================== */
+
+.activity-feed {
+    background: white;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-    height: 100%;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.time-caption {
+.activity-item {
+    position: relative;
+    padding-left: 24px;
+    padding-bottom: 20px;
+    cursor: pointer;
+}
+
+.activity-item:last-child {
+    padding-bottom: 0;
+}
+
+.activity-line {
+    position: absolute;
+    left: 7px;
+    top: 14px;
+    bottom: 0;
+    width: 2px;
+    background: #E2E8F0;
+}
+
+.activity-dot {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #3B82F6;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3B82F6;
+}
+
+.activity-content {
+    padding: 2px 0 0 4px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.activity-item:hover .activity-content {
+    background: #F8FAFC;
+    margin: -4px -8px;
+    padding: 6px 8px 6px 12px;
+}
+
+.activity-text {
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.activity-action {
+    color: #64748B;
+}
+
+.activity-entity {
+    font-weight: 600;
+    color: #1E293B;
+}
+
+.activity-time {
     font-size: 11px;
-    color: #8c8c8c;
-    margin-top: 4px;
+    color: #94A3B8;
+    margin-top: 2px;
+    display: block;
 }
 
-/* Responsive */
+/* ==========================================
+   Responsive
+   ========================================== */
+
 @media (max-width: 1024px) {
     .dashboard-grid {
         grid-template-columns: 1fr;

@@ -22,7 +22,6 @@ import {
     Spin,
     Tooltip,
     Badge,
-    Statistic,
     Dropdown,
     DatePicker,
     Checkbox,
@@ -59,6 +58,7 @@ const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
 import { PROJECT_COLORS } from '../constants';
+import { useCountUp } from '../hooks/useCountUp';
 
 interface ProjectWithStats extends Project {
     stats?: {
@@ -70,6 +70,78 @@ interface ProjectWithStats extends Project {
         progress?: number;
     };
 }
+
+// --- Stat Card with count-up animation ---
+const StatCardItem = ({ title, value, icon, iconClass }: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    iconClass: string;
+}) => {
+    const animatedValue = useCountUp(value, 1000);
+    return (
+        <Card className="stat-card" bordered={false}>
+            <div className="stat-card-inner">
+                <div>
+                    <div className="stat-label">{title}</div>
+                    <div className="stat-value">{animatedValue}</div>
+                </div>
+                <div className={`stat-icon-box ${iconClass}`}>
+                    {icon}
+                </div>
+            </div>
+        </Card>
+    );
+};
+
+const STATUS_FILTER_COLORS: Record<string, string> = {
+    ACTIVE: '#10B981',
+    DELAY: '#EF4444',
+    COMPLETED: '#3B82F6',
+    HOLD: '#F59E0B',
+    CANCELLED: '#6B7280',
+};
+
+const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return 'badge-active';
+        case 'DELAY': return 'badge-delay';
+        case 'COMPLETED': return 'badge-completed';
+        case 'HOLD': return 'badge-hold';
+        case 'CANCELLED': return 'badge-cancelled';
+        default: return 'badge-active';
+    }
+};
+
+const getStatusProgressColor = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#10B981';
+        case 'DELAY': return '#EF4444';
+        case 'COMPLETED': return '#3B82F6';
+        case 'HOLD': return '#F59E0B';
+        default: return '#6B7280';
+    }
+};
+
+const getStatusIconBg = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#D1FAE5';
+        case 'DELAY': return '#FEE2E2';
+        case 'COMPLETED': return '#DBEAFE';
+        case 'HOLD': return '#FEF3C7';
+        default: return '#F1F5F9';
+    }
+};
+
+const getStatusIconColor = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#10B981';
+        case 'DELAY': return '#EF4444';
+        case 'COMPLETED': return '#3B82F6';
+        case 'HOLD': return '#F59E0B';
+        default: return '#6B7280';
+    }
+};
 
 export const ProjectsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -283,11 +355,11 @@ export const ProjectsPage: React.FC = () => {
     ];
 
     const BOARD_COLUMNS = [
-        { status: 'ACTIVE', label: 'Active', dotColor: '#52c41a' },
-        { status: 'DELAY', label: 'Delay', dotColor: '#ff4d4f' },
-        { status: 'COMPLETED', label: 'Completed', dotColor: '#1890ff' },
-        { status: 'HOLD', label: 'Hold', dotColor: '#fa8c16' },
-        { status: 'CANCELLED', label: 'Cancelled', dotColor: '#8c8c8c' },
+        { status: 'ACTIVE', label: 'Active', dotColor: '#10B981' },
+        { status: 'DELAY', label: 'Delay', dotColor: '#EF4444' },
+        { status: 'COMPLETED', label: 'Completed', dotColor: '#3B82F6' },
+        { status: 'HOLD', label: 'Hold', dotColor: '#F59E0B' },
+        { status: 'CANCELLED', label: 'Cancelled', dotColor: '#6B7280' },
     ];
 
     const handleDragEnd = async (result: DropResult) => {
@@ -366,126 +438,91 @@ export const ProjectsPage: React.FC = () => {
                     {/* Stats Cards */}
                     <Row gutter={16} className="stats-row">
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-total">
-                                <Statistic
-                                    title="Total"
-                                    value={totalProjects}
-                                    valueStyle={{ color: '#1a1a2e' }}
-                                    prefix={<FolderOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Total" value={totalProjects} icon={<FolderOutlined />} iconClass="icon-slate" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-active">
-                                <Statistic
-                                    title="Active"
-                                    value={activeProjects}
-                                    valueStyle={{ color: '#1a1a2e' }}
-                                    prefix={<CheckCircleOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Active" value={activeProjects} icon={<CheckCircleOutlined />} iconClass="icon-emerald" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-delay">
-                                <Statistic
-                                    title="Delay"
-                                    value={delayProjects}
-                                    valueStyle={{ color: '#CF1322' }}
-                                    prefix={<WarningOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Delay" value={delayProjects} icon={<WarningOutlined />} iconClass="icon-red" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-completed">
-                                <Statistic
-                                    title="Completed"
-                                    value={completedProjects}
-                                    valueStyle={{ color: '#1a1a2e' }}
-                                    prefix={<CheckCircleOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Completed" value={completedProjects} icon={<CheckCircleOutlined />} iconClass="icon-blue" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-hold">
-                                <Statistic
-                                    title="Hold"
-                                    value={holdProjects}
-                                    valueStyle={{ color: '#1a1a2e' }}
-                                    prefix={<PauseCircleOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Hold" value={holdProjects} icon={<PauseCircleOutlined />} iconClass="icon-amber" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <Card className="stat-card stat-cancelled">
-                                <Statistic
-                                    title="Cancelled"
-                                    value={cancelledProjects}
-                                    valueStyle={{ color: '#1a1a2e' }}
-                                    prefix={<StopOutlined />}
-                                />
-                            </Card>
+                            <StatCardItem title="Cancelled" value={cancelledProjects} icon={<StopOutlined />} iconClass="icon-slate" />
                         </Col>
                     </Row>
 
                     {/* Filters */}
-                    <div className="filters-section">
-                        <Input
-                            placeholder="Search projects..."
-                            prefix={<FolderOutlined />}
-                            style={{ width: 300 }}
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            allowClear
-                            size="large"
-                        />
-                        <Select
-                            value={sortBy}
-                            onChange={setSortBy}
-                            style={{ width: 180 }}
-                            size="large"
-                            suffixIcon={<SortAscendingOutlined />}
-                        >
-                            <Option value="name-asc">Name (A → Z)</Option>
-                            <Option value="name-desc">Name (Z → A)</Option>
-                            <Option value="date-newest">Newest First</Option>
-                            <Option value="date-oldest">Oldest First</Option>
-                            <Option value="status">Status</Option>
-                        </Select>
-                        <Button.Group size="large">
-                            <Tooltip title="Card View">
-                                <Button
-                                    type={viewMode === 'card' ? 'primary' : 'default'}
-                                    icon={<AppstoreOutlined />}
-                                    onClick={() => handleViewModeChange('card')}
-                                />
-                            </Tooltip>
-                            <Tooltip title="Board View">
-                                <Button
-                                    type={viewMode === 'board' ? 'primary' : 'default'}
-                                    icon={<InsertRowLeftOutlined />}
-                                    onClick={() => handleViewModeChange('board')}
-                                />
-                            </Tooltip>
-                            <Tooltip title="List View">
-                                <Button
-                                    type={viewMode === 'list' ? 'primary' : 'default'}
-                                    icon={<BarsOutlined />}
-                                    onClick={() => handleViewModeChange('list')}
-                                />
-                            </Tooltip>
-                        </Button.Group>
-                    </div>
-                    <div className="status-filter-section" style={{ padding: '0 24px 16px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        <Checkbox.Group
-                            value={statusFilter}
-                            onChange={(values) => setStatusFilter(values as string[])}
-                        >
-                            <Checkbox value="ACTIVE"><Tag color="success">Active</Tag></Checkbox>
-                            <Checkbox value="DELAY"><Tag color="error">Delay</Tag></Checkbox>
-                            <Checkbox value="COMPLETED"><Tag color="processing">Completed</Tag></Checkbox>
-                            <Checkbox value="HOLD"><Tag color="orange">Hold</Tag></Checkbox>
-                            <Checkbox value="CANCELLED"><Tag color="default">Cancelled</Tag></Checkbox>
-                        </Checkbox.Group>
+                    <div className="filter-card">
+                        <div className="filters-section">
+                            <Input
+                                placeholder="Search projects..."
+                                prefix={<FolderOutlined />}
+                                style={{ width: 300 }}
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                allowClear
+                                size="large"
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+                                <Select
+                                    value={sortBy}
+                                    onChange={setSortBy}
+                                    style={{ width: 180 }}
+                                    size="large"
+                                    suffixIcon={<SortAscendingOutlined />}
+                                >
+                                    <Option value="name-asc">Name (A → Z)</Option>
+                                    <Option value="name-desc">Name (Z → A)</Option>
+                                    <Option value="date-newest">Newest First</Option>
+                                    <Option value="date-oldest">Oldest First</Option>
+                                    <Option value="status">Status</Option>
+                                </Select>
+                                <Button.Group size="large">
+                                    <Tooltip title="Card View">
+                                        <Button
+                                            type={viewMode === 'card' ? 'primary' : 'default'}
+                                            icon={<AppstoreOutlined />}
+                                            onClick={() => handleViewModeChange('card')}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip title="Board View">
+                                        <Button
+                                            type={viewMode === 'board' ? 'primary' : 'default'}
+                                            icon={<InsertRowLeftOutlined />}
+                                            onClick={() => handleViewModeChange('board')}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip title="List View">
+                                        <Button
+                                            type={viewMode === 'list' ? 'primary' : 'default'}
+                                            icon={<BarsOutlined />}
+                                            onClick={() => handleViewModeChange('list')}
+                                        />
+                                    </Tooltip>
+                                </Button.Group>
+                            </div>
+                        </div>
+                        <div className="filter-divider" />
+                        <div className="status-filter-row">
+                            <Checkbox.Group
+                                value={statusFilter}
+                                onChange={(values) => setStatusFilter(values as string[])}
+                            >
+                                {(['ACTIVE', 'DELAY', 'COMPLETED', 'HOLD', 'CANCELLED'] as const).map(status => (
+                                    <Checkbox key={status} value={status}>
+                                        <span style={{ color: STATUS_FILTER_COLORS[status], fontWeight: 500 }}>
+                                            {status.charAt(0) + status.slice(1).toLowerCase()}
+                                        </span>
+                                    </Checkbox>
+                                ))}
+                            </Checkbox.Group>
+                        </div>
                     </div>
                 </div>
 
@@ -527,71 +564,52 @@ export const ProjectsPage: React.FC = () => {
 
                                         return (
                                             <Col xs={24} sm={12} md={8} lg={8} xl={8} key={project.id}>
-                                                <Card
-                                                    className="project-card compact"
-                                                    hoverable
+                                                <div
+                                                    className="project-card-v2"
                                                     onClick={() => handleViewProject(project.id)}
                                                 >
-                                                    {/* Color Bar */}
-                                                    <div
-                                                        className="project-color-bar"
-                                                        style={{ backgroundColor: project.color }}
-                                                    />
-
-                                                    {/* Card Header */}
-                                                    <div className="project-card-header">
-                                                        <Tag
-                                                            icon={statusConfig.icon}
-                                                            color={statusConfig.color as string}
-                                                            style={{ fontSize: 11 }}
-                                                        >
-                                                            {statusConfig.label}
-                                                        </Tag>
-                                                        <Dropdown
-                                                            menu={{ items: getProjectMenuItems(project) }}
-                                                            trigger={['click']}
-                                                            placement="bottomRight"
-                                                        >
-                                                            <Button
-                                                                type="text"
-                                                                size="small"
-                                                                icon={<MoreOutlined />}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="more-btn"
-                                                            />
-                                                        </Dropdown>
-                                                    </div>
-
-                                                    {/* Project Info */}
-                                                    <div className="project-info">
-                                                        <Text strong ellipsis className="project-name">
-                                                            {project.name}
-                                                        </Text>
-                                                    </div>
-
-                                                    {/* Progress Section */}
-                                                    <div className="project-progress">
-                                                        <div className="progress-header">
-                                                            <Text type="secondary">{progress}%</Text>
-                                                            <Text type="secondary" style={{ fontSize: 11 }}>{completedTasks}/{totalTasks}</Text>
+                                                    <div className="card-header">
+                                                        <div className="project-icon-v2" style={{ backgroundColor: getStatusIconBg(project.status) }}>
+                                                            <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 18 }} />
                                                         </div>
-                                                        <Progress
-                                                            percent={progress}
-                                                            showInfo={false}
-                                                            size="small"
-                                                            strokeColor={project.color}
-                                                            trailColor="#f0f0f0"
-                                                        />
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <span className={`status-badge ${getStatusBadgeClass(project.status)}`}>
+                                                                {statusConfig.label}
+                                                            </span>
+                                                            <Dropdown
+                                                                menu={{ items: getProjectMenuItems(project) }}
+                                                                trigger={['click']}
+                                                                placement="bottomRight"
+                                                            >
+                                                                <Button
+                                                                    type="text"
+                                                                    size="small"
+                                                                    icon={<MoreOutlined />}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="more-btn"
+                                                                />
+                                                            </Dropdown>
+                                                        </div>
                                                     </div>
-
-                                                    {/* Stats Footer */}
-                                                    <div className="project-footer">
-                                                        <Space className="footer-stat" size={4}>
-                                                            <TeamOutlined />
-                                                            <Text>{project.members?.length || 0}</Text>
-                                                        </Space>
+                                                    <h3 className="project-card-title">{project.name}</h3>
+                                                    <p className="project-card-id">{project.description || 'No description'}</p>
+                                                    <div className="project-card-progress">
+                                                        <div className="progress-header">
+                                                            <span className="progress-label">Progress</span>
+                                                            <span className="progress-value">{progress}% · {completedTasks}/{totalTasks}</span>
+                                                        </div>
+                                                        <div className="progress-bar-track">
+                                                            <div
+                                                                className="progress-bar-fill"
+                                                                style={{ width: `${progress}%`, background: getStatusProgressColor(project.status) }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </Card>
+                                                    <div className="project-card-footer-v2">
+                                                        <TeamOutlined style={{ color: '#94A3B8', fontSize: 14 }} />
+                                                        <span style={{ color: '#64748B', fontSize: 13 }}>{project.members?.length || 0} members</span>
+                                                    </div>
+                                                </div>
                                             </Col>
                                         );
                                     })}
@@ -648,16 +666,20 @@ export const ProjectsPage: React.FC = () => {
                                                                                 className={`board-project-card ${snapshot.isDragging ? 'board-card-dragging' : ''}`}
                                                                                 onClick={() => handleViewProject(project.id)}
                                                                             >
-                                                                                <div className="board-card-color" style={{ backgroundColor: project.color }} />
+                                                                                <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(project.status) }} />
                                                                                 <div className="board-card-body">
                                                                                     <div className="board-card-title">{project.name}</div>
                                                                                     <div className="board-card-progress">
-                                                                                        <Progress
-                                                                                            percent={progress}
-                                                                                            size="small"
-                                                                                            strokeColor={project.color}
-                                                                                            format={(p) => `${p}%`}
-                                                                                        />
+                                                                                        <div className="progress-header">
+                                                                                            <span className="progress-label">Progress</span>
+                                                                                            <span className="progress-value">{progress}%</span>
+                                                                                        </div>
+                                                                                        <div className="progress-bar-track">
+                                                                                            <div
+                                                                                                className="progress-bar-fill"
+                                                                                                style={{ width: `${progress}%`, background: getStatusProgressColor(project.status) }}
+                                                                                            />
+                                                                                        </div>
                                                                                     </div>
                                                                                     <div className="board-card-members">
                                                                                         {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }) => (

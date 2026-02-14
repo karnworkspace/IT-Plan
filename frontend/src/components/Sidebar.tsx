@@ -5,10 +5,10 @@ import {
     FolderOutlined,
     CheckCircleOutlined,
     CalendarOutlined,
-    TeamOutlined,
     DashboardOutlined,
     FieldTimeOutlined,
     UsergroupAddOutlined,
+    AppstoreOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { NotificationPopover } from './NotificationPopover';
@@ -37,10 +37,12 @@ export const Sidebar: React.FC = () => {
     ];
 
     return (
-        <Sider width={250} className="app-sider">
+        <Sider width={260} className="app-sider">
             <div className="logo">
-                <TeamOutlined style={{ fontSize: 24 }} />
-                <Title level={4} style={{ margin: 0, color: 'white' }}>SENA</Title>
+                <div className="logo-icon">
+                    <AppstoreOutlined />
+                </div>
+                <Title level={4} style={{ margin: 0, color: 'white', letterSpacing: '0.5px' }}>SENA</Title>
             </div>
 
             <div className="sidebar-menu">
@@ -58,7 +60,7 @@ export const Sidebar: React.FC = () => {
             <div className="sidebar-user">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Avatar style={{ backgroundColor: '#1890ff' }}>{user?.name?.charAt(0) || 'U'}</Avatar>
+                        <Avatar style={{ backgroundColor: '#3B82F6' }}>{user?.name?.charAt(0) || 'U'}</Avatar>
                         <Text style={{ color: 'white', maxWidth: 120 }} ellipsis>{user?.name || 'User'}</Text>
                     </div>
                     <NotificationPopover />
@@ -68,7 +70,7 @@ export const Sidebar: React.FC = () => {
                     ghost
                     block
                     onClick={handleLogout}
-                    style={{ color: 'rgba(255,255,255,0.8)', borderColor: 'rgba(255,255,255,0.4)' }}
+                    style={{ color: 'rgba(255,255,255,0.5)', borderColor: 'rgba(255,255,255,0.15)' }}
                 >
                     Logout
                 </Button>

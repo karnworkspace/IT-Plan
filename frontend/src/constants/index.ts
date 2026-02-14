@@ -22,11 +22,11 @@ export interface PriorityConfig {
 // --- Task Status Config ---
 
 export const STATUS_CONFIG: Record<string, StatusConfig> = {
-  TODO:        { color: 'default',    label: 'To Do',        dotColor: '#8c8c8c', badgeColor: '#8c8c8c', tagColor: 'default' },
-  IN_PROGRESS: { color: 'processing', label: 'In Progress',  dotColor: '#1890ff', badgeColor: '#1890ff', tagColor: 'processing' },
-  DONE:        { color: 'success',    label: 'Done',         dotColor: '#52c41a', badgeColor: '#52c41a', tagColor: 'success' },
-  HOLD:        { color: 'orange',     label: 'Hold',         dotColor: '#fa8c16', badgeColor: '#fa8c16', tagColor: 'warning' },
-  CANCELLED:   { color: 'error',      label: 'Cancelled',    dotColor: '#595959', badgeColor: '#595959', tagColor: 'error' },
+  TODO:        { color: 'default',    label: 'To Do',        dotColor: '#6B7280', badgeColor: '#6B7280', tagColor: 'default' },
+  IN_PROGRESS: { color: 'processing', label: 'In Progress',  dotColor: '#3B82F6', badgeColor: '#3B82F6', tagColor: 'processing' },
+  DONE:        { color: 'success',    label: 'Done',         dotColor: '#10B981', badgeColor: '#10B981', tagColor: 'success' },
+  HOLD:        { color: 'orange',     label: 'Hold',         dotColor: '#F59E0B', badgeColor: '#F59E0B', tagColor: 'warning' },
+  CANCELLED:   { color: 'error',      label: 'Cancelled',    dotColor: '#6B7280', badgeColor: '#6B7280', tagColor: 'error' },
 };
 
 export const STATUS_COLUMN_ORDER = ['TODO', 'IN_PROGRESS', 'DONE', 'HOLD', 'CANCELLED'] as const;
@@ -34,26 +34,26 @@ export const STATUS_COLUMN_ORDER = ['TODO', 'IN_PROGRESS', 'DONE', 'HOLD', 'CANC
 // --- Priority Config ---
 
 export const PRIORITY_CONFIG: Record<string, PriorityConfig> = {
-  URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-  HIGH:   { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-  MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-  LOW:    { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
+  URGENT: { color: '#DC2626', bg: '#FEF2F2', label: 'Urgent' },
+  HIGH:   { color: '#EA580C', bg: '#FFF7ED', label: 'High' },
+  MEDIUM: { color: '#D97706', bg: '#FFFBEB', label: 'Medium' },
+  LOW:    { color: '#16A34A', bg: '#F0FDF4', label: 'Low' },
 };
 
 // --- Gantt Chart Colors ---
 
 export const GANTT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  TODO:        { bg: '#f0f0f0', text: '#595959' },
-  IN_PROGRESS: { bg: '#e6f4ff', text: '#1677ff' },
-  IN_REVIEW:   { bg: '#f9f0ff', text: '#722ed1' },
-  DONE:        { bg: '#f6ffed', text: '#52c41a' },
+  TODO:        { bg: '#F1F5F9', text: '#6B7280' },
+  IN_PROGRESS: { bg: '#EFF6FF', text: '#3B82F6' },
+  IN_REVIEW:   { bg: '#F5F3FF', text: '#8B5CF6' },
+  DONE:        { bg: '#ECFDF5', text: '#10B981' },
 };
 
 export const GANTT_PRIORITY_COLORS: Record<string, string> = {
-  URGENT: '#ff4d4f',
-  HIGH:   '#fa8c16',
-  MEDIUM: '#fadb14',
-  LOW:    '#52c41a',
+  URGENT: '#EF4444',
+  HIGH:   '#F59E0B',
+  MEDIUM: '#EAB308',
+  LOW:    '#10B981',
 };
 
 // --- Label Configs (for Export) ---

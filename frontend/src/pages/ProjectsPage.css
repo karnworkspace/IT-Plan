@@ -1,8 +1,8 @@
-/* ProjectsPage Styles - Premium UI */
+/* ProjectsPage Styles — Minimal UI V1 */
 
 .projects-layout {
     min-height: 100vh;
-    background: #ffffff;
+    background: #F8FAFC;
 }
 
 .projects-main-layout {
@@ -11,10 +11,9 @@
 
 /* Page Header */
 .projects-page-header {
-    background: #f5f7fa;
+    background: #F8FAFC;
     padding: 32px 40px;
     margin: 0;
-    border-bottom: 1px solid #e8e8e8;
 }
 
 .header-content {
@@ -25,7 +24,7 @@
 }
 
 .header-title-section .page-title {
-    color: #1a1a2e !important;
+    color: #1E293B !important;
     margin: 0 0 8px 0 !important;
     font-weight: 600;
 }
@@ -35,48 +34,97 @@
 }
 
 .page-subtitle {
-    color: #8c8c8c !important;
+    color: #64748B !important;
     font-size: 15px;
 }
 
 .create-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #3B82F6;
     border: none;
     height: 48px;
     padding: 0 32px;
     font-size: 15px;
     font-weight: 500;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s ease;
 }
 
 .create-btn:hover {
-    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    background: #2563EB;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-/* Stats: uses shared.css .stat-card */
+/* ==========================================
+   Stat Card Inner Layout
+   ========================================== */
 
-/* Filters Section */
+.stat-card-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.2;
+}
+
+/* ==========================================
+   Filter Card
+   ========================================== */
+
+.filter-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
 .filters-section {
     display: flex;
+    align-items: center;
     gap: 16px;
 }
 
 .filters-section .ant-input-affix-wrapper,
 .filters-section .ant-select-selector {
     background: white !important;
-    border: 1px solid #d9d9d9 !important;
+    border: 1px solid #E2E8F0 !important;
     border-radius: 10px !important;
 }
 
 .filters-section .ant-input-affix-wrapper input::placeholder {
-    color: #bfbfbf;
+    color: #94A3B8;
 }
 
-/* Content Area */
+.filter-divider {
+    height: 1px;
+    background: #F1F5F9;
+    margin: 12px 0;
+}
+
+.status-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ==========================================
+   Content Area
+   ========================================== */
+
 .projects-content {
     padding: 32px 40px;
     background: transparent;
@@ -88,8 +136,9 @@
     text-align: center;
     padding: 80px 40px;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     max-width: 500px;
     margin: 60px auto;
 }
@@ -98,104 +147,65 @@
     opacity: 0.5;
 }
 
-/* Project Cards */
-.project-card {
-    border-radius: 12px;
-    overflow: hidden;
-    border: none;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    position: relative;
+/* ==========================================
+   Project Cards V2 (Card View)
+   ========================================== */
+
+.project-card-v2 {
     background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+.project-card-v2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: #CBD5E1;
 }
 
-.project-card .ant-card-body {
-    padding: 0;
-}
-
-/* Compact Card Variant */
-.project-card.compact .project-color-bar {
-    height: 4px;
-}
-
-.project-card.compact .project-card-header {
-    padding: 10px 12px 0 12px;
-}
-
-.project-card.compact .project-info {
-    padding: 8px 12px 0 12px;
-}
-
-.project-card.compact .project-name {
-    font-size: 14px !important;
-    margin: 0 !important;
-    line-height: 1.4;
-}
-
-.project-card.compact .project-progress {
-    padding: 8px 12px;
-}
-
-.project-card.compact .progress-header {
-    margin-bottom: 4px;
-}
-
-.project-card.compact .progress-header .ant-typography {
-    font-size: 11px;
-}
-
-.project-card.compact .project-footer {
-    padding: 8px 12px;
-}
-
-.project-card.compact .footer-stat {
-    font-size: 12px;
-}
-
-/* Color Bar at top */
-.project-color-bar {
-    height: 6px;
-    width: 100%;
-}
-
-/* Card Header */
-.project-card-header {
+.project-card-v2 .card-header {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.project-icon-v2 {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
     align-items: center;
-    padding: 16px 20px 0 20px;
+    justify-content: center;
 }
 
-.more-btn {
-    color: #8c8c8c;
-    border-radius: 8px;
-}
-
-.more-btn:hover {
-    background: #f5f5f5;
-    color: #262626;
-}
-
-/* Project Info */
-.project-info {
-    padding: 12px 20px 0 20px;
-}
-
-.project-name {
-    margin: 0 0 8px 0 !important;
+.project-card-title {
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a2e;
+    color: #1E293B;
+    margin: 0 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* Progress Section */
-.project-progress {
-    padding: 12px 20px;
+.project-card-id {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0 0 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-card-progress {
+    margin-top: auto;
 }
 
 .progress-header {
@@ -205,39 +215,34 @@
     margin-bottom: 6px;
 }
 
-.progress-header .ant-typography {
+.progress-label {
     font-size: 12px;
+    color: #64748B;
 }
 
-.project-progress .ant-progress {
-    margin-bottom: 0;
+.progress-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1E293B;
 }
 
-.project-progress .ant-progress-inner {
-    border-radius: 4px;
-}
-
-.project-progress .ant-progress-bg {
-    border-radius: 4px;
-}
-
-/* Footer Stats */
-.project-footer {
+.project-card-footer-v2 {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    padding: 10px 12px;
-    background: #fafafa;
-    border-top: 1px solid #f0f0f0;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
 }
 
-.footer-stat {
-    color: #595959;
-    font-size: 12px;
+.more-btn {
+    color: #94A3B8;
+    border-radius: 8px;
 }
 
-.footer-stat .anticon {
-    color: #8c8c8c;
+.more-btn:hover {
+    background: #F1F5F9;
+    color: #475569;
 }
 
 /* Pagination */
@@ -247,7 +252,10 @@
     padding: 24px 0 8px;
 }
 
-/* ==================== Board View (Kanban) ==================== */
+/* ==========================================
+   Board View (Kanban)
+   ========================================== */
+
 .projects-board {
     display: flex;
     gap: 12px;
@@ -257,7 +265,8 @@
 .board-column {
     flex: 1;
     min-width: 0;
-    background: #f5f7fa;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -268,7 +277,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid #E2E8F0;
     flex-shrink: 0;
 }
 
@@ -282,7 +291,7 @@
 .board-column-title {
     font-weight: 600;
     font-size: 14px;
-    color: #1a1a2e;
+    color: #1E293B;
     flex: 1;
 }
 
@@ -299,13 +308,13 @@
 }
 
 .board-column-content.board-column-over {
-    background: #e8f4fd;
+    background: #EFF6FF;
     border-radius: 0 0 12px 12px;
 }
 
 .board-empty {
     text-align: center;
-    color: #bfbfbf;
+    color: #94A3B8;
     padding: 32px 8px;
     font-size: 13px;
 }
@@ -314,39 +323,40 @@
 .board-project-card {
     background: white;
     border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E2E8F0;
     cursor: grab;
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
     overflow: hidden;
     user-select: none;
     flex-shrink: 0;
 }
 
 .board-project-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #CBD5E1;
 }
 
 .board-card-dragging {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
     transform: rotate(2deg);
     cursor: grabbing;
 }
 
 .board-card-color {
-    height: 4px;
+    height: 3px;
     width: 100%;
 }
 
 .board-card-body {
-    padding: 10px 12px;
+    padding: 12px 14px;
 }
 
 .board-card-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1a1a2e;
+    color: #1E293B;
     line-height: 1.4;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -354,11 +364,16 @@
 }
 
 .board-card-progress {
+    margin-bottom: 8px;
+}
+
+.board-card-progress .progress-header {
     margin-bottom: 4px;
 }
 
-.board-card-progress .ant-progress {
-    margin-bottom: 0;
+.board-card-progress .progress-label,
+.board-card-progress .progress-value {
+    font-size: 11px;
 }
 
 /* Board Card Members */
@@ -366,16 +381,15 @@
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .board-member-tag {
     display: inline-block;
     padding: 2px 8px;
     font-size: 11px;
-    color: #595959;
-    background: #f0f0f0;
+    color: #475569;
+    background: #F1F5F9;
     border-radius: 6px;
     white-space: nowrap;
     overflow: hidden;
@@ -385,8 +399,8 @@
 }
 
 .board-member-more {
-    background: #e6e6e6;
-    color: #8c8c8c;
+    background: #E2E8F0;
+    color: #64748B;
     font-weight: 500;
 }
 
@@ -394,29 +408,20 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 4px;
 }
 
 .board-card-stat {
     font-size: 12px;
-    color: #8c8c8c;
+    color: #94A3B8;
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-/* Board responsive */
-@media (max-width: 768px) {
-    .projects-board {
-        flex-direction: column;
-    }
+/* ==========================================
+   Project Modal
+   ========================================== */
 
-    .board-column-content {
-        max-height: 300px;
-    }
-}
-
-/* Project Modal */
 .project-modal .ant-modal-content {
     border-radius: 16px;
     overflow: hidden;
@@ -462,12 +467,39 @@
 }
 
 .color-option.selected {
-    border-color: #1a1a2e;
-    box-shadow: 0 0 0 2px rgba(26, 26, 46, 0.2);
+    border-color: #1E293B;
+    box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.2);
     transform: scale(1.15);
 }
 
-/* Responsive */
+/* ==========================================
+   List View
+   ========================================== */
+
+.project-list-view .project-list-item .ant-card-body {
+    padding: 12px 16px;
+}
+
+/* ==========================================
+   View Toggle Buttons
+   ========================================== */
+
+.filters-section .ant-btn-group .ant-btn {
+    background: white;
+    border-color: #E2E8F0;
+    color: #64748B;
+}
+
+.filters-section .ant-btn-group .ant-btn-primary {
+    background: #3B82F6;
+    border-color: #3B82F6;
+    color: white;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
 @media (max-width: 768px) {
     .projects-page-header {
         padding: 24px 20px;
@@ -494,80 +526,31 @@
     .create-btn {
         width: 100%;
     }
+
+    .projects-board {
+        flex-direction: column;
+    }
+
+    .board-column-content {
+        max-height: 300px;
+    }
 }
 
-/* List View */
-.project-list-view .project-list-item .ant-card-body {
-    padding: 12px 16px;
-}
+/* ==========================================
+   Animations
+   ========================================== */
 
-/* Status Filter Checkboxes */
-.status-filter-section .ant-checkbox-wrapper {
-    color: #595959;
-}
-
-/* View Toggle Buttons in header */
-.filters-section .ant-btn-group .ant-btn {
-    background: white;
-    border-color: #d9d9d9;
-    color: #595959;
-}
-
-.filters-section .ant-btn-group .ant-btn-primary {
-    background: #1890ff;
-    border-color: #1890ff;
-    color: white;
-}
-
-/* Animations */
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.project-card:not(.compact) {
-    animation: fadeInUp 0.4s ease forwards;
-}
-
-.project-card.compact {
+.project-card-v2 {
     animation: fadeInUp 0.3s ease forwards;
-}
-
-.project-card:nth-child(1) {
-    animation-delay: 0.05s;
-}
-
-.project-card:nth-child(2) {
-    animation-delay: 0.1s;
-}
-
-.project-card:nth-child(3) {
-    animation-delay: 0.15s;
-}
-
-.project-card:nth-child(4) {
-    animation-delay: 0.2s;
-}
-
-.project-card:nth-child(5) {
-    animation-delay: 0.25s;
-}
-
-.project-card:nth-child(6) {
-    animation-delay: 0.3s;
-}
-
-.project-card:nth-child(7) {
-    animation-delay: 0.35s;
-}
-
-.project-card:nth-child(8) {
-    animation-delay: 0.4s;
 }

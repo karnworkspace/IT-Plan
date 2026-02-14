@@ -2,7 +2,7 @@
 
 .project-detail-layout {
     min-height: 100vh;
-    background: #f5f7fa;
+    background: #F8FAFC;
 }
 
 .project-detail-main {
@@ -137,7 +137,7 @@
 .board-column {
     flex: 1;
     min-width: 0;
-    background: #f5f7fa;
+    background: #F8FAFC;
     border-radius: 12px;
     display: flex;
     flex-direction: column;

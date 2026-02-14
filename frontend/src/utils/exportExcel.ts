@@ -53,8 +53,6 @@ const STATUS_LABELS: Record<string, string> = {
   COMPLETED: 'Completed',
   HOLD: 'Hold',
   CANCELLED: 'Cancelled',
-  POSTPONE: 'Postpone',
-  ARCHIVED: 'Archived',
 };
 
 const TASK_STATUS_LABELS: Record<string, string> = {

@@ -27,6 +27,7 @@ import {
     Badge,
     Dropdown,
     DatePicker,
+    Progress,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import {
@@ -46,8 +47,10 @@ import {
     StopOutlined,
     DownloadOutlined,
     FilePdfOutlined,
+    TeamOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import './ProjectDetailPage.css';
@@ -66,13 +69,20 @@ const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
 };
 
 // Status colors
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined /> },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin /> },
-    IN_REVIEW: { color: 'warning', label: 'In Review', icon: <ExclamationCircleOutlined /> },
-    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined /> },
-    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined /> },
-    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined /> },
+const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode; dotColor: string; badgeColor: string }> = {
+    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined />, dotColor: '#8c8c8c', badgeColor: '#8c8c8c' },
+    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin />, dotColor: '#1890ff', badgeColor: '#1890ff' },
+    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined />, dotColor: '#52c41a', badgeColor: '#52c41a' },
+    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined />, dotColor: '#fa8c16', badgeColor: '#fa8c16' },
+    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined />, dotColor: '#595959', badgeColor: '#595959' },
+};
+
+// Priority badge config (rounded rectangle style)
+const PRIORITY_BADGE: Record<string, { color: string; bg: string; label: string }> = {
+    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
+    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
+    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
+    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
 };
 
 import { TaskDetailModal } from './TaskDetailModal';
@@ -206,6 +216,24 @@ export const ProjectDetailPage: React.FC = () => {
         }
     };
 
+    const handleTaskDragEnd = async (result: DropResult) => {
+        const { draggableId, destination } = result;
+        if (!destination) return;
+        const newStatus = destination.droppableId;
+        const task = tasks.find(t => t.id === draggableId);
+        if (!task || task.status === newStatus) return;
+
+        // Optimistic update
+        setTasks(prev => prev.map(t => t.id === draggableId ? { ...t, status: newStatus as any } : t));
+        try {
+            await taskService.updateTaskStatus(draggableId, { status: newStatus });
+            message.success(`Moved "${task.title}" to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
+        } catch {
+            setTasks(prev => prev.map(t => t.id === draggableId ? { ...t, status: task.status } : t));
+            message.error('Failed to update task status');
+        }
+    };
+
     const handleTaskClick = (taskId: string) => {
         setSelectedTaskId(taskId);
         setDetailModalVisible(true);
@@ -246,7 +274,6 @@ export const ProjectDetailPage: React.FC = () => {
     const tasksByStatus = {
         TODO: tasks.filter(t => t.status === 'TODO'),
         IN_PROGRESS: tasks.filter(t => t.status === 'IN_PROGRESS'),
-        IN_REVIEW: tasks.filter(t => t.status === 'IN_REVIEW'),
         DONE: tasks.filter(t => t.status === 'DONE'),
         HOLD: tasks.filter(t => t.status === 'HOLD'),
         CANCELLED: tasks.filter(t => t.status === 'CANCELLED'),
@@ -309,6 +336,25 @@ export const ProjectDetailPage: React.FC = () => {
                                 <Paragraph type="secondary" className="project-desc">
                                     {project.description}
                                 </Paragraph>
+                            )}
+                            {project.members && project.members.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
+                                    <span style={{ fontSize: 13, color: '#8c8c8c', marginRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <TeamOutlined /> Members:
+                                    </span>
+                                    {project.members.map((m: any) => (
+                                        <span key={m.id} style={{
+                                            display: 'inline-block',
+                                            padding: '2px 10px',
+                                            fontSize: 12,
+                                            color: '#595959',
+                                            background: '#f0f0f0',
+                                            borderRadius: 6,
+                                        }}>
+                                            {m.user?.name || 'Unknown'}
+                                        </span>
+                                    ))}
+                                </div>
                             )}
                         </div>
 
@@ -448,93 +494,112 @@ export const ProjectDetailPage: React.FC = () => {
                     <Tabs defaultActiveKey="board" size="large">
                         {/* Board View */}
                         <TabPane tab="Board View" key="board">
-                            <div className="task-board">
-                                {Object.entries(tasksByStatus).map(([status, statusTasks]) => {
-                                    const config = STATUS_CONFIG[status];
-                                    return (
-                                        <div key={status} className="board-column">
-                                            <div className="column-header">
-                                                <Tag color={config.color}>{config.label}</Tag>
-                                                <Badge count={statusTasks.length} showZero />
-                                            </div>
-                                            <div className="column-content">
-                                                {statusTasks.length === 0 ? (
-                                                    <Empty
-                                                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                                        description="No tasks"
-                                                    />
-                                                ) : (
-                                                    statusTasks.map(task => (
-                                                        <Card
-                                                            key={task.id}
-                                                            className="task-card"
-                                                            size="small"
-                                                            onClick={() => handleTaskClick(task.id)}
+                            <DragDropContext onDragEnd={handleTaskDragEnd}>
+                                <div className="task-board">
+                                    {Object.entries(tasksByStatus).map(([status, statusTasks]) => {
+                                        const config = STATUS_CONFIG[status];
+                                        return (
+                                            <div key={status} className="board-column">
+                                                <div className="column-header">
+                                                    <span className="column-dot" style={{ background: config.dotColor }} />
+                                                    <span className="column-title">{config.label}</span>
+                                                    <Badge count={statusTasks.length} showZero style={{ backgroundColor: config.badgeColor }} />
+                                                </div>
+                                                <Droppable droppableId={status}>
+                                                    {(provided, snapshot) => (
+                                                        <div
+                                                            className={`column-content ${snapshot.isDraggingOver ? 'column-content-over' : ''}`}
+                                                            ref={provided.innerRef}
+                                                            {...provided.droppableProps}
                                                         >
-                                                            <div className="task-card-header">
-                                                                <Tag
-                                                                    color={PRIORITY_CONFIG[task.priority]?.color}
-                                                                    className="priority-tag"
-                                                                >
-                                                                    {PRIORITY_CONFIG[task.priority]?.label}
-                                                                </Tag>
-                                                                <Dropdown
-                                                                    menu={{ items: getTaskMenuItems(task) }}
-                                                                    trigger={['click']}
-                                                                >
-                                                                    <Button
-                                                                        type="text"
-                                                                        size="small"
-                                                                        icon={<MoreOutlined />}
-                                                                    />
-                                                                </Dropdown>
-                                                            </div>
-                                                            <Title level={5} className="task-title">
-                                                                {task.title}
-                                                            </Title>
-                                                            {task.description && (
-                                                                <Text type="secondary" ellipsis className="task-desc">
-                                                                    {task.description}
-                                                                </Text>
+                                                            {statusTasks.length === 0 && !snapshot.isDraggingOver && (
+                                                                <div className="column-empty">No tasks</div>
                                                             )}
-                                                            <div className="task-footer">
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                                                                    {task.dueDate && (
-                                                                        <Tooltip title={`Finish: ${dayjs(task.dueDate).format('MMM D, YYYY')}`}>
-                                                                            <Space size={4}>
-                                                                                <CalendarOutlined />
-                                                                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                                                                    {dayjs(task.dueDate).format('MMM D')}
-                                                                                </Text>
-                                                                            </Space>
-                                                                        </Tooltip>
-                                                                    )}
-                                                                    {task.dueDate && task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
-                                                                        const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
-                                                                        if (daysLeft < 0) {
-                                                                            return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>Delay {Math.abs(daysLeft)}d</Tag>;
-                                                                        } else if (daysLeft <= 3) {
-                                                                            return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>Due soon</Tag>;
-                                                                        }
-                                                                        return null;
-                                                                    })()}
-                                                                </div>
-                                                                {task.assignee && (
-                                                                    <Tooltip title={task.assignee.name}>
-                                                                        <Avatar size="small" icon={<UserOutlined />}>
-                                                                            {task.assignee.name?.[0]}
-                                                                        </Avatar>
-                                                                    </Tooltip>
-                                                                )}
-                                                            </div>
-                                                        </Card>
-                                                    ))
-                                                )}
+                                                            {statusTasks.map((task, index) => {
+                                                                const pBadge = PRIORITY_BADGE[task.priority] || PRIORITY_BADGE.MEDIUM;
+                                                                return (
+                                                                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                                                                        {(dragProvided, dragSnapshot) => (
+                                                                            <div
+                                                                                ref={dragProvided.innerRef}
+                                                                                {...dragProvided.draggableProps}
+                                                                                {...dragProvided.dragHandleProps}
+                                                                                className={`task-card ${dragSnapshot.isDragging ? 'task-card-dragging' : ''}`}
+                                                                                onClick={() => !dragSnapshot.isDragging && handleTaskClick(task.id)}
+                                                                            >
+                                                                                {/* Color bar */}
+                                                                                <div className="task-card-color" style={{ background: project?.color || '#1890ff' }} />
+                                                                                <div className="task-card-body">
+                                                                                    {/* Title */}
+                                                                                    <div className="task-card-title">{task.title}</div>
+
+                                                                                    {/* Priority Badge */}
+                                                                                    <span
+                                                                                        className="task-priority-badge"
+                                                                                        style={{ color: pBadge.color, background: pBadge.bg, borderColor: pBadge.color }}
+                                                                                    >
+                                                                                        {pBadge.label}
+                                                                                    </span>
+
+                                                                                    {/* Due Date */}
+                                                                                    {task.dueDate && (
+                                                                                        <div className="task-card-due">
+                                                                                            <CalendarOutlined />
+                                                                                            <span>{dayjs(task.dueDate).format('DD MMM YYYY')}</span>
+                                                                                            {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                                                const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                                                if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                                                if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
+                                                                                                return null;
+                                                                                            })()}
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* Footer: Assignee + Menu */}
+                                                                                    <div className="task-card-footer">
+                                                                                        {task.assignee && (
+                                                                                            <Tooltip title={task.assignee.name}>
+                                                                                                <span className="task-card-assignee">
+                                                                                                    <UserOutlined /> {task.assignee.name}
+                                                                                                </span>
+                                                                                            </Tooltip>
+                                                                                        )}
+                                                                                        <Dropdown
+                                                                                            menu={{ items: getTaskMenuItems(task) }}
+                                                                                            trigger={['click']}
+                                                                                        >
+                                                                                            <Button
+                                                                                                type="text"
+                                                                                                size="small"
+                                                                                                icon={<MoreOutlined />}
+                                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                            />
+                                                                                        </Dropdown>
+                                                                                    </div>
+
+                                                                                    {/* Progress */}
+                                                                                    <Progress
+                                                                                        percent={task.progress}
+                                                                                        size="small"
+                                                                                        showInfo={false}
+                                                                                        strokeColor={project?.color || '#1890ff'}
+                                                                                        style={{ marginBottom: 0 }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </Draggable>
+                                                                );
+                                                            })}
+                                                            {provided.placeholder}
+                                                        </div>
+                                                    )}
+                                                </Droppable>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </DragDropContext>
                         </TabPane>
 
                         {/* List View */}

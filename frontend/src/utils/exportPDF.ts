@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable';
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Active', DELAY: 'Delay', COMPLETED: 'Completed',
-  HOLD: 'Hold', CANCELLED: 'Cancelled', POSTPONE: 'Postpone', ARCHIVED: 'Archived',
+  HOLD: 'Hold', CANCELLED: 'Cancelled',
 };
 
 const TASK_STATUS_LABELS: Record<string, string> = {

@@ -35,19 +35,25 @@ dayjs.extend(relativeTime);
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// --- Stat Card with count-up animation ---
-const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick }: {
+// --- Stat Card with count-up animation + gradient ---
+const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradientFrom }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
     suffix?: string;
     onClick?: () => void;
+    gradientFrom?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
 
     return (
-        <Card className="stat-card" bordered={false} onClick={onClick}>
+        <Card
+            className="stat-card"
+            bordered={false}
+            onClick={onClick}
+            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
+        >
             <div className="stat-card-inner">
                 <div>
                     <div className="stat-label">{title}</div>
@@ -202,6 +208,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
                                     iconClass="icon-blue"
+                                    gradientFrom="#DBEAFE"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>
@@ -211,6 +218,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
                                     iconClass="icon-amber"
+                                    gradientFrom="#FEF3C7"
                                     onClick={() => navigate('/my-tasks')}
                                 />
                             </Col>
@@ -220,6 +228,7 @@ export const DashboardPage: React.FC = () => {
                                     value={8}
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
+                                    gradientFrom="#D1FAE5"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>
@@ -230,6 +239,7 @@ export const DashboardPage: React.FC = () => {
                                     suffix="%"
                                     icon={<RocketOutlined />}
                                     iconClass="icon-purple"
+                                    gradientFrom="#EDE9FE"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>

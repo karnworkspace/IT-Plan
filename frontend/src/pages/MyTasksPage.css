@@ -1,11 +1,14 @@
+/* MyTasksPage Styles — Minimal UI V1 */
+
 .my-tasks-layout {
     min-height: 100vh;
+    background: #F8FAFC;
 }
 
 .my-tasks-header {
-    background: white;
-    padding: 24px;
-    border-bottom: 1px solid #f0f0f0;
+    background: #F8FAFC !important;
+    padding: 32px 40px !important;
+    border-bottom: none !important;
     height: auto !important;
     line-height: normal !important;
 }
@@ -16,34 +19,72 @@
     align-items: center;
 }
 
+.my-tasks-header-content .ant-typography {
+    color: #1E293B !important;
+}
+
+.my-tasks-header-content .ant-typography-secondary {
+    color: #64748B !important;
+}
+
 /* Create Task Button */
 .create-task-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
+    background: #3B82F6 !important;
+    border: none !important;
     height: 48px;
     padding: 0 32px;
     font-size: 15px;
     font-weight: 500;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s ease;
 }
 
 .create-task-btn:hover {
-    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    background: #2563EB !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-/* Stats: uses shared.css .stat-card */
+/* ==========================================
+   Stat Cards
+   ========================================== */
+
+.stat-card-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.2;
+}
+
+/* ==========================================
+   Content Area
+   ========================================== */
 
 .my-tasks-content {
-    padding: 24px;
-    background: #f5f5f5;
+    padding: 24px 40px;
+    background: #F8FAFC;
     min-height: calc(100vh - 64px);
 }
 
 .filters-card {
     background: white;
-    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .empty-state {
@@ -65,6 +106,7 @@
     flex: 1;
     min-width: 0;
     background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -75,7 +117,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid #E2E8F0;
     flex-shrink: 0;
 }
 
@@ -89,7 +131,7 @@
 .mytasks-column-title {
     font-weight: 600;
     font-size: 14px;
-    color: #1a1a2e;
+    color: #1E293B;
     flex: 1;
 }
 
@@ -102,17 +144,17 @@
     overflow-y: auto;
     flex: 1;
     min-height: 60px;
-    transition: background 0.2s;
+    transition: background 0.2s ease;
 }
 
 .mytasks-column-content.mytasks-column-over {
-    background: #e8f4fd;
+    background: #EFF6FF;
     border-radius: 0 0 12px 12px;
 }
 
 .mytasks-empty {
     text-align: center;
-    color: #bfbfbf;
+    color: #94A3B8;
     padding: 32px 8px;
     font-size: 13px;
 }
@@ -126,34 +168,36 @@
     border-radius: 10px;
     overflow: hidden;
     cursor: grab;
-    transition: box-shadow 0.2s;
-    border: 1px solid #f0f0f0;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid #E2E8F0;
     flex-shrink: 0;
+    user-select: none;
 }
 
 .mytasks-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #CBD5E1;
 }
 
 .mytasks-card-dragging {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
     transform: rotate(2deg);
     cursor: grabbing;
 }
 
 .mytasks-card-color {
-    height: 4px;
+    height: 3px;
     width: 100%;
 }
 
 .mytasks-card-body {
-    padding: 10px 12px;
+    padding: 12px 14px;
 }
 
 /* Project Name */
 .mytasks-card-project {
     font-size: 11px;
-    color: #8c8c8c;
+    color: #94A3B8;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -173,9 +217,9 @@
 .mytasks-card-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1a1a2e;
+    color: #1E293B;
     line-height: 1.4;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -190,26 +234,56 @@
     font-weight: 600;
     border-radius: 6px;
     border: 1px solid;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 /* Due Date */
 .mytasks-card-due {
     font-size: 11px;
-    color: #8c8c8c;
+    color: #94A3B8;
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
-/* Progress */
+/* Progress Bar */
 .mytasks-card-progress {
     margin-bottom: 0;
 }
 
-.mytasks-card-progress .ant-progress {
-    margin-bottom: 0;
+.progress-bar-track {
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+}
+
+/* ==========================================
+   Scrollbar
+   ========================================== */
+
+.mytasks-column-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.mytasks-column-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mytasks-column-content::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 2px;
+}
+
+.mytasks-column-content::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
 }
 
 /* ==========================================
@@ -227,6 +301,23 @@
 }
 
 @media (max-width: 768px) {
+    .my-tasks-header {
+        padding: 24px 20px !important;
+    }
+
+    .my-tasks-header-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .my-tasks-content {
+        padding: 20px;
+    }
+
+    .create-task-btn {
+        width: 100%;
+    }
+
     .mytasks-board {
         flex-direction: column;
     }

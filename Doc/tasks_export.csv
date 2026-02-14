@@ -1,0 +1,74 @@
+project_name,project_status,project_start,project_end,task_title,task_status,priority,assignee,assignee_email,task_start,task_due,progress,created_by,created_date
+"Booking-to-Transfer Tracking  (Integrate กับ REM,LivNex,RentNex,  Sitemaps,Fast Inspect) รองรับวงจรประสิทธิภาพ 30 วัน",ACTIVE,,,Core Booking-to-Transfer Tracking,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Booking-to-Transfer Tracking  (Integrate กับ REM,LivNex,RentNex,  Sitemaps,Fast Inspect) รองรับวงจรประสิทธิภาพ 30 วัน",ACTIVE,,,Integration FastInspect,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Booking-to-Transfer Tracking  (Integrate กับ REM,LivNex,RentNex,  Sitemaps,Fast Inspect) รองรับวงจรประสิทธิภาพ 30 วัน",ACTIVE,,,Integration REM (All versions),TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Booking-to-Transfer Tracking  (Integrate กับ REM,LivNex,RentNex,  Sitemaps,Fast Inspect) รองรับวงจรประสิทธิภาพ 30 วัน",ACTIVE,,,Integration SiteMaps,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Booking-to-Transfer Tracking  (Integrate กับ REM,LivNex,RentNex,  Sitemaps,Fast Inspect) รองรับวงจรประสิทธิภาพ 30 วัน",ACTIVE,,,Integration with Loan Activity and Bank Status,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+CDP/CRM 2025 (Leads Tracking (Online/Offline/Chat)),ACTIVE,,,"Lead follow-up omni-channal (Online Chat,Register)",TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+CDP/CRM 2025 (Leads Tracking (Online/Offline/Chat)),ACTIVE,,,SENA AI-Agent ให้ทำงานร่วมกับพนักงาน,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+CMS-POJJAMAN 2026,ACTIVE,,,Automation with AI,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+CMS-POJJAMAN 2026,ACTIVE,,,"Golive - HHP32,HHP35,HHP36,HHP37  (7 โครงการ - อยู่ระหว่างก่อสร้าง)",TODO,MEDIUM,อดินันท์ (OHM),adinuna@sena.co.th,,,0,ธรา,2026-01-27
+CMS-POJJAMAN 2026,ACTIVE,,,"Golive - HHP9 , HHP4,HHP7,HHP11,HHP16,HHP17,HHP19,HHP22,HHP23 (X โครงการ - ก่อสร้างเรียบร้อยแล้ว)",TODO,MEDIUM,อดินันท์ (OHM),adinuna@sena.co.th,,,0,ธรา,2026-01-27
+CMS-POJJAMAN 2026,ACTIVE,,,"Report คงค้างทั้งหมด (Before Jul,26)",TODO,MEDIUM,อดินันท์ (OHM),adinuna@sena.co.th,,,0,ธรา,2026-01-27
+Corporate OKR System,COMPLETED,,,Center KPI,TODO,MEDIUM,Pending to search email,Pending to search email,,,0,ธรา,2026-01-27
+Corporate OKR System,COMPLETED,,,Cororate OKR/KPI (Continue),TODO,MEDIUM,Pending to search email,Pending to search email,,,0,ธรา,2026-01-27
+Corporate OKR System,COMPLETED,,,"KPI-Performance พนักงานรายบุคคล  OP1,OP2,OP3,OP4",TODO,MEDIUM,Pending to search email,Pending to search email,,,0,ธรา,2026-01-27
+E-Constract,HOLD,,,E-Contract for LivNex,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+E-Constract,HOLD,,,E-Contract for Real Estate,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+E-Constract,HOLD,,,E-Contract for RentNex,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+Master Customer Profiles & Customer Single View,COMPLETED,,,Customer Single View,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+Master Customer Profiles & Customer Single View,COMPLETED,,,ปรับปรุงระบบโทรศัพท์ให้เรียกใช้งาน Customer Single View,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+Meta CAPI Gateway,ACTIVE,,,Meta Conversion API,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+New HR System or Upgrade (New Technology),DELAY,2026-01-31,2026-03-30,"ESS System ( Employee Dashboard,Emp document, Incentive&Commission Dashboard)",IN_PROGRESS,MEDIUM,monchiant,monchiant@sena.co.th,,2026-01-30,0,ธรา,2026-01-27
+New HR System or Upgrade (New Technology),DELAY,2026-01-31,2026-03-30,HR Integration with Internal System (การเชื่อมต่อระบบ HR ไปหาระบบต่างๆ ของบริษัทเพื่อให้การเข้าใช้งานระบบสอดคล้องกับสถานะพนักงาน),IN_REVIEW,MEDIUM,monchiant,monchiant@sena.co.th,,2026-01-26,0,ธรา,2026-01-27
+New HR System or Upgrade (New Technology),DELAY,2026-01-31,2026-03-30,HR System,TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+New HR System or Upgrade (New Technology),DELAY,2026-01-31,2026-03-30,สมมุติว่า Done,DONE,HIGH,(ไม่ได้ assign),"",,2026-01-19,0,ธรา,2026-01-27
+"Pricing Management  , Audit with AI",ACTIVE,,,Price Analysis with AI / Dashboard  / Alert,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Pricing Management  , Audit with AI",ACTIVE,,,Price Management System,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Pricing Management  , Audit with AI",ACTIVE,,,Workflow Pricing Approval,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+Product Single View,DELAY,,,Product Single View / Housing Traceability,TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+Product Single View,DELAY,,,SENA Warranty Center,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+REM Improvement,ACTIVE,,,AI - Auto split customer documents,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+REM Improvement,ACTIVE,,,AI - Sales Activity Analysis,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+REM Improvement,ACTIVE,,,AI - Sales process automations,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+REM LivNex/RentNex Improvement 2026,HOLD,,,LivNex/RentNex - Exit Process,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+REM LivNex/RentNex Improvement 2026,HOLD,,,REM-Livnex ตารางเข้าตรวจสภาพห้อง,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+REM LivNex/RentNex Improvement 2026,HOLD,,,Samrtify Order on REM LivNex,TODO,MEDIUM,nattapongm,nattapongm@sena.co.th,,,0,ธรา,2026-01-27
+"Referral - RentNex,LivNex",DELAY,,,Friend Get Friends,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+"Referral - RentNex,LivNex",DELAY,,,SENA Agent Portal,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA 360 Revamp2025,ACTIVE,,,SENA 360 Revamp Projects,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA 360 Revamp2025,ACTIVE,,,SENA 360 for Cashless payment,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA 360 Revamp2025,ACTIVE,,,SENA Agent Portal,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA AI Automation,ACTIVE,,,AMS to CMS with AI,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA AI Automation,ACTIVE,,,AR/AP Automation (ต่อเนื่อง),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA AI Automation,ACTIVE,,,BOQ Update เข้าระบบ CMS ด้วย  AI,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA AI Automation,ACTIVE,,,SenX ค่าส่วนกลาง,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA AI Automation,ACTIVE,,,"ประสานงานราชการ FL.6 (มิเตอร์น้ำ-ไฟ,โฉนด,ทะเบียนบ้าน) -> REM",TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA Cashless Journey,ACTIVE,,,Web Payment Gateway & Integration with SENA360,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA RentNex Application,ACTIVE,,,APP สำหรับส่งมอบห้อง RentNex (Scan ทรัพย์สินในห้อง),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA RentNex Application,ACTIVE,,,SENA RentNex App (Customer self service),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,Construction Dashboard,TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,"Construction Operation (Infra-Progress, Unit-Progress, QS-Progress,Payment-Progress)",TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,"Construction Planing (ConsPlan,On-Shelf,Inspection Plan,LivNex,RentNex)",TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,Construction Quality Tracking Process (งานซ่อมส่วนกลาง),TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,New PlanViewer(แนวราบ) / UnitMatrix(โครงการแนวสูง),TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,"Project Tracking(Sourcing,Purchasing)",TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+SENA SiteMaps (Masterplan) 2026(V2),ACTIVE,,,"UnitMatrix - for LivNex,RentNex (Integration with REMLivNex, REMRentNex)",TODO,MEDIUM,monchiant,monchiant@sena.co.th,,,0,ธรา,2026-01-27
+Sales-Bot (สำหรับช่วยทำงานเก็บข้อมูลใน LineGroup  ที่มีการคุยกับธนาคาร),ACTIVE,,,Sales-Bot,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+Sales-Kit + AI,ACTIVE,,,Sales - Dashboard (Performance),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+Sales-Kit + AI,ACTIVE,,,"Sales - ToDo(LivNex,RentNex,Smartify)",TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+Sales-Kit + AI,ACTIVE,,,Sales - ToDo(REM),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenProp Improvement 2025,ACTIVE,,,Batch 1,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenProp Improvement 2025,ACTIVE,,,Batch 2,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenX Complain Management and Analysis with AI,ACTIVE,,,Integration to Construction Quality Tracking Process (งานซ่อมส่วนกลาง),TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenX Complain Management and Analysis with AI,ACTIVE,,,Merge ทุก Channel แยก Category อัตโนมัติ ด้วย AI,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenX Complain Management and Analysis with AI,ACTIVE,,,Report/Dashboard,TODO,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+SenX-Bot (สำหรับช่วยทำงานเก็บข้อมูลใน LineGroup  ที่มีการคุยกัน),ACTIVE,,,SenX-Bot,IN_PROGRESS,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+Smartify-Backend (สร้างระบบทดแทนการใช้ Google Appsheet),ACTIVE,,,Smartify Backend System,IN_PROGRESS,MEDIUM,ธรา,tharab@sena.co.th,,,100,ธรา,2026-01-27
+Smartify-Backend (สร้างระบบทดแทนการใช้ Google Appsheet),ACTIVE,,,ระบบบริหารวัสดุสิ้นเปลือง(Smartify),IN_PROGRESS,MEDIUM,ธรา,tharab@sena.co.th,,,0,ธรา,2026-01-27
+ohm test,ACTIVE,2026-01-28,2026-01-30,Ohm task3,IN_PROGRESS,MEDIUM,(ไม่ได้ assign),"",,2026-01-26,0,อดินันท์ (OHM),2026-01-29
+ohm test,ACTIVE,2026-01-28,2026-01-30,ohm task1,TODO,MEDIUM,(ไม่ได้ assign),"",,2026-01-24,0,อดินันท์ (OHM),2026-01-29
+ohm test,ACTIVE,2026-01-28,2026-01-30,ohm task2,DONE,URGENT,(ไม่ได้ assign),"",,2026-01-25,0,อดินันท์ (OHM),2026-01-29
+ohm test,ACTIVE,2026-01-28,2026-01-30,ohm task4,IN_REVIEW,URGENT,(ไม่ได้ assign),"",,2026-01-27,0,อดินันท์ (OHM),2026-01-29
+ohm test,ACTIVE,2026-01-28,2026-01-30,ohm task5,TODO,MEDIUM,(ไม่ได้ assign),"",,2026-01-28,0,อดินันท์ (OHM),2026-01-29
+ระบบบริหารห้องเช่าสำหรับ SENA Fast - Improvement 2026,ACTIVE,,,ศึกษาความเป็นไปได้ เพื่อนำเอามาใช้ร่วมกันกับ RentNex,TODO,MEDIUM,Pending to search email,Pending to search email,,,0,ธรา,2026-01-27

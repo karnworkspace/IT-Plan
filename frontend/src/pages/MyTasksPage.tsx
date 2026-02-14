@@ -11,7 +11,6 @@ import {
     Typography,
     Space,
     Tag,
-    Progress,
     Checkbox,
     Badge,
     Button,
@@ -20,7 +19,6 @@ import {
     Input,
     Select,
     DatePicker,
-    Statistic,
     message,
     Spin,
 } from 'antd';
@@ -35,6 +33,7 @@ import {
     DownloadOutlined,
     FilePdfOutlined,
 } from '@ant-design/icons';
+import { useCountUp } from '../hooks/useCountUp';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import { exportTasks } from '../utils/exportExcel';
@@ -52,6 +51,34 @@ const STATUS_COLUMNS = STATUS_COLUMN_ORDER.map(key => ({
     color: STATUS_CONFIG[key].dotColor,
     dotColor: STATUS_CONFIG[key].dotColor,
 }));
+
+// --- Stat Card with count-up animation + gradient ---
+const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    iconClass: string;
+    gradientFrom?: string;
+}) => {
+    const animatedValue = useCountUp(value, 1000);
+    return (
+        <Card
+            className="stat-card"
+            bordered={false}
+            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
+        >
+            <div className="stat-card-inner">
+                <div>
+                    <div className="stat-label">{title}</div>
+                    <div className="stat-value">{animatedValue}</div>
+                </div>
+                <div className={`stat-icon-box ${iconClass}`}>
+                    {icon}
+                </div>
+            </div>
+        </Card>
+    );
+};
 
 export const MyTasksPage: React.FC = () => {
     const navigate = useNavigate();
@@ -223,64 +250,22 @@ export const MyTasksPage: React.FC = () => {
                         {/* Stats Cards */}
                         <Row gutter={16} className="stats-row">
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-total">
-                                    <Statistic
-                                        title="Total"
-                                        value={filteredTasks.length}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<FolderOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-todo">
-                                    <Statistic
-                                        title="To Do"
-                                        value={todoCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<CheckCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-purple" gradientFrom="#EDE9FE" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-inprogress">
-                                    <Statistic
-                                        title="In Progress"
-                                        value={inProgressCount}
-                                        valueStyle={{ color: '#1890ff' }}
-                                        prefix={<SyncOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-done">
-                                    <Statistic
-                                        title="Done"
-                                        value={doneCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<CheckCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-hold">
-                                    <Statistic
-                                        title="Hold"
-                                        value={holdCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<PauseCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="stat-card stat-cancelled">
-                                    <Statistic
-                                        title="Cancelled"
-                                        value={cancelledCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<StopOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
                             </Col>
                         </Row>
 
@@ -382,12 +367,12 @@ export const MyTasksPage: React.FC = () => {
 
                                                                                 {/* Progress */}
                                                                                 <div className="mytasks-card-progress">
-                                                                                    <Progress
-                                                                                        percent={task.progress}
-                                                                                        size="small"
-                                                                                        showInfo={false}
-                                                                                        strokeColor={task.project?.color || '#1890ff'}
-                                                                                    />
+                                                                                    <div className="progress-bar-track">
+                                                                                        <div
+                                                                                            className="progress-bar-fill"
+                                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
+                                                                                        />
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>

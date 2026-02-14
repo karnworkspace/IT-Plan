@@ -1,0 +1,78 @@
+name,email,role,assigned_tasks,project_count,last_login,created_date
+Admin User,admin@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Automated Tester,tester1769479770896@example.com,MEMBER,0,0,2026-01-27,2026-01-27
+Automated Tester,tester1769418169201@example.com,MEMBER,0,0,,2026-01-26
+Automated Tester,tester1769418214843@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Automated Tester,tester1769418125332@example.com,MEMBER,0,0,,2026-01-26
+Automated Tester,tester1769418268824@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Dashboard User,e2e-dashboard-1769393673496@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Dashboard User,e2e-dashboard-1769393186095@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Dashboard User,e2e-dashboard-1769393242296@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Dashboard User,e2e-dashboard-1769393144731@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Logout User,e2e-logout-1769393186489@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Logout User,e2e-logout-1769393144962@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Logout User,e2e-logout-1769393673978@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Logout User,e2e-logout-1769393242738@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E PIN Test User,e2e-pin-test-1769393672816@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E PIN Test User,e2e-pin-test-1769393143865@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E PIN Test User,e2e-pin-test-1769393241612@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E PIN Test User,e2e-pin-test-1769393185395@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393675094@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393242751@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393243409@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393243826@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393244185@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393303569@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393304106@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393304777@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393305220@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393674022@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393674597@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Tasks Test User,e2e-tasks-1769393675362@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Test User,e2e-test-1769393671902@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Test User,e2e-test-1769393184629@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Test User,e2e-test-1769393142990@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+E2E Test User,e2e-test-1769393240974@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+KARN,test2@example.com,USER,0,0,2026-01-26,2026-01-23
+Notification Test User,notif-test-1769184763747@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Notification Test User,notif-test-1769334709903@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Notification Test User,notif-test-1769393695726@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Notification Test User,notif-test-1769184256987@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Notification Test User,notif-test-1769334846248@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Pending to search email,Pending to search email,MEMBER,4,2,,2026-01-27
+Project Test User,project-test-1769334839709@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Project Test User,project-test-1769393689166@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Project Test User,project-test-1769184758741@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Project Test User,project-test-1769334707224@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Project Test User,project-test-1769184255249@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Second Test User,project-test2-1769184758977@example.com,MEMBER,0,0,,2026-01-23
+Second Test User,project-test2-1769184255469@example.com,MEMBER,0,0,,2026-01-23
+Second Test User,project-test2-1769393689414@example.com,MEMBER,0,0,,2026-01-26
+Second Test User,project-test2-1769334707456@example.com,MEMBER,0,0,,2026-01-25
+Second Test User,project-test2-1769334840001@example.com,MEMBER,0,0,,2026-01-25
+TEAM,team@sena.co.th,MEMBER,0,0,,2026-01-27
+Task Test User,task-test-1769393693179@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Task Test User,task-test-1769334703153@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Task Test User,task-test-1769334841506@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Task Test User,task-test-1769184253298@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Task Test User,task-test-1769184756915@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test,invalid-email,MEMBER,0,0,,2026-01-23
+Test User,test-1769183420077@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test User,test-1769334704923@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Test User,test-1769183268463@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test User,test-1769334843152@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Test User,test-1769393690916@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Test User,test-1769183080508@example.com,MEMBER,0,0,,2026-01-23
+Test User,test-1769184760602@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test User,test-1769184258686@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test User,test-1769183439921@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Test User,test-1769183321580@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Updates Test User,updates-test-1769393694816@example.com,MEMBER,0,0,2026-01-26,2026-01-26
+Updates Test User,updates-test-1769184257721@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+Updates Test User,updates-test-1769334845329@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Updates Test User,updates-test-1769334708976@example.com,MEMBER,0,0,2026-01-25,2026-01-25
+Updates Test User,updates-test-1769184762845@example.com,MEMBER,0,0,2026-01-23,2026-01-23
+monchiant,monchiant@sena.co.th,ADMIN,11,3,2026-01-27,2026-01-27
+nattapongm,nattapongm@sena.co.th,MEMBER,19,7,2026-01-29,2026-01-27
+ธรา,tharab@sena.co.th,OWNER,30,25,2026-02-14,2026-01-26
+อดินันท์ (OHM),adinuna@sena.co.th,ADMIN,3,2,2026-02-14,2026-01-27

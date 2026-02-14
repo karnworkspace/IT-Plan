@@ -4,60 +4,42 @@
     width: 100%;
 }
 
-/* Left Side - Branding */
+/* Left Side - SENA Branding Image */
 .login-branding {
     flex: 1;
-    background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px;
+    background-color: #e8f0e8;
+    background-image: url('/images/sena-branding.png');
+    background-size: contain;
+    background-position: center bottom;
+    background-repeat: no-repeat;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.branding-content {
-    max-width: 500px;
+.branding-title {
+    padding-top: 32px;
+    text-align: center;
     z-index: 1;
 }
 
-.logo {
-    text-align: left;
+.branding-title .app-name {
+    font-size: 42px;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    margin: 0;
 }
 
-.logo .anticon {
-    color: white;
-}
-
-.features {
-    margin-top: 60px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    color: white;
-}
-
-.feature-icon {
-    font-size: 32px;
-    width: 56px;
-    height: 56px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-}
-
-.feature-title {
-    font-size: 16px;
-    font-weight: 500;
+.branding-title .app-subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: #4a6741;
+    letter-spacing: 5px;
+    margin-top: 6px;
 }
 
 /* Right Side - Login Form */
@@ -86,24 +68,7 @@
     }
 
     .login-branding {
-        min-height: 300px;
-        padding: 40px 20px;
-    }
-
-    .branding-content {
-        text-align: center;
-    }
-
-    .logo {
-        text-align: center;
-    }
-
-    .features {
-        margin-top: 40px;
-    }
-
-    .feature-item {
-        justify-content: center;
+        min-height: 280px;
     }
 
     .login-form-card {

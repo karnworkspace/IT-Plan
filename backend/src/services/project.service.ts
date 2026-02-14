@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../config/database';
+import { AppError } from '../utils/AppError';
 
 // Types
 export interface CreateProjectInput {
@@ -209,7 +208,7 @@ export class ProjectService {
     // Allow owner, ADMIN, or OWNER role
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (project.ownerId !== userId && user?.role !== 'ADMIN' && user?.role !== 'OWNER') {
-      throw new Error('You do not have permission to update this project');
+      throw new AppError('You do not have permission to update this project', 403);
     }
 
     return await prisma.project.update({
@@ -241,7 +240,7 @@ export class ProjectService {
     }
 
     if (project.ownerId !== userId) {
-      throw new Error('You do not have permission to delete this project');
+      throw new AppError('You do not have permission to delete this project', 403);
     }
 
     await prisma.project.delete({
@@ -301,7 +300,7 @@ export class ProjectService {
     });
 
     if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new Error('Only project owners and admins can add members');
+      throw new AppError('Only project owners and admins can add members', 403);
     }
 
     // Check if user already exists
@@ -310,7 +309,7 @@ export class ProjectService {
     });
 
     if (existingMember) {
-      throw new Error('User is already a member of this project');
+      throw new AppError('User is already a member of this project', 400);
     }
 
     return await prisma.projectMember.create({
@@ -331,7 +330,7 @@ export class ProjectService {
     });
 
     if (!requesterMember || requesterMember.role !== 'OWNER') {
-      throw new Error('Only project owners can change member roles');
+      throw new AppError('Only project owners can change member roles', 403);
     }
 
     return await prisma.projectMember.update({
@@ -353,7 +352,7 @@ export class ProjectService {
     });
 
     if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new Error('Only project owners and admins can remove members');
+      throw new AppError('Only project owners and admins can remove members', 403);
     }
 
     // Prevent removing the owner
@@ -362,7 +361,7 @@ export class ProjectService {
     });
 
     if (targetMember?.role === 'OWNER') {
-      throw new Error('Cannot remove project owner');
+      throw new AppError('Cannot remove project owner', 400);
     }
 
     await prisma.projectMember.delete({ where: { id: memberId } });

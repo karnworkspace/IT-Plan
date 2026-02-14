@@ -41,3 +41,6 @@ coverage/
 
 # Data export files
 *_export.json
+
+# Internal review documents
+riskassetment.md

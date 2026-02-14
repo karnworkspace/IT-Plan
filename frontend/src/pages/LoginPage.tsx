@@ -1,7 +1,7 @@
 // Login Page with PIN and Email/Password options - Updated with Auth Store
 import React, { useState } from 'react';
 import { Form, Input, Button, Tabs, Checkbox, Typography, message } from 'antd';
-import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { PinInput } from '../components/PinInput';
 import { useAuthStore } from '../store/authStore';
@@ -80,40 +80,11 @@ export const LoginPage: React.FC = () => {
 
     return (
         <div className="login-container">
-            {/* Left Side - Branding */}
+            {/* Left Side - SENA Branding */}
             <div className="login-branding">
-                <div className="branding-content">
-                    <div className="logo">
-                        <UserOutlined style={{ fontSize: 48 }} />
-                        <Title level={1} style={{ color: 'white', marginTop: 16 }}>TaskFlow</Title>
-                    </div>
-
-                    <Title level={3} style={{ color: 'white', fontWeight: 400, marginTop: 40 }}>
-                        Manage Projects.<br />
-                        Track Progress.<br />
-                        Achieve Goals.
-                    </Title>
-
-                    <div className="features">
-                        <div className="feature-item">
-                            <div className="feature-icon">👥</div>
-                            <div>
-                                <div className="feature-title">Real-time Collaboration</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <div className="feature-icon">🔔</div>
-                            <div>
-                                <div className="feature-title">Smart Notifications</div>
-                            </div>
-                        </div>
-                        <div className="feature-item">
-                            <div className="feature-icon">📊</div>
-                            <div>
-                                <div className="feature-title">Powerful Analytics</div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="branding-title">
+                    <div className="app-name">SENA</div>
+                    <div className="app-subtitle">IT Project Progress</div>
                 </div>
             </div>
 

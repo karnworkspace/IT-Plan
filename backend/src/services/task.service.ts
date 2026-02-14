@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database';
 import notificationService from './notification.service';
 import activityLogService from './activityLog.service';
-
-const prisma = new PrismaClient();
 
 // Types
 export interface CreateTaskInput {

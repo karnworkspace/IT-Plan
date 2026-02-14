@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { taskService, type Task } from '../services/taskService';
-import { projectService } from '../services/projectService';
+import { taskService, type Task, type CreateTaskInput } from '../services/taskService';
+import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import dayjs from 'dayjs';
 import {
@@ -39,27 +39,19 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { useNavigate } from 'react-router-dom';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
+import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-// Status columns config (ไม่มี BLOCKED, IN_REVIEW)
-const STATUS_COLUMNS: { key: string; label: string; color: string; dotColor: string }[] = [
-    { key: 'TODO', label: 'To Do', color: '#8c8c8c', dotColor: '#8c8c8c' },
-    { key: 'IN_PROGRESS', label: 'In Progress', color: '#1890ff', dotColor: '#1890ff' },
-    { key: 'DONE', label: 'Done', color: '#52c41a', dotColor: '#52c41a' },
-    { key: 'HOLD', label: 'Hold', color: '#fa8c16', dotColor: '#fa8c16' },
-    { key: 'CANCELLED', label: 'Cancelled', color: '#8c8c8c', dotColor: '#595959' },
-];
-
-// Priority config
-const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
-};
+// Derive STATUS_COLUMNS from centralized config
+const STATUS_COLUMNS = STATUS_COLUMN_ORDER.map(key => ({
+    key,
+    label: STATUS_CONFIG[key].label,
+    color: STATUS_CONFIG[key].dotColor,
+    dotColor: STATUS_CONFIG[key].dotColor,
+}));
 
 export const MyTasksPage: React.FC = () => {
     const navigate = useNavigate();
@@ -67,7 +59,7 @@ export const MyTasksPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -167,21 +159,19 @@ export const MyTasksPage: React.FC = () => {
     const handleCreateTask = async () => {
         try {
             const values = await form.validateFields();
-            const payload: any = {
+            const payload: CreateTaskInput = {
                 title: values.title,
                 description: values.description,
                 priority: values.priority || 'MEDIUM',
                 status: values.status || 'TODO',
+                dueDate: values.dueDate ? values.dueDate.toISOString() : undefined,
             };
-            if (values.dueDate) {
-                payload.dueDate = values.dueDate.toISOString();
-            }
             await taskService.createTask(values.projectId, payload);
             message.success('Task created');
             setIsModalVisible(false);
             loadMyTasks();
-        } catch (error: any) {
-            if (error?.errorFields) return; // form validation
+        } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'errorFields' in error) return; // form validation
             message.error('Failed to create task');
             console.error(error);
         }
@@ -231,9 +221,9 @@ export const MyTasksPage: React.FC = () => {
                 <Content className="my-tasks-content">
                     <Spin spinning={loading}>
                         {/* Stats Cards */}
-                        <Row gutter={16} className="mytasks-stats-row">
+                        <Row gutter={16} className="stats-row">
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-total">
+                                <Card className="stat-card stat-total">
                                     <Statistic
                                         title="Total"
                                         value={filteredTasks.length}
@@ -243,7 +233,7 @@ export const MyTasksPage: React.FC = () => {
                                 </Card>
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-todo">
+                                <Card className="stat-card stat-todo">
                                     <Statistic
                                         title="To Do"
                                         value={todoCount}
@@ -253,7 +243,7 @@ export const MyTasksPage: React.FC = () => {
                                 </Card>
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-inprogress">
+                                <Card className="stat-card stat-inprogress">
                                     <Statistic
                                         title="In Progress"
                                         value={inProgressCount}
@@ -263,7 +253,7 @@ export const MyTasksPage: React.FC = () => {
                                 </Card>
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-done">
+                                <Card className="stat-card stat-done">
                                     <Statistic
                                         title="Done"
                                         value={doneCount}
@@ -273,7 +263,7 @@ export const MyTasksPage: React.FC = () => {
                                 </Card>
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-hold">
+                                <Card className="stat-card stat-hold">
                                     <Statistic
                                         title="Hold"
                                         value={holdCount}
@@ -283,7 +273,7 @@ export const MyTasksPage: React.FC = () => {
                                 </Card>
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-cancelled">
+                                <Card className="stat-card stat-cancelled">
                                     <Statistic
                                         title="Cancelled"
                                         value={cancelledCount}
@@ -435,7 +425,7 @@ export const MyTasksPage: React.FC = () => {
                         rules={[{ required: true, message: 'Please select a project' }]}
                     >
                         <Select placeholder="Select project" showSearch optionFilterProp="children">
-                            {projects.map((p: any) => (
+                            {projects.map((p: Project) => (
                                 <Select.Option key={p.id} value={p.id}>
                                     {p.name}
                                 </Select.Option>

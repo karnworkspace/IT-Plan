@@ -65,22 +65,8 @@ interface TaskDetailModalProps {
     onUpdate: () => void;
 }
 
-// Configs
-const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
-    URGENT: { color: '#ff4d4f', label: 'Urgent' },
-    HIGH: { color: '#fa8c16', label: 'High' },
-    MEDIUM: { color: '#fadb14', label: 'Medium' },
-    LOW: { color: '#52c41a', label: 'Low' },
-};
-
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined /> },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin /> },
-    IN_REVIEW: { color: 'warning', label: 'In Review', icon: <ExclamationCircleOutlined /> },
-    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined /> },
-    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined /> },
-    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined /> },
-};
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
+import { STATUS_ICONS } from '../constants/statusIcons';
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     visible,
@@ -285,7 +271,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     <Tag color={PRIORITY_CONFIG[task.priority]?.color}>
                                         {PRIORITY_CONFIG[task.priority]?.label} Priority
                                     </Tag>
-                                    <Tag color={STATUS_CONFIG[task.status]?.color} icon={STATUS_CONFIG[task.status]?.icon}>
+                                    <Tag color={STATUS_CONFIG[task.status]?.color} icon={STATUS_ICONS[task.status]}>
                                         {STATUS_CONFIG[task.status]?.label}
                                     </Tag>
                                 </div>

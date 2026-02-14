@@ -33,21 +33,7 @@ const generateWeeks = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
     return weeks;
 };
 
-// Status colors for bars
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-    TODO: { bg: '#f0f0f0', text: '#595959' },
-    IN_PROGRESS: { bg: '#e6f4ff', text: '#1677ff' },
-    IN_REVIEW: { bg: '#f9f0ff', text: '#722ed1' },
-    DONE: { bg: '#f6ffed', text: '#52c41a' },
-};
-
-// Priority border colors
-const PRIORITY_COLORS: Record<string, string> = {
-    URGENT: '#ff4d4f',
-    HIGH: '#fa8c16',
-    MEDIUM: '#fadb14',
-    LOW: '#52c41a',
-};
+import { GANTT_STATUS_COLORS as STATUS_COLORS, GANTT_PRIORITY_COLORS as PRIORITY_COLORS } from '../constants';
 
 export const GanttChart: React.FC<GanttChartProps> = ({ tasks, projectStartDate, projectEndDate }) => {
     // Filter tasks with dates and sort by start date

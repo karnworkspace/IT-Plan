@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projectService, type Project } from '../services/projectService';
 import { taskService, type Task } from '../services/taskService';
+import type { ProjectMember } from '../types';
 import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
@@ -53,6 +54,8 @@ import dayjs from 'dayjs';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
+import { STATUS_ICONS } from '../constants/statusIcons';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;
@@ -60,30 +63,8 @@ const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-// Priority colors
-const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
-    URGENT: { color: '#ff4d4f', label: 'Urgent' },
-    HIGH: { color: '#fa8c16', label: 'High' },
-    MEDIUM: { color: '#fadb14', label: 'Medium' },
-    LOW: { color: '#52c41a', label: 'Low' },
-};
-
-// Status colors
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode; dotColor: string; badgeColor: string }> = {
-    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined />, dotColor: '#8c8c8c', badgeColor: '#8c8c8c' },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin />, dotColor: '#1890ff', badgeColor: '#1890ff' },
-    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined />, dotColor: '#52c41a', badgeColor: '#52c41a' },
-    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined />, dotColor: '#fa8c16', badgeColor: '#fa8c16' },
-    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined />, dotColor: '#595959', badgeColor: '#595959' },
-};
-
-// Priority badge config (rounded rectangle style)
-const PRIORITY_BADGE: Record<string, { color: string; bg: string; label: string }> = {
-    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
-};
+// PRIORITY_BADGE uses same values as centralized PRIORITY_CONFIG (color + bg + label)
+const PRIORITY_BADGE = PRIORITY_CONFIG;
 
 import { TaskDetailModal } from './TaskDetailModal';
 import { GanttChart } from '../components/GanttChart';
@@ -342,7 +323,7 @@ export const ProjectDetailPage: React.FC = () => {
                                     <span style={{ fontSize: 13, color: '#8c8c8c', marginRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <TeamOutlined /> Members:
                                     </span>
-                                    {project.members.map((m: any) => (
+                                    {project.members.map((m: ProjectMember) => (
                                         <span key={m.id} style={{
                                             display: 'inline-block',
                                             padding: '2px 10px',

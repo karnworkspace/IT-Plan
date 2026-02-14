@@ -5,6 +5,7 @@ import { MailOutlined, LockOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant
 import { useNavigate } from 'react-router-dom';
 import { PinInput } from '../components/PinInput';
 import { authService } from '../services/authService';
+import { getErrorMessage } from '../utils/getErrorMessage';
 import './LoginPage.css';
 
 const { Title, Text, Link } = Typography;
@@ -32,8 +33,8 @@ export const ForgotPinPage: React.FC = () => {
             }
 
             setCurrentStep(1);
-        } catch (error: any) {
-            message.error(error.message || 'Failed to request PIN reset');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         } finally {
             setIsLoading(false);
         }
@@ -56,8 +57,8 @@ export const ForgotPinPage: React.FC = () => {
             await authService.resetPinWithToken(resetToken, newPin, confirmPin);
             message.success('PIN reset successfully!');
             setCurrentStep(2);
-        } catch (error: any) {
-            message.error(error.message || 'Failed to reset PIN');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         } finally {
             setIsLoading(false);
         }
@@ -183,19 +184,11 @@ export const ForgotPinPage: React.FC = () => {
 
     return (
         <div className="login-container">
-            {/* Left Side - Branding */}
+            {/* Left Side - SENA Branding */}
             <div className="login-branding">
-                <div className="branding-content">
-                    <div className="logo">
-                        <LockOutlined style={{ fontSize: 48 }} />
-                        <Title level={1} style={{ color: 'white', marginTop: 16 }}>TaskFlow</Title>
-                    </div>
-
-                    <Title level={3} style={{ color: 'white', fontWeight: 400, marginTop: 40 }}>
-                        Forgot your PIN?<br />
-                        No worries!<br />
-                        We'll help you reset it.
-                    </Title>
+                <div className="branding-title">
+                    <div className="app-name">SENA</div>
+                    <div className="app-subtitle">IT Project Progress</div>
                 </div>
             </div>
 

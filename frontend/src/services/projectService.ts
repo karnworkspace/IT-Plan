@@ -1,33 +1,10 @@
 import api from './api';
+import type { Project, ProjectsResponse, ProjectStats } from '../types';
 
-// Types
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  color: string;
-  icon?: string;
-  status: 'ACTIVE' | 'DELAY' | 'COMPLETED' | 'HOLD' | 'CANCELLED';
-  startDate?: string;
-  endDate?: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  members?: {
-    id: string;
-    role: string;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  }[];
-  _count?: {
-    tasks: number;
-    members: number;
-  };
-}
+// Re-export entity types for backward compatibility
+export type { Project, ProjectsResponse, ProjectStats } from '../types';
 
+// Input types (request-specific, kept here)
 export interface CreateProjectInput {
   name: string;
   description?: string;
@@ -46,20 +23,6 @@ export interface UpdateProjectInput {
   status?: string;
   startDate?: string;
   endDate?: string;
-}
-
-export interface ProjectStats {
-  total: number;
-  completed: number;
-  inProgress: number;
-  overdue: number;
-}
-
-export interface ProjectsResponse {
-  projects: Project[];
-  total: number;
-  page: number;
-  pageSize: number;
 }
 
 // Project Service

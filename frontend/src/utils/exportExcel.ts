@@ -1,16 +1,20 @@
 import * as XLSX from 'xlsx';
+import type { Project, Task } from '../types';
 
 interface ExportColumn {
   header: string;
   key: string;
   width?: number;
-  transform?: (value: any, row: any) => string;
+  // Dynamic property access — any is intentional here
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transform?: (value: any, row: any) => string | number;
 }
 
 /**
  * Export data to Excel file
  */
 export function exportToExcel(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[],
   columns: ExportColumn[],
   fileName: string,
@@ -39,45 +43,19 @@ export function exportToExcel(
   XLSX.writeFile(wb, `${fileName}.xlsx`);
 }
 
-function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getNestedValue(obj: any, path: string): unknown {
+  return path.split('.').reduce((acc: any, key: string) => acc?.[key], obj);
 }
 
-// ============================================
-// Pre-built export configs
-// ============================================
-
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Active',
-  DELAY: 'Delay',
-  COMPLETED: 'Completed',
-  HOLD: 'Hold',
-  CANCELLED: 'Cancelled',
-};
-
-const TASK_STATUS_LABELS: Record<string, string> = {
-  TODO: 'To Do',
-  IN_PROGRESS: 'In Progress',
-  IN_REVIEW: 'In Review',
-  DONE: 'Done',
-  BLOCKED: 'Blocked',
-  HOLD: 'Hold',
-  CANCELLED: 'Cancelled',
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-  LOW: 'Low',
-  MEDIUM: 'Medium',
-  HIGH: 'High',
-  URGENT: 'Urgent',
-};
+import { PROJECT_STATUS_LABELS as STATUS_LABELS, TASK_STATUS_LABELS, PRIORITY_LABELS } from '../constants';
 
 function formatDate(val: string | undefined): string {
   if (!val) return '-';
   return new Date(val).toLocaleDateString('th-TH');
 }
 
-export function exportProjects(projects: any[]) {
+export function exportProjects(projects: Project[]) {
   const columns: ExportColumn[] = [
     { header: 'No.', key: '_index', width: 5, transform: (_v, _r) => '' },
     { header: 'Project Name', key: 'name', width: 25 },
@@ -118,10 +96,10 @@ export function exportProjects(projects: any[]) {
   XLSX.utils.book_append_sheet(wb, ws, 'Projects');
 
   const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `TaskFlow_Projects_${today}.xlsx`);
+  XLSX.writeFile(wb, `SENA_Projects_${today}.xlsx`);
 }
 
-export function exportTasks(tasks: any[], projectName: string) {
+export function exportTasks(tasks: Task[], projectName: string) {
   const columns: ExportColumn[] = [
     { header: 'No.', key: '_index', width: 5 },
     { header: 'Task Title', key: 'title', width: 30 },
@@ -152,5 +130,5 @@ export function exportTasks(tasks: any[], projectName: string) {
 
   const safeName = projectName.replace(/[^a-zA-Z0-9\u0E00-\u0E7F]/g, '_');
   const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `TaskFlow_Tasks_${safeName}_${today}.xlsx`);
+  XLSX.writeFile(wb, `SENA_Tasks_${safeName}_${today}.xlsx`);
 }

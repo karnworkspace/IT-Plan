@@ -57,65 +57,7 @@
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
-/* Stats Row */
-.stats-row {
-    margin-bottom: 24px;
-}
-
-.stat-card {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-}
-
-.stat-card.stat-total {
-    background: #ffffff;
-    border: 1px solid #f0f0f0;
-}
-
-.stat-card.stat-active {
-    background: #FFF9E6;
-}
-
-.stat-card.stat-delay {
-    background: #FFF1F0;
-}
-
-.stat-card.stat-completed {
-    background: #F0FFF4;
-}
-
-.stat-card.stat-hold {
-    background: #fa8c16;
-}
-
-.stat-card.stat-hold .ant-statistic-title,
-.stat-card.stat-hold .ant-statistic-content {
-    color: #000 !important;
-}
-
-.stat-card.stat-cancelled {
-    background: #1a1a2e;
-}
-
-.stat-card.stat-cancelled .ant-statistic-title,
-.stat-card.stat-cancelled .ant-statistic-content {
-    color: #fff !important;
-}
-
-.stat-card .ant-statistic-title {
-    color: #595959;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.stat-card .ant-statistic-content {
-    color: #1a1a2e;
-}
-
-.stat-card .ant-statistic-content-prefix {
-    margin-right: 8px;
-}
+/* Stats: uses shared.css .stat-card */
 
 /* Filters Section */
 .filters-section {
@@ -547,10 +489,6 @@
 
     .projects-content {
         padding: 20px;
-    }
-
-    .stat-card {
-        margin-bottom: 8px;
     }
 
     .create-btn {

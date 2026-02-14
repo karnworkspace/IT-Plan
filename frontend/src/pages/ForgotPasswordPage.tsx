@@ -4,6 +4,7 @@ import { Form, Input, Button, Typography, message, Steps, Result } from 'antd';
 import { MailOutlined, LockOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { getErrorMessage } from '../utils/getErrorMessage';
 import './LoginPage.css';
 
 const { Title, Text, Link } = Typography;
@@ -29,8 +30,8 @@ export const ForgotPasswordPage: React.FC = () => {
             }
 
             setCurrentStep(1);
-        } catch (error: any) {
-            message.error(error.message || 'Failed to request password reset');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         } finally {
             setIsLoading(false);
         }
@@ -43,8 +44,8 @@ export const ForgotPasswordPage: React.FC = () => {
             await authService.resetPassword(values.token, values.newPassword, values.confirmPassword);
             message.success('Password reset successfully!');
             setCurrentStep(2);
-        } catch (error: any) {
-            message.error(error.message || 'Failed to reset password');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         } finally {
             setIsLoading(false);
         }
@@ -181,19 +182,11 @@ export const ForgotPasswordPage: React.FC = () => {
 
     return (
         <div className="login-container">
-            {/* Left Side - Branding */}
+            {/* Left Side - SENA Branding */}
             <div className="login-branding">
-                <div className="branding-content">
-                    <div className="logo">
-                        <LockOutlined style={{ fontSize: 48 }} />
-                        <Title level={1} style={{ color: 'white', marginTop: 16 }}>TaskFlow</Title>
-                    </div>
-
-                    <Title level={3} style={{ color: 'white', fontWeight: 400, marginTop: 40 }}>
-                        Forgot your password?<br />
-                        No worries!<br />
-                        We'll help you reset it.
-                    </Title>
+                <div className="branding-title">
+                    <div className="app-name">SENA</div>
+                    <div className="app-subtitle">IT Project Progress</div>
                 </div>
             </div>
 

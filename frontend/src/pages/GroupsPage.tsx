@@ -34,6 +34,7 @@ import {
 import { Sidebar } from '../components/Sidebar';
 import { groupService, type Group } from '../services/groupService';
 import { projectService, type Project } from '../services/projectService';
+import { getErrorMessage } from '../utils/getErrorMessage';
 import './GroupsPage.css';
 
 const { Content } = Layout;
@@ -186,8 +187,8 @@ export const GroupsPage: React.FC = () => {
             setDetailGroup(updated);
             setAddMemberUserId(undefined);
             await loadGroups();
-        } catch (error: any) {
-            message.error(error.response?.data?.error || 'Failed to add member');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         }
     };
 
@@ -213,8 +214,8 @@ export const GroupsPage: React.FC = () => {
             setDetailGroup(updated);
             setAddProjectId(undefined);
             await loadGroups();
-        } catch (error: any) {
-            message.error(error.response?.data?.error || 'Failed to add project');
+        } catch (error) {
+            message.error(getErrorMessage(error));
         }
     };
 

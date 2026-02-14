@@ -13,7 +13,7 @@ export const RegisterPage: React.FC = () => {
     const { register, isLoading, clearError } = useAuthStore();
     const [form] = Form.useForm();
 
-    const handleRegister = async (values: any) => {
+    const handleRegister = async (values: { email: string; password: string; name: string }) => {
         clearError();
         try {
             await register(values.email, values.password, values.name);
@@ -27,18 +27,11 @@ export const RegisterPage: React.FC = () => {
 
     return (
         <div className="login-container">
-            {/* Left Side - Branding (Same as Login) */}
+            {/* Left Side - SENA Branding */}
             <div className="login-branding">
-                <div className="branding-content">
-                    <div className="logo">
-                        <UserOutlined style={{ fontSize: 48 }} />
-                        <Title level={1} style={{ color: 'white', marginTop: 16 }}>TaskFlow</Title>
-                    </div>
-                    <Title level={3} style={{ color: 'white', fontWeight: 400, marginTop: 40 }}>
-                        Join us today.<br />
-                        Start collaborating.<br />
-                        Get things done.
-                    </Title>
+                <div className="branding-title">
+                    <div className="app-name">SENA</div>
+                    <div className="app-subtitle">IT Project Progress</div>
                 </div>
             </div>
 

@@ -40,7 +40,7 @@ export const Sidebar: React.FC = () => {
         <Sider width={250} className="app-sider">
             <div className="logo">
                 <TeamOutlined style={{ fontSize: 24 }} />
-                <Title level={4} style={{ margin: 0, color: 'white' }}>TaskFlow</Title>
+                <Title level={4} style={{ margin: 0, color: 'white' }}>SENA</Title>
             </div>
 
             <div className="sidebar-menu">

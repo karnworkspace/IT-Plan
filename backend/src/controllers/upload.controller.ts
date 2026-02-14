@@ -6,7 +6,7 @@ import { extractUserId } from '../utils/auth';
 /**
  * Upload images for a comment
  */
-export const uploadCommentImages = async (req: Request, res: Response, _next: NextFunction) => {
+export const uploadCommentImages = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { commentId } = req.params as { commentId: string };
     const files = req.files as Express.Multer.File[];
@@ -29,27 +29,27 @@ export const uploadCommentImages = async (req: Request, res: Response, _next: Ne
 
     return sendSuccess(res, { attachments }, undefined, 201);
   } catch (error) {
-    return sendError(res, 'Failed to upload files', 500);
+    next(error);
   }
 };
 
 /**
  * Get attachments for a comment
  */
-export const getCommentAttachments = async (req: Request, res: Response, _next: NextFunction) => {
+export const getCommentAttachments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { commentId } = req.params as { commentId: string };
     const attachments = await attachmentService.getCommentAttachments(commentId);
     return sendSuccess(res, { attachments });
   } catch (error) {
-    return sendError(res, 'Failed to fetch attachments', 500);
+    next(error);
   }
 };
 
 /**
  * Delete attachment
  */
-export const deleteAttachment = async (req: Request, res: Response, _next: NextFunction) => {
+export const deleteAttachment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
     const userId = extractUserId(req);
@@ -59,10 +59,7 @@ export const deleteAttachment = async (req: Request, res: Response, _next: NextF
       return sendError(res, 'Attachment not found', 404);
     }
     return sendSuccess(res, { message: 'Attachment deleted' });
-  } catch (error: any) {
-    if (error.message === 'Permission denied') {
-      return sendError(res, 'Permission denied', 403);
-    }
-    return sendError(res, 'Failed to delete attachment', 500);
+  } catch (error) {
+    next(error);
   }
 };

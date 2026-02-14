@@ -58,17 +58,7 @@ const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
-// Color options for projects
-const PROJECT_COLORS = [
-    { value: '#3B82F6', label: 'Blue', class: 'blue' },
-    { value: '#10B981', label: 'Green', class: 'green' },
-    { value: '#EF4444', label: 'Red', class: 'red' },
-    { value: '#F59E0B', label: 'Orange', class: 'orange' },
-    { value: '#8B5CF6', label: 'Purple', class: 'purple' },
-    { value: '#06B6D4', label: 'Cyan', class: 'cyan' },
-    { value: '#EC4899', label: 'Pink', class: 'pink' },
-    { value: '#6366F1', label: 'Indigo', class: 'indigo' },
-];
+import { PROJECT_COLORS } from '../constants';
 
 interface ProjectWithStats extends Project {
     stats?: {
@@ -670,7 +660,7 @@ export const ProjectsPage: React.FC = () => {
                                                                                         />
                                                                                     </div>
                                                                                     <div className="board-card-members">
-                                                                                        {project.members?.slice(0, 3).map((m: any) => (
+                                                                                        {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }) => (
                                                                                             <span key={m.id} className="board-member-tag">
                                                                                                 {m.user?.name || 'Unknown'}
                                                                                             </span>

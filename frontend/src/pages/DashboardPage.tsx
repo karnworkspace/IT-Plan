@@ -85,7 +85,7 @@ export const DashboardPage: React.FC = () => {
 
             // Calculate aggregated stats (In real app, backend should provide a stats endpoint)
             const totalProjects = projectsRes.total || projectsRes.projects.length;
-            const activeProjects = projectsRes.projects.filter((p: any) => p.status === 'ACTIVE').length;
+            const activeProjects = projectsRes.projects.filter((p) => p.status === 'ACTIVE').length;
 
             const myTotalTasks = tasksRes.total || 0;
 
@@ -109,7 +109,7 @@ export const DashboardPage: React.FC = () => {
         }
     };
 
-    const StatusCard = ({ title, value, icon, color, suffix, onClick }: any) => (
+    const StatusCard = ({ title, value, icon, color, suffix, onClick }: { title: string; value: number; icon: React.ReactNode; color: string; suffix?: string; onClick?: () => void }) => (
         <Card
             className="stat-card"
             bordered={false}

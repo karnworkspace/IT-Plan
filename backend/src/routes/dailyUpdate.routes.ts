@@ -8,6 +8,7 @@ import {
   getUpdatesByDateRange,
 } from '../controllers/dailyUpdate.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { validateUUID } from '../middlewares/validate.middleware';
 
 const router = Router();
 
@@ -15,13 +16,13 @@ const router = Router();
 router.use(authenticate);
 
 // Task-specific daily update routes
-router.get('/tasks/:taskId/updates', getTaskUpdates);
-router.get('/tasks/:taskId/updates/range', getUpdatesByDateRange);
-router.post('/tasks/:taskId/updates', createDailyUpdate);
+router.get('/tasks/:taskId/updates', validateUUID('taskId'), getTaskUpdates);
+router.get('/tasks/:taskId/updates/range', validateUUID('taskId'), getUpdatesByDateRange);
+router.post('/tasks/:taskId/updates', validateUUID('taskId'), createDailyUpdate);
 
 // Individual daily update routes
-router.get('/updates/:id', getDailyUpdate);
-router.put('/updates/:id', updateDailyUpdate);
-router.delete('/updates/:id', deleteDailyUpdate);
+router.get('/updates/:id', validateUUID('id'), getDailyUpdate);
+router.put('/updates/:id', validateUUID('id'), updateDailyUpdate);
+router.delete('/updates/:id', validateUUID('id'), deleteDailyUpdate);
 
 export default router;

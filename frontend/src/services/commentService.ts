@@ -1,44 +1,16 @@
 import api from './api';
+import type { Comment, Attachment, CommentsResponse } from '../types';
 
-// Types
-export interface Attachment {
-  id: string;
-  commentId: string;
-  filename: string;
-  path: string;
-  mimetype: string;
-  size: number;
-  createdAt: string;
-}
+// Re-export entity types for backward compatibility
+export type { Comment, Attachment, CommentsResponse } from '../types';
 
-export interface Comment {
-  id: string;
-  taskId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  attachments?: Attachment[];
-}
-
+// Input types (request-specific, kept here)
 export interface CreateCommentInput {
   content: string;
 }
 
 export interface UpdateCommentInput {
   content?: string;
-}
-
-export interface CommentsResponse {
-  comments: Comment[];
-  total: number;
-  page: number;
-  pageSize: number;
 }
 
 // Comment Service

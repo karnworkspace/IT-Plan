@@ -8,6 +8,7 @@ import {
   getUserComments,
 } from '../controllers/comment.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { validateUUID } from '../middlewares/validate.middleware';
 
 const router = Router();
 
@@ -15,13 +16,13 @@ const router = Router();
 router.use(authenticate);
 
 // Task-specific comment routes
-router.get('/tasks/:taskId/comments', getTaskComments);
-router.post('/tasks/:taskId/comments', createComment);
+router.get('/tasks/:taskId/comments', validateUUID('taskId'), getTaskComments);
+router.post('/tasks/:taskId/comments', validateUUID('taskId'), createComment);
 
 // Individual comment routes
-router.get('/comments/:id', getComment);
-router.put('/comments/:id', updateComment);
-router.delete('/comments/:id', deleteComment);
+router.get('/comments/:id', validateUUID('id'), getComment);
+router.put('/comments/:id', validateUUID('id'), updateComment);
+router.delete('/comments/:id', validateUUID('id'), deleteComment);
 
 // User-specific routes
 router.get('/user/comments', getUserComments);

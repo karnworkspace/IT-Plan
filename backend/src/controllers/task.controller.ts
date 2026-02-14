@@ -7,6 +7,8 @@ import taskService, {
 } from '../services/task.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
+import prisma from '../config/database';
+import { TASK_STATUSES, PRIORITIES } from '../constants';
 
 /**
  * Get all tasks in a project
@@ -78,14 +80,12 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     }
 
     // Validate status if provided
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
-    if (status && !validStatuses.includes(status)) {
+    if (status && !(TASK_STATUSES as readonly string[]).includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
 
     // Validate priority if provided
-    const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-    if (priority && !validPriorities.includes(priority)) {
+    if (priority && !(PRIORITIES as readonly string[]).includes(priority)) {
       return sendError(res, 'Invalid priority value', 400);
     }
 
@@ -107,9 +107,6 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 
     // Validate assigneeId if provided
     if (assigneeId) {
-      // Check if user exists
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
       const user = await prisma.user.findUnique({
         where: { id: assigneeId },
       });
@@ -158,14 +155,12 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     }
 
     // Validate status if provided
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
-    if (status && !validStatuses.includes(status)) {
+    if (status && !(TASK_STATUSES as readonly string[]).includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
 
     // Validate priority if provided
-    const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-    if (priority && !validPriorities.includes(priority)) {
+    if (priority && !(PRIORITIES as readonly string[]).includes(priority)) {
       return sendError(res, 'Invalid priority value', 400);
     }
 
@@ -192,8 +187,6 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
 
     // Validate assigneeId if provided
     if (assigneeId) {
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
       const user = await prisma.user.findUnique({
         where: { id: assigneeId },
       });
@@ -260,8 +253,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Status is required', 400);
     }
 
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED', 'HOLD', 'CANCELLED'];
-    if (!validStatuses.includes(status)) {
+    if (!(TASK_STATUSES as readonly string[]).includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
 

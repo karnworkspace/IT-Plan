@@ -1,8 +1,6 @@
 import cron from 'node-cron';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database';
 import notificationService from '../services/notification.service';
-
-const prisma = new PrismaClient();
 
 export function startDueDateReminderJob() {
   // Run every day at 9:00 AM

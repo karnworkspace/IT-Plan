@@ -1,7 +1,7 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-02-12 (Phase 11 - Manual Test Round 1 Bug Fixes)
-**Status:** ✅ Deployed to Vercel (UAT) - Manual Test Bug Fixes Applied
+**Last Updated:** 2026-02-14 (Phase 12 - Codebase Refactoring)
+**Status:** ✅ Deployed to Vercel (UAT) - Refactored Codebase
 **Live URLs:**
 - Frontend: https://frontend-beta-seven-60.vercel.app
 - Backend: https://backend-five-iota-42.vercel.app
@@ -670,6 +670,42 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 5. **Admin name "OHM"** [SCRIPT CREATED]
    - สร้าง `backend/scripts/fix-admin-name.ts` — เปลี่ยน "OHM" → "อดินันท์ (OHM)"
    - ต้อง run บน production: `npx ts-node scripts/fix-admin-name.ts`
+
+---
+
+### Phase 12: Codebase Refactoring (100%) ✅ COMPLETE (2026-02-14)
+
+**Objective:** Refactor codebase ตาม global best practices เพื่อลด duplication, เพิ่มความสะดวกในการ maintain, ลด token usage สำหรับ AI agent
+
+#### Backend Refactoring
+1. ✅ **PrismaClient Singleton** — แก้ 10 ไฟล์ที่สร้าง `new PrismaClient()` ให้ import จาก `config/database.ts`
+2. ✅ **Centralized Constants** — สร้าง `constants/index.ts` สำหรับ Status/Priority/Role enums + validation helpers
+3. ✅ **UUID Validation Middleware** — สร้าง `validate.middleware.ts` ตรวจ UUID params ก่อนเข้า controller
+4. ✅ **AppError + Error Standardization** — สร้าง `utils/AppError.ts`, update `error.middleware.ts`, standardize error handling ทุก controller
+
+#### Frontend Refactoring
+5. ✅ **Centralized Types** — สร้าง `types/index.ts` รวม types จาก 9 service files (User, Task, Project, Comment, etc.)
+6. ✅ **Centralized Constants** — สร้าง `constants/index.ts` + `constants/statusIcons.tsx` แทน config ที่ซ้ำกัน 7+ ไฟล์
+7. ✅ **Fix TypeScript `any`** — ลดจาก ~35 จุด → 4 จุด (intentional dynamic access), สร้าง `utils/getErrorMessage.ts`
+8. ✅ **Shared CSS** — สร้าง `styles/shared.css` รวม stat card CSS ที่ซ้ำจาก 4 หน้า
+
+#### Documentation
+9. ✅ **structurecode.md** — สร้างเอกสาร code structure ที่ root folder
+
+#### Files Created (8 files)
+- `backend/src/constants/index.ts`
+- `backend/src/middlewares/validate.middleware.ts`
+- `backend/src/utils/AppError.ts`
+- `frontend/src/types/index.ts`
+- `frontend/src/constants/index.ts`
+- `frontend/src/constants/statusIcons.tsx`
+- `frontend/src/utils/getErrorMessage.ts`
+- `frontend/src/styles/shared.css`
+- `structurecode.md`
+
+#### Files Modified (~45 files)
+- Backend: 10 services + 8 controllers + routes + error middleware
+- Frontend: 8 services + authStore + 9 pages + 2 components + 2 export utils + 4 CSS + main.tsx
 
 ---
 

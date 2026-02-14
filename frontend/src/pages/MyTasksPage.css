@@ -33,68 +33,7 @@
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
-/* ==========================================
-   Stats Cards
-   ========================================== */
-
-.mytasks-stats-row {
-    margin-bottom: 24px;
-}
-
-.mytasks-stat-card {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-}
-
-.mytasks-stat-card.mytasks-stat-total {
-    background: #ffffff;
-    border: 1px solid #f0f0f0;
-}
-
-.mytasks-stat-card.mytasks-stat-todo {
-    background: #fffbe6;
-}
-
-.mytasks-stat-card.mytasks-stat-inprogress {
-    background: #e6f7ff;
-}
-
-.mytasks-stat-card.mytasks-stat-done {
-    background: #F0FFF4;
-}
-
-.mytasks-stat-card.mytasks-stat-hold {
-    background: #fa8c16;
-}
-
-.mytasks-stat-card.mytasks-stat-hold .ant-statistic-title,
-.mytasks-stat-card.mytasks-stat-hold .ant-statistic-content {
-    color: #000 !important;
-}
-
-.mytasks-stat-card.mytasks-stat-cancelled {
-    background: #1a1a2e;
-}
-
-.mytasks-stat-card.mytasks-stat-cancelled .ant-statistic-title,
-.mytasks-stat-card.mytasks-stat-cancelled .ant-statistic-content {
-    color: #fff !important;
-}
-
-.mytasks-stat-card .ant-statistic-title {
-    color: #595959;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.mytasks-stat-card .ant-statistic-content {
-    color: #1a1a2e;
-}
-
-.mytasks-stat-card .ant-statistic-content-prefix {
-    margin-right: 8px;
-}
+/* Stats: uses shared.css .stat-card */
 
 .my-tasks-content {
     padding: 24px;

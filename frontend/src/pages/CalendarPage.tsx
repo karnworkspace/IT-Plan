@@ -21,26 +21,11 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
 import './CalendarPage.css';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
-
-// Status config (consistent with other pages)
-const STATUS_CONFIG: Record<string, { color: string; label: string; tagColor: string }> = {
-    TODO: { color: '#8c8c8c', label: 'To Do', tagColor: 'default' },
-    IN_PROGRESS: { color: '#1890ff', label: 'In Progress', tagColor: 'processing' },
-    DONE: { color: '#52c41a', label: 'Done', tagColor: 'success' },
-    HOLD: { color: '#fa8c16', label: 'Hold', tagColor: 'warning' },
-    CANCELLED: { color: '#595959', label: 'Cancelled', tagColor: 'error' },
-};
-
-const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
-};
 
 export const CalendarPage: React.FC = () => {
     const [loading, setLoading] = useState(true);

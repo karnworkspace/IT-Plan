@@ -156,6 +156,41 @@
 .progress-bar-fill.fill-amber    { background: #F59E0B; }
 .progress-bar-fill.fill-slate    { background: #6B7280; }
 
+/* ==========================================
+   Shared Legend — bar style (used across Calendar, Timeline, etc.)
+   ========================================== */
+
+.shared-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 14px;
+    background: #F1F5F9;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #64748B;
+}
+
+.shared-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shared-legend-bar {
+    width: 24px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+.shared-legend-current {
+    width: 16px;
+    height: 16px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 3px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .stat-card {

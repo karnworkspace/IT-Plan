@@ -254,8 +254,8 @@ export const MyTasksPage: React.FC = () => {
                 <Header className="my-tasks-header">
                     <div className="my-tasks-header-content">
                         <div>
-                            <Title level={3} style={{ margin: 0 }}>My Tasks</Title>
-                            <Text type="secondary">Tasks assigned to or created by you</Text>
+                            <Title level={2} style={{ margin: 0, fontSize: 48 }}>My Tasks</Title>
+                            <Text type="secondary" style={{ fontSize: 30 }}>Tasks assigned to or created by you</Text>
                         </div>
                         <Space>
                             <Button

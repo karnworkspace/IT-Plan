@@ -183,10 +183,10 @@ export const DashboardPage: React.FC = () => {
                 <Content className="dashboard-content">
                     <div className="dashboard-header-section">
                         <div>
-                            <Title level={2} style={{ margin: 0, color: '#1E293B' }}>
+                            <Title level={2} style={{ margin: 0, color: '#1E293B', fontSize: 48 }}>
                                 Welcome back, {user?.name?.split(' ')[0]}! 👋
                             </Title>
-                            <Text style={{ color: '#64748B' }}>Here's what's happening with your projects today.</Text>
+                            <Text style={{ color: '#64748B', fontSize: 30 }}>Here's what's happening with your projects today.</Text>
                         </div>
                         <Button
                             type="primary"

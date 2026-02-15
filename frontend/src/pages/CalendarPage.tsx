@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
+import { TaskDetailModal } from './TaskDetailModal';
 import './CalendarPage.css';
 
 const { Content } = Layout;
@@ -32,6 +33,9 @@ export const CalendarPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [statModalType, setStatModalType] = useState<'due' | 'overdue' | null>(null);
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    const [taskDetailVisible, setTaskDetailVisible] = useState(false);
 
     useEffect(() => {
         loadTasks();
@@ -130,6 +134,14 @@ export const CalendarPage: React.FC = () => {
 
     const selectedTasks = selectedDate ? (tasksByDate[selectedDate] || []) : [];
 
+    // Tasks for stat modals
+    const tasksWithDue = useMemo(() => tasks.filter(t => t.dueDate), [tasks]);
+    const overdueTasks = useMemo(() => tasks.filter(t => {
+        if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
+        return new Date(t.dueDate) < new Date(new Date().toDateString());
+    }), [tasks]);
+    const statModalTasks = statModalType === 'due' ? tasksWithDue : statModalType === 'overdue' ? overdueTasks : [];
+
     return (
         <Layout className="calendar-layout">
             <Sidebar />
@@ -138,44 +150,29 @@ export const CalendarPage: React.FC = () => {
                 <Content className="calendar-content">
                     <div className="calendar-page-header">
                         <div>
-                            <Title level={3} style={{ margin: 0 }}>Calendar</Title>
-                            <Text type="secondary">Tasks from all your projects</Text>
+                            <Title level={2} style={{ margin: 0, fontSize: 48 }}>Calendar</Title>
+                            <Text type="secondary" style={{ fontSize: 30 }}>Tasks from all your projects</Text>
                         </div>
-                        <Space size="middle">
-                            <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.TODO.dotColor }} />
-                                <span>To Do</span>
-                            </div>
-                            <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.IN_PROGRESS.dotColor }} />
-                                <span>In Progress</span>
-                            </div>
-                            <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.DONE.dotColor }} />
-                                <span>Done</span>
-                            </div>
-                            <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.HOLD.dotColor }} />
-                                <span>Hold</span>
-                            </div>
-                            <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: '#EF4444' }} />
-                                <span>Overdue</span>
-                            </div>
-                        </Space>
+                        <div className="shared-legend">
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.TODO.dotColor }} /><span>To Do</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.IN_PROGRESS.dotColor }} /><span>In Progress</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.DONE.dotColor }} /><span>Done</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.HOLD.dotColor }} /><span>Hold</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Overdue</span></div>
+                        </div>
                     </div>
 
                     {/* Stats summary */}
                     <div className="cal-stats-row">
-                        <div className="cal-stat-item">
-                            <CalendarOutlined style={{ fontSize: 18, color: '#667eea' }} />
+                        <div className="cal-stat-item cal-stat-clickable" onClick={() => setStatModalType('due')}>
+                            <CalendarOutlined style={{ fontSize: 24, color: '#667eea' }} />
                             <div>
                                 <div className="cal-stat-value">{totalWithDue}</div>
                                 <div className="cal-stat-label">Tasks with due date</div>
                             </div>
                         </div>
-                        <div className="cal-stat-item cal-stat-overdue">
-                            <CalendarOutlined style={{ fontSize: 18, color: '#cf1322' }} />
+                        <div className="cal-stat-item cal-stat-overdue cal-stat-clickable" onClick={() => setStatModalType('overdue')}>
+                            <CalendarOutlined style={{ fontSize: 24, color: '#cf1322' }} />
                             <div>
                                 <div className="cal-stat-value" style={{ color: overdueCount > 0 ? '#cf1322' : undefined }}>{overdueCount}</div>
                                 <div className="cal-stat-label">Overdue</div>
@@ -193,6 +190,75 @@ export const CalendarPage: React.FC = () => {
                     </Spin>
                 </Content>
             </Layout>
+
+            {/* Stat tasks modal (due / overdue) */}
+            <Modal
+                title={
+                    <Space>
+                        <CalendarOutlined />
+                        <span>{statModalType === 'overdue' ? 'Overdue Tasks' : 'Tasks with Due Date'}</span>
+                        <Badge count={statModalTasks.length} style={{ backgroundColor: statModalType === 'overdue' ? '#cf1322' : '#667eea' }} />
+                    </Space>
+                }
+                open={statModalType !== null}
+                onCancel={() => setStatModalType(null)}
+                footer={null}
+                width={560}
+            >
+                <div className="cal-modal-tasks">
+                    {statModalTasks.length === 0 ? (
+                        <Text type="secondary" style={{ display: 'block', textAlign: 'center', padding: 24 }}>No tasks</Text>
+                    ) : (
+                        statModalTasks.map(task => {
+                            const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                            const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                            const overdue = isOverdue(task);
+                            return (
+                                <div key={task.id} className="cal-modal-task-card cal-modal-task-clickable" onClick={() => { setStatModalType(null); setSelectedTaskId(task.id); setTaskDetailVisible(true); }}>
+                                    <div className="cal-modal-task-color" style={{ background: overdue ? '#EF4444' : statusCfg.color }} />
+                                    <div className="cal-modal-task-body">
+                                        {task.project && (
+                                            <div className="cal-modal-task-project">
+                                                <FolderOutlined />
+                                                <span>{task.project.name}</span>
+                                            </div>
+                                        )}
+                                        <div className="cal-modal-task-title">{task.title}</div>
+                                        <div className="cal-modal-task-meta">
+                                            <Tag color={overdue ? 'red' : statusCfg.tagColor}>
+                                                {overdue ? 'Overdue' : statusCfg.label}
+                                            </Tag>
+                                            <span
+                                                className="cal-modal-priority-badge"
+                                                style={{
+                                                    color: priorityCfg.color,
+                                                    background: priorityCfg.bg,
+                                                    border: `1px solid ${priorityCfg.color}30`,
+                                                }}
+                                            >
+                                                {priorityCfg.label}
+                                            </span>
+                                            {task.assignee && (
+                                                <span className="cal-modal-task-assignee">
+                                                    <UserOutlined /> {task.assignee.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {task.dueDate && (
+                                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                                Due: {new Date(task.dueDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </Text>
+                                        )}
+                                        {task.progress > 0 && (
+                                            <Progress percent={task.progress} size="small" strokeColor={overdue ? '#EF4444' : statusCfg.color} />
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </Modal>
 
             {/* Tasks for selected date modal */}
             <Modal
@@ -213,7 +279,7 @@ export const CalendarPage: React.FC = () => {
                         const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
                         const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
                         return (
-                            <div key={task.id} className="cal-modal-task-card">
+                            <div key={task.id} className="cal-modal-task-card cal-modal-task-clickable" onClick={() => { setIsModalVisible(false); setSelectedTaskId(task.id); setTaskDetailVisible(true); }}>
                                 <div className="cal-modal-task-color" style={{ background: statusCfg.color }} />
                                 <div className="cal-modal-task-body">
                                     {task.project && (
@@ -250,6 +316,13 @@ export const CalendarPage: React.FC = () => {
                     })}
                 </div>
             </Modal>
+
+            <TaskDetailModal
+                visible={taskDetailVisible}
+                taskId={selectedTaskId}
+                onClose={() => { setTaskDetailVisible(false); setSelectedTaskId(null); }}
+                onUpdate={loadTasks}
+            />
         </Layout>
     );
 };

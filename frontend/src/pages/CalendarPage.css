@@ -19,21 +19,6 @@
     margin-bottom: 16px;
 }
 
-.cal-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #595959;
-}
-
-.cal-legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
 /* ==========================================
    Stats Row
    ========================================== */
@@ -47,23 +32,39 @@
 .cal-stat-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: white;
-    padding: 12px 20px;
+    gap: 14px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 50%, #E2E8F0 100%);
+    padding: 20px 28px;
     border-radius: 12px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #E2E8F0;
+}
+
+.cal-stat-overdue {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 50%, #FCA5A5 100%);
+    border: 1px solid #FECACA;
 }
 
 .cal-stat-value {
-    font-size: 20px;
+    font-size: 28px;
     font-weight: 700;
     color: #1a1a2e;
     line-height: 1.2;
 }
 
 .cal-stat-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #8c8c8c;
+}
+
+.cal-stat-clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cal-stat-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #d0d0d0;
 }
 
 /* ==========================================
@@ -165,6 +166,15 @@
 
 .cal-modal-task-card:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cal-modal-task-clickable {
+    cursor: pointer;
+}
+
+.cal-modal-task-clickable:hover {
+    background: #f0f5ff;
+    border-color: #d6e4ff;
 }
 
 .cal-modal-task-color {

@@ -403,10 +403,10 @@ export const ProjectsPage: React.FC = () => {
                 <div className="projects-page-header">
                     <div className="header-content">
                         <div className="header-title-section">
-                            <Title level={2} className="page-title">
+                            <Title level={2} className="page-title" style={{ fontSize: 48, margin: 0 }}>
                                 <ProjectOutlined /> Projects
                             </Title>
-                            <Text type="secondary" className="page-subtitle">
+                            <Text type="secondary" className="page-subtitle" style={{ fontSize: 30 }}>
                                 Manage and track all your projects
                             </Text>
                         </div>

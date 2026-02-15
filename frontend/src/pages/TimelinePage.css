@@ -406,6 +406,17 @@
     color: #64748B;
 }
 
+/* Clickable names */
+.ap-clickable {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.ap-clickable:hover {
+    color: #3B82F6 !important;
+    text-decoration: underline;
+}
+
 .ap-task-bars {
     min-height: 30px;
 }

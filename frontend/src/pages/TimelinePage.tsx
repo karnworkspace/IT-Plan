@@ -13,7 +13,9 @@ import {
     CaretRightOutlined,
     CaretDownOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
+import { TaskDetailModal } from './TaskDetailModal';
 import api from '../services/api';
 import './TimelinePage.css';
 
@@ -85,10 +87,13 @@ const getMonthBarColor = (project: TimelineProject, monthIndex: number): string 
 const currentMonth = new Date().getMonth(); // 0-indexed
 
 export const TimelinePage: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<TimelineProject[]>([]);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
     const [filterCategory, setFilterCategory] = useState<string>('ALL');
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
 
     useEffect(() => {
         loadTimeline();
@@ -259,7 +264,12 @@ export const TimelinePage: React.FC = () => {
                                                                 </span>
                                                             )}
                                                             <Tooltip title={project.name} placement="topLeft">
-                                                                <span className="ap-project-name">{project.name}</span>
+                                                                <span
+                                                                    className="ap-project-name ap-clickable"
+                                                                    onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project.id}`); }}
+                                                                >
+                                                                    {project.name}
+                                                                </span>
                                                             </Tooltip>
                                                             <span className={`ap-status-dot ap-status-${project.status.toLowerCase()}`} />
                                                         </div>
@@ -314,7 +324,12 @@ export const TimelinePage: React.FC = () => {
                                                             <div className="ap-col-code ap-cell" />
                                                             <div className="ap-col-name ap-cell ap-task-name-cell">
                                                                 <Tooltip title={task.title} placement="topLeft">
-                                                                    <span className="ap-task-name">{task.title}</span>
+                                                                    <span
+                                                                        className="ap-task-name ap-clickable"
+                                                                        onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}
+                                                                    >
+                                                                        {task.title}
+                                                                    </span>
                                                                 </Tooltip>
                                                                 <span className={`ap-task-status ap-task-status-${task.status.toLowerCase()}`}>
                                                                     {task.status.replace('_', ' ')}
@@ -364,6 +379,13 @@ export const TimelinePage: React.FC = () => {
                     </Spin>
                 </Content>
             </Layout>
+
+            <TaskDetailModal
+                visible={detailModalVisible}
+                taskId={selectedTaskId}
+                onClose={() => { setDetailModalVisible(false); setSelectedTaskId(null); }}
+                onUpdate={loadTimeline}
+            />
         </Layout>
     );
 };

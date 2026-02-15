@@ -86,6 +86,13 @@ model Project {
   startDate   DateTime?
   endDate     DateTime?
 
+  // Annual Plan fields
+  projectCode   String?  // e.g. "PP26000-01-00"
+  category      String?  // "CONSTRUCTION_OPERATION", "SALES_MARKETING", "CORPORATE", "PRODUCT", "CUSTOMER_SERVICE"
+  businessOwner String?  // Business Owner name
+  sortOrder     Int      @default(0)
+  timeline      Json?    // Monthly plan: { "2026": { "1": "planned", "2": "actual", ... } }
+
   // Ownership
   ownerId String
 

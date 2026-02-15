@@ -80,6 +80,11 @@ export const CalendarPage: React.FC = () => {
         }
     };
 
+    const isOverdue = (task: Task) => {
+        if (!task.dueDate || task.status === 'DONE' || task.status === 'CANCELLED') return false;
+        return new Date(task.dueDate) < new Date(new Date().toDateString());
+    };
+
     const dateCellRender = (date: Dayjs) => {
         const dateStr = date.format('YYYY-MM-DD');
         const tasksForDate = tasksByDate[dateStr] || [];
@@ -89,12 +94,28 @@ export const CalendarPage: React.FC = () => {
             <div className="cal-cell-tasks">
                 {tasksForDate.slice(0, 3).map(task => {
                     const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                    const overdue = isOverdue(task);
                     return (
-                        <Tooltip key={task.id} title={`${task.title} (${statusCfg.label})`}>
+                        <Tooltip
+                            key={task.id}
+                            title={
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{task.title}</div>
+                                    {task.project && <div style={{ fontSize: 11, opacity: 0.8 }}>{task.project.name}</div>}
+                                    <div style={{ fontSize: 11 }}>{statusCfg.label}{overdue ? ' — Overdue' : ''}</div>
+                                </div>
+                            }
+                        >
                             <div
-                                className="cal-task-bar"
-                                style={{ borderLeftColor: statusCfg.color }}
+                                className={`cal-task-bar ${overdue ? 'cal-task-overdue' : ''}`}
+                                style={{
+                                    borderLeftColor: overdue ? '#EF4444' : statusCfg.dotColor,
+                                    backgroundColor: overdue ? '#FEF2F2' : `${statusCfg.dotColor}12`,
+                                }}
                             >
+                                {task.project && (
+                                    <span className="cal-task-bar-project">{task.project.name}</span>
+                                )}
                                 <span className="cal-task-bar-title">{task.title}</span>
                             </div>
                         </Tooltip>
@@ -122,20 +143,24 @@ export const CalendarPage: React.FC = () => {
                         </div>
                         <Space size="middle">
                             <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: '#8c8c8c' }} />
+                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.TODO.dotColor }} />
                                 <span>To Do</span>
                             </div>
                             <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: '#1890ff' }} />
+                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.IN_PROGRESS.dotColor }} />
                                 <span>In Progress</span>
                             </div>
                             <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: '#52c41a' }} />
+                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.DONE.dotColor }} />
                                 <span>Done</span>
                             </div>
                             <div className="cal-legend-item">
-                                <span className="cal-legend-dot" style={{ background: '#fa8c16' }} />
+                                <span className="cal-legend-dot" style={{ background: STATUS_CONFIG.HOLD.dotColor }} />
                                 <span>Hold</span>
+                            </div>
+                            <div className="cal-legend-item">
+                                <span className="cal-legend-dot" style={{ background: '#EF4444' }} />
+                                <span>Overdue</span>
                             </div>
                         </Space>
                     </div>

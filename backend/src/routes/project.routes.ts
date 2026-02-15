@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
 import {
+  getTimeline,
   getProjects,
   getProject,
   createProject,
@@ -24,6 +25,13 @@ router.use(authenticate);
  * @desc    Get all projects with filters and pagination
  * @access  Private
  */
+/**
+ * @route   GET /api/v1/projects/timeline
+ * @desc    Get all projects for Annual Plan Timeline view
+ * @access  Private
+ */
+router.get('/timeline', getTimeline);
+
 router.get('/', getProjects);
 
 /**

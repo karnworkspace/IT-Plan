@@ -41,6 +41,45 @@ export interface PaginationResult<T> {
 
 export class ProjectService {
   /**
+   * Get projects for Annual Plan Timeline view
+   */
+  async getTimelineData(): Promise<any[]> {
+    const projects = await prisma.project.findMany({
+      where: { category: { not: null } },
+      include: {
+        owner: { select: { id: true, name: true, email: true } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
+        tasks: {
+          where: { parentTaskId: null },
+          select: {
+            id: true, title: true, status: true, priority: true, progress: true,
+            assignee: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        _count: { select: { tasks: true } },
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    return projects.map(p => {
+      const totalTasks = p.tasks.length;
+      const doneTasks = p.tasks.filter(t => t.status === 'DONE').length;
+      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      return {
+        id: p.id, name: p.name, projectCode: p.projectCode, category: p.category,
+        status: p.status, color: p.color, businessOwner: p.businessOwner,
+        sortOrder: p.sortOrder, timeline: p.timeline, progress, totalTasks, doneTasks,
+        owner: p.owner,
+        members: p.members.map(m => ({ id: m.user.id, name: m.user.name, role: m.role })),
+        tasks: p.tasks,
+      };
+    });
+  }
+
+  /**
    * Get all projects with filters and pagination
    */
   async getAllProjects(filters: ProjectFilters = {}): Promise<PaginationResult<any>> {

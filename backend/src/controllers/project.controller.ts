@@ -5,6 +5,22 @@ import projectService from '../services/project.service';
 import { PROJECT_STATUSES, MEMBER_ROLES } from '../constants';
 
 /**
+ * Get timeline data (Annual Plan view)
+ */
+export const getTimeline = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await projectService.getTimelineData();
+    return sendSuccess(res, { projects: data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get all projects
  */
 export const getProjects = async (

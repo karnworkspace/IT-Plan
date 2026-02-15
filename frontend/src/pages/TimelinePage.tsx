@@ -1,205 +1,366 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Layout,
     Typography,
-    Select,
     Spin,
-    Card,
-    Space,
-    Tag,
-    Empty,
+    Select,
+    Tooltip,
+    Progress,
     message,
 } from 'antd';
 import {
     FieldTimeOutlined,
-    FolderOutlined,
+    CaretRightOutlined,
+    CaretDownOutlined,
 } from '@ant-design/icons';
 import { Sidebar } from '../components/Sidebar';
-import { projectService, type Project } from '../services/projectService';
-import { taskService, type Task } from '../services/taskService';
-import { GanttChart } from '../components/GanttChart';
+import api from '../services/api';
 import './TimelinePage.css';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
-const { Option } = Select;
+
+// Types
+interface TimelineTask {
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    progress: number;
+    assignee?: { id: string; name: string };
+}
+
+interface TimelineProject {
+    id: string;
+    name: string;
+    projectCode: string | null;
+    category: string | null;
+    status: string;
+    color: string;
+    businessOwner: string | null;
+    sortOrder: number;
+    timeline: Record<string, Record<string, string>> | null;
+    progress: number;
+    totalTasks: number;
+    doneTasks: number;
+    owner: { id: string; name: string };
+    members: { id: string; name: string; role: string }[];
+    tasks: TimelineTask[];
+}
+
+// Category labels + colors
+const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
+    CONSTRUCTION_OPERATION: { label: 'CONSTRUCTION OPERATION SUPPORT', color: '#0F172A' },
+    SALES_MARKETING: { label: 'SALES & MARKETING', color: '#1E40AF' },
+    CORPORATE: { label: 'CORPORATE', color: '#7C3AED' },
+    PRODUCT: { label: 'PRODUCT DEVELOPMENT', color: '#059669' },
+    CUSTOMER_SERVICE: { label: 'CUSTOMER SERVICE & AUTOMATION', color: '#DC2626' },
+};
+
+// Month labels
+const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const MONTH_FULL = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const QUARTERS = [
+    { label: 'Q1', months: [0, 1, 2] },
+    { label: 'Q2', months: [3, 4, 5] },
+    { label: 'Q3', months: [6, 7, 8] },
+    { label: 'Q4', months: [9, 10, 11] },
+];
+
+// Get bar color for a month cell — uses timeline JSON only (not project.status)
+const getMonthBarColor = (project: TimelineProject, monthIndex: number): string | null => {
+    const year = '2026';
+    const monthKey = String(monthIndex + 1);
+    const timeline = project.timeline as Record<string, Record<string, string>> | null;
+
+    if (!timeline || !timeline[year] || !timeline[year][monthKey]) return null;
+
+    const planType = timeline[year][monthKey];
+    if (planType === 'actual') return '#10B981';    // Green — completed
+    if (planType === 'delayed') return '#F59E0B';   // Orange — delayed
+    return '#EF4444';                                // Red — planned (default)
+};
+
+// Current month indicator
+const currentMonth = new Date().getMonth(); // 0-indexed
 
 export const TimelinePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
-    const [allTasks, setAllTasks] = useState<Task[]>([]);
-    const [loadingTasks, setLoadingTasks] = useState(false);
+    const [projects, setProjects] = useState<TimelineProject[]>([]);
+    const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+    const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
     useEffect(() => {
-        loadProjects();
+        loadTimeline();
     }, []);
 
-    useEffect(() => {
-        if (selectedProjectIds.length > 0) {
-            loadTasksForProjects(selectedProjectIds);
-        } else {
-            setAllTasks([]);
-        }
-    }, [selectedProjectIds]);
-
-    const loadProjects = async () => {
+    const loadTimeline = async () => {
         try {
             setLoading(true);
-            const response = await projectService.getProjects({ pageSize: 100 });
-            setProjects(response.projects || []);
-            // Select all active projects by default
-            const activeIds = (response.projects || [])
-                .filter(p => p.status === 'ACTIVE')
-                .map(p => p.id);
-            setSelectedProjectIds(activeIds);
+            const response = await api.get('/projects/timeline');
+            setProjects(response.data.data.projects || []);
         } catch (error) {
-            message.error('Failed to load projects');
+            message.error('Failed to load timeline data');
         } finally {
             setLoading(false);
         }
     };
 
-    const loadTasksForProjects = async (projectIds: string[]) => {
-        try {
-            setLoadingTasks(true);
-            const results = await Promise.all(
-                projectIds.map(id => taskService.getTasks(id, { pageSize: 200 }))
-            );
+    // Group projects by category
+    const groupedProjects = useMemo(() => {
+        const groups: Record<string, TimelineProject[]> = {};
+        const filtered = filterCategory === 'ALL'
+            ? projects
+            : projects.filter(p => p.category === filterCategory);
 
-            const tasks: Task[] = [];
-            results.forEach((result, idx) => {
-                const projectId = projectIds[idx];
-                const project = projects.find(p => p.id === projectId);
-                (result.tasks || []).forEach(task => {
-                    tasks.push({
-                        ...task,
-                        project: task.project || (project ? { id: project.id, name: project.name, color: project.color } : undefined),
-                    });
-                });
-            });
+        filtered.forEach(p => {
+            const cat = p.category || 'OTHER';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(p);
+        });
 
-            setAllTasks(tasks);
-        } catch (error) {
-            message.error('Failed to load tasks');
-        } finally {
-            setLoadingTasks(false);
-        }
+        const order = Object.keys(CATEGORY_CONFIG);
+        const sorted: [string, TimelineProject[]][] = [];
+        order.forEach(cat => {
+            if (groups[cat]) sorted.push([cat, groups[cat]]);
+        });
+        Object.keys(groups).forEach(cat => {
+            if (!order.includes(cat)) sorted.push([cat, groups[cat]]);
+        });
+
+        return sorted;
+    }, [projects, filterCategory]);
+
+    // Stats
+    const totalProjects = projects.length;
+    const totalTasks = projects.reduce((sum, p) => sum + p.totalTasks, 0);
+    const avgProgress = totalProjects > 0
+        ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / totalProjects)
+        : 0;
+
+    const toggleExpand = (projectId: string) => {
+        setExpandedProjects(prev => {
+            const next = new Set(prev);
+            if (next.has(projectId)) next.delete(projectId);
+            else next.add(projectId);
+            return next;
+        });
     };
 
-    // Calculate combined date range
-    const selectedProjects = projects.filter(p => selectedProjectIds.includes(p.id));
-    const earliestStart = selectedProjects
-        .filter(p => p.startDate)
-        .map(p => p.startDate!)
-        .sort()[0];
-    const latestEnd = selectedProjects
-        .filter(p => p.endDate)
-        .map(p => p.endDate!)
-        .sort()
-        .reverse()[0];
+    // Running project number
+    let projectNumber = 0;
 
     return (
         <Layout className="timeline-layout">
             <Sidebar />
-
             <Layout className="timeline-main">
+                {/* Header */}
                 <div className="timeline-page-header">
-                    <div className="header-content">
+                    <div className="timeline-header-top">
                         <div>
-                            <Title level={2} style={{ color: '#1a1a2e', margin: 0 }}>
-                                <FieldTimeOutlined style={{ marginRight: 12 }} />
-                                Timeline View
+                            <Title level={2} style={{ color: '#0F172A', margin: 0, fontSize: 22 }}>
+                                <FieldTimeOutlined style={{ marginRight: 10 }} />
+                                IT Project Tracking 2026
                             </Title>
-                            <Text type="secondary" style={{ marginTop: 8, display: 'block' }}>
-                                View tasks across multiple projects on a timeline
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                                Annual Plan View — {totalProjects} projects, {totalTasks} tasks, avg {avgProgress}% progress
                             </Text>
                         </div>
-                    </div>
-
-                    <div style={{ marginTop: 20 }}>
-                        <Text type="secondary" style={{ marginBottom: 8, display: 'block' }}>
-                            Select Projects:
-                        </Text>
-                        <Select
-                            mode="multiple"
-                            placeholder="Select projects to display..."
-                            value={selectedProjectIds}
-                            onChange={setSelectedProjectIds}
-                            style={{ width: '100%', maxWidth: 800 }}
-                            size="large"
-                            maxTagCount={5}
-                            optionFilterProp="children"
-                        >
-                            {projects.map(project => (
-                                <Option key={project.id} value={project.id}>
-                                    <Space>
-                                        <div style={{
-                                            width: 12, height: 12, borderRadius: 3,
-                                            backgroundColor: project.color, display: 'inline-block'
-                                        }} />
-                                        {project.name}
-                                        <Tag color={project.status === 'ACTIVE' ? 'success' : 'default'}>
-                                            {project.status}
-                                        </Tag>
-                                    </Space>
-                                </Option>
-                            ))}
-                        </Select>
-                    </div>
-
-                    {/* Selected project summary */}
-                    {selectedProjectIds.length > 0 && (
-                        <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                            <Tag color="blue">{selectedProjectIds.length} projects selected</Tag>
-                            <Tag color="cyan">{allTasks.length} total tasks</Tag>
-                            <Tag color="green">{allTasks.filter(t => t.status === 'DONE').length} completed</Tag>
-                            <Tag color="orange">{allTasks.filter(t => t.startDate || t.dueDate).length} with dates</Tag>
+                        <div className="timeline-header-filters">
+                            <div className="timeline-legend-inline">
+                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Planned</span></div>
+                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Completed</span></div>
+                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Delayed</span></div>
+                                <div className="ap-legend-item"><div className="ap-legend-current" /><span>Current</span></div>
+                            </div>
+                            <Select
+                                value={filterCategory}
+                                onChange={setFilterCategory}
+                                style={{ width: 260 }}
+                                size="middle"
+                            >
+                                <Select.Option value="ALL">All Categories</Select.Option>
+                                {Object.entries(CATEGORY_CONFIG).map(([key, cfg]) => (
+                                    <Select.Option key={key} value={key}>{cfg.label}</Select.Option>
+                                ))}
+                            </Select>
                         </div>
-                    )}
+                    </div>
                 </div>
 
                 <Content className="timeline-content">
-                    <Spin spinning={loading || loadingTasks}>
-                        {selectedProjectIds.length === 0 ? (
-                            <Card style={{ textAlign: 'center', padding: 60 }}>
-                                <Empty
-                                    image={<FolderOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />}
-                                    description="Select one or more projects to view their timeline"
-                                />
-                            </Card>
-                        ) : allTasks.length === 0 ? (
-                            <Card style={{ textAlign: 'center', padding: 60 }}>
-                                <Empty description="No tasks found in selected projects" />
-                            </Card>
-                        ) : (
-                            <div>
-                                {/* Project color legend */}
-                                <div style={{
-                                    marginBottom: 16, padding: '12px 16px',
-                                    background: '#fff', borderRadius: 8,
-                                    border: '1px solid #f0f0f0',
-                                    display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center'
-                                }}>
-                                    <Text strong style={{ fontSize: 13 }}>Projects:</Text>
-                                    {selectedProjects.map(p => (
-                                        <Space key={p.id} size={4}>
-                                            <div style={{
-                                                width: 14, height: 14, borderRadius: 4,
-                                                backgroundColor: p.color
-                                            }} />
-                                            <Text style={{ fontSize: 13 }}>{p.name}</Text>
-                                        </Space>
-                                    ))}
+                    <Spin spinning={loading}>
+                        <div className="annual-plan-wrapper">
+                            <div className="annual-plan-table">
+                                {/* Table Header */}
+                                <div className="ap-header-row">
+                                    <div className="ap-col-no">NO</div>
+                                    <div className="ap-col-code">PROJECT ID</div>
+                                    <div className="ap-col-name">IT PROJECT — 2026</div>
+                                    <div className="ap-col-team">IT TEAM</div>
+                                    <div className="ap-col-progress">% PROGRESS</div>
+                                    <div className="ap-col-timeline">
+                                        <div className="ap-quarters">
+                                            {QUARTERS.map(q => (
+                                                <div key={q.label} className="ap-quarter">
+                                                    <div className="ap-quarter-label">{q.label}</div>
+                                                    <div className="ap-months">
+                                                        {q.months.map(m => (
+                                                            <div
+                                                                key={m}
+                                                                className={`ap-month-header ${m === currentMonth ? 'ap-current-month' : ''}`}
+                                                            >
+                                                                {MONTHS[m]}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <GanttChart
-                                    tasks={allTasks}
-                                    projectStartDate={earliestStart}
-                                    projectEndDate={latestEnd}
-                                />
+                                {/* Data Rows */}
+                                {groupedProjects.map(([category, catProjects]) => (
+                                    <React.Fragment key={category}>
+                                        {/* Category Header */}
+                                        <div className="ap-category-row" style={{ borderLeftColor: CATEGORY_CONFIG[category]?.color || '#64748B' }}>
+                                            <div className="ap-category-label">
+                                                {CATEGORY_CONFIG[category]?.label || category}
+                                            </div>
+                                            <div className="ap-category-count">
+                                                {catProjects.length} projects
+                                            </div>
+                                        </div>
+
+                                        {/* Project Rows */}
+                                        {catProjects.map(project => {
+                                            projectNumber++;
+                                            const isExpanded = expandedProjects.has(project.id);
+                                            const hasTasks = project.tasks.length > 0;
+
+                                            return (
+                                                <React.Fragment key={project.id}>
+                                                    <div
+                                                        className={`ap-project-row ${isExpanded ? 'ap-expanded' : ''}`}
+                                                        onClick={() => hasTasks && toggleExpand(project.id)}
+                                                        style={{ cursor: hasTasks ? 'pointer' : 'default' }}
+                                                    >
+                                                        <div className="ap-col-no ap-cell">
+                                                            <span className="ap-no-badge">{projectNumber}</span>
+                                                        </div>
+                                                        <div className="ap-col-code ap-cell">
+                                                            <span className="ap-code">{project.projectCode || '-'}</span>
+                                                        </div>
+                                                        <div className="ap-col-name ap-cell ap-project-name-cell">
+                                                            {hasTasks && (
+                                                                <span className="ap-expand-icon">
+                                                                    {isExpanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
+                                                                </span>
+                                                            )}
+                                                            <Tooltip title={project.name} placement="topLeft">
+                                                                <span className="ap-project-name">{project.name}</span>
+                                                            </Tooltip>
+                                                            <span className={`ap-status-dot ap-status-${project.status.toLowerCase()}`} />
+                                                        </div>
+                                                        <div className="ap-col-team ap-cell">
+                                                            <span className="ap-team-text">
+                                                                {project.members.slice(0, 3).map(m => {
+                                                                    const parts = m.name.split(' ');
+                                                                    return parts[0].length > 8 ? parts[0].substring(0, 8) : parts[0];
+                                                                }).join(', ')}
+                                                                {project.members.length > 3 && ` +${project.members.length - 3}`}
+                                                            </span>
+                                                        </div>
+                                                        <div className="ap-col-progress ap-cell">
+                                                            <div className="ap-progress-wrapper">
+                                                                <Progress
+                                                                    percent={project.progress}
+                                                                    size="small"
+                                                                    strokeColor={project.progress >= 100 ? '#10B981' : project.progress > 0 ? '#3B82F6' : '#E2E8F0'}
+                                                                    trailColor="#F1F5F9"
+                                                                    format={p => <span className="ap-progress-text">{p}%</span>}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ap-col-timeline ap-cell">
+                                                            <div className="ap-month-bars">
+                                                                {Array.from({ length: 12 }, (_, i) => {
+                                                                    const color = getMonthBarColor(project, i);
+                                                                    return (
+                                                                        <Tooltip
+                                                                            key={i}
+                                                                            title={`${MONTH_FULL[i]} 2026${color ? ' — Planned' : ''}`}
+                                                                        >
+                                                                            <div className={`ap-month-cell ${i === currentMonth ? 'ap-current-month-cell' : ''}`}>
+                                                                                {color && (
+                                                                                    <div
+                                                                                        className="ap-month-bar"
+                                                                                        style={{ backgroundColor: color }}
+                                                                                    />
+                                                                                )}
+                                                                            </div>
+                                                                        </Tooltip>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Task Rows (expanded) */}
+                                                    {isExpanded && project.tasks.map(task => (
+                                                        <div key={task.id} className="ap-task-row">
+                                                            <div className="ap-col-no ap-cell" />
+                                                            <div className="ap-col-code ap-cell" />
+                                                            <div className="ap-col-name ap-cell ap-task-name-cell">
+                                                                <Tooltip title={task.title} placement="topLeft">
+                                                                    <span className="ap-task-name">{task.title}</span>
+                                                                </Tooltip>
+                                                                <span className={`ap-task-status ap-task-status-${task.status.toLowerCase()}`}>
+                                                                    {task.status.replace('_', ' ')}
+                                                                </span>
+                                                            </div>
+                                                            <div className="ap-col-team ap-cell">
+                                                                <span className="ap-task-assignee">
+                                                                    {task.assignee?.name || '-'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="ap-col-progress ap-cell">
+                                                                <Progress
+                                                                    percent={task.progress}
+                                                                    size="small"
+                                                                    strokeColor={task.status === 'DONE' ? '#10B981' : '#3B82F6'}
+                                                                    trailColor="#F1F5F9"
+                                                                    format={p => <span className="ap-progress-text">{p}%</span>}
+                                                                />
+                                                            </div>
+                                                            <div className="ap-col-timeline ap-cell">
+                                                                <div className="ap-month-bars ap-task-bars">
+                                                                    {Array.from({ length: 12 }, (_, i) => {
+                                                                        const color = getMonthBarColor(project, i);
+                                                                        return (
+                                                                            <div key={i} className={`ap-month-cell ${i === currentMonth ? 'ap-current-month-cell' : ''}`}>
+                                                                                {color && (
+                                                                                    <div
+                                                                                        className="ap-month-bar ap-task-month-bar"
+                                                                                        style={{ backgroundColor: `${color}50` }}
+                                                                                    />
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </React.Fragment>
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                ))}
+
                             </div>
-                        )}
+                        </div>
                     </Spin>
                 </Content>
             </Layout>

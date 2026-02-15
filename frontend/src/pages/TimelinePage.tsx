@@ -215,7 +215,7 @@ export const TimelinePage: React.FC = () => {
                                                                 key={m}
                                                                 className={`ap-month-header ${m === currentMonth ? 'ap-current-month' : ''}`}
                                                             >
-                                                                {MONTHS[m]}
+                                                                {MONTH_FULL[m]}
                                                             </div>
                                                         ))}
                                                     </div>

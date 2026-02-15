@@ -66,6 +66,48 @@
 
 ---
 
+## Phase 14: UX Improvements + Multi-Assignee (2026-02-15)
+
+**Backend:**
+1. ADMIN bypass — project.service + task.service: ADMIN สามารถ CRUD project/task ทุกตัวได้โดยไม่ต้องเป็นสมาชิก
+2. Multiple Assignees — เพิ่ม `TaskAssignee` model (many-to-many), `createTask`/`updateTask` รับ `assigneeIds[]`
+3. Task controller — รองรับทั้ง `assigneeId` (backward compat) และ `assigneeIds` (new)
+
+**Frontend:**
+4. Multiple Assignees UI:
+   - `TaskDetailModal` — แก้ไข/แสดง assignees หลายคน (multi-select + Tags)
+   - `ProjectDetailPage` board view — task cards แสดง assignees หลายคน
+   - `taskService.ts` + `types/index.ts` — เพิ่ม `taskAssignees` ใน Task type
+
+5. Project Status Gradient:
+   - `constants/index.ts` — เพิ่ม `PROJECT_STATUS_GRADIENT` config (5 statuses × 5 colors)
+   - `ProjectDetailPage` — header borderTop + timeline cards + stat cards ใช้สีตาม status
+
+6. Timeline Page — Clickable Links:
+   - คลิกชื่อ Project → navigate ไปหน้า `/projects/:id`
+   - คลิกชื่อ Task → เปิด `TaskDetailModal` (ดู/แก้ไขได้)
+   - เพิ่ม CSS class `ap-clickable` (hover สีฟ้า + underline)
+
+7. Projects Page (Kanban) — เพิ่ม Dropdown Menu:
+   - Board view cards มีปุ่ม `⋮` → Edit Project / Delete Project
+
+8. My Tasks Page (Kanban) — Clickable + Editable:
+   - คลิก task card → เปิด `TaskDetailModal` (แทน navigate ไป project)
+   - เพิ่มปุ่ม `⋮` → View/Edit / Delete Task
+
+9. Configuration & User Management (ADMIN only):
+   - `/configuration` page — sidebar menu (ADMIN only)
+   - `/configuration/users` — User list + Edit role + Reset password
+   - Role permissions table (ADMIN/OWNER/MEMBER/USER)
+   - Disable PIN Login (email/password only)
+
+10. Login Page — ปรับ UI:
+    - ลบ PIN login → email/password only
+    - เพิ่ม "Forgot Password?" link
+    - เพิ่มข้อความติดต่อ IT support
+
+---
+
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)

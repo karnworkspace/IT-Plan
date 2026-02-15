@@ -192,6 +192,22 @@ cd frontend && npm run dev
 - ✅ Save as PDF (jspdf + html2canvas, Projects + Tasks)
 - ✅ Annual Plan Timeline — Redesign จาก Gantt → table + monthly bars (Q1-Q4, 5 categories)
 
+## ✅ Phase 14: UX Improvements + Multi-Assignee (2026-02-15)
+
+**Backend:**
+- ✅ ADMIN bypass — CRUD project/task ทุกตัวได้โดยไม่ต้องเป็นสมาชิก
+- ✅ Multiple Assignees — `TaskAssignee` model (many-to-many), `assigneeIds[]` ใน create/update
+- ✅ Backward compat — รองรับทั้ง `assigneeId` (เดิม) และ `assigneeIds` (ใหม่)
+
+**Frontend:**
+- ✅ Multiple Assignees UI — TaskDetailModal + ProjectDetailPage board view
+- ✅ Project Status Gradient — header/cards สีตาม status (5 statuses × 5 สี)
+- ✅ Timeline clickable — ชื่อ Project → navigate, ชื่อ Task → TaskDetailModal
+- ✅ Projects kanban — ปุ่ม ⋮ (Edit/Delete) บน board card
+- ✅ My Tasks kanban — คลิก card → TaskDetailModal + ปุ่ม ⋮ (View/Delete)
+- ✅ Configuration page (ADMIN only) — User list + Edit role + Reset password
+- ✅ Login — email/password only (ลบ PIN), Forgot Password link
+
 ---
 
 ## 🔑 Key Files

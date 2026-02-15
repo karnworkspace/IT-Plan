@@ -433,52 +433,47 @@ export const ProjectDetailPage: React.FC = () => {
                     })()}
 
                     {/* Stats */}
-                    {(() => {
-                        const sg = PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE;
-                        return (
                     <Row gutter={16} className="project-stats">
                         <Col xs={6}>
-                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
+                            <Card className="stat-card stat-total">
                                 <Statistic
                                     title="Total Tasks"
                                     value={stats?.total_tasks || tasks.length}
-                                    prefix={<FolderOutlined style={{ color: sg.accentColor }} />}
+                                    prefix={<FolderOutlined style={{ color: '#64748B' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
+                            <Card className="stat-card stat-completed">
                                 <Statistic
                                     title="Completed"
                                     value={stats?.completed_tasks || tasksByStatus.DONE.length}
-                                    valueStyle={{ color: '#10B981' }}
+                                    valueStyle={{ color: '#065F46' }}
                                     prefix={<CheckCircleOutlined style={{ color: '#10B981' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
+                            <Card className="stat-card stat-inprogress">
                                 <Statistic
                                     title="In Progress"
                                     value={stats?.in_progress_tasks || tasksByStatus.IN_PROGRESS.length}
-                                    valueStyle={{ color: '#3B82F6' }}
+                                    valueStyle={{ color: '#1E40AF' }}
                                     prefix={<SyncOutlined style={{ color: '#3B82F6' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
+                            <Card className="stat-card stat-progress">
                                 <Statistic
                                     title="Progress"
                                     value={stats?.progress || 0}
                                     suffix="%"
-                                    valueStyle={{ color: sg.accentColor }}
+                                    valueStyle={{ color: '#92400E' }}
                                 />
                             </Card>
                         </Col>
                     </Row>
-                        );
-                    })()}
                 </div>
 
                 {/* Content */}

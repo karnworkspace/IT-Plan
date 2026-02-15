@@ -36,7 +36,7 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 // --- Stat Card with count-up animation + gradient ---
-const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradientFrom }: {
+const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradientFrom, description }: {
     title: string;
     value: number;
     icon: React.ReactNode;
@@ -44,6 +44,7 @@ const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradient
     suffix?: string;
     onClick?: () => void;
     gradientFrom?: string;
+    description?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
 
@@ -60,6 +61,9 @@ const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradient
                     <div className="stat-value">
                         {animatedValue}{suffix}
                     </div>
+                    {description && (
+                        <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{description}</div>
+                    )}
                 </div>
                 <div className={`stat-icon-box ${iconClass}`}>
                     {icon}
@@ -124,6 +128,7 @@ export const DashboardPage: React.FC = () => {
         pendingTasks: 0,
         overdueTasks: 0,
         completionRate: 0,
+        teamMembers: 0,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,28 +150,39 @@ export const DashboardPage: React.FC = () => {
         try {
             setLoading(true);
 
-            const [projectsRes, tasksRes, activitiesRes] = await Promise.all([
-                projectService.getProjects({ pageSize: 5 }),
-                taskService.getMyTasks({ pageSize: 5, status: 'IN_PROGRESS' }),
+            const [projectsRes, allTasksRes, activitiesRes] = await Promise.all([
+                projectService.getProjects({ pageSize: 500 }),
+                taskService.getMyTasks({ pageSize: 500 }),
                 activityLogService.getUserActivities(user.id, 10)
             ]);
 
             const totalProjects = projectsRes.total || projectsRes.projects.length;
-            const activeProjects = projectsRes.projects.filter((p) => p.status === 'ACTIVE').length;
-            const myTotalTasks = tasksRes.total || 0;
+            const activeProjects = projectsRes.projects.filter((p: any) => p.status === 'ACTIVE').length;
+            const allTasks = allTasksRes.tasks || [];
+            const doneTasks = allTasks.filter((t: any) => t.status === 'DONE').length;
+            const pendingTasks = allTasks.filter((t: any) => t.status !== 'DONE' && t.status !== 'CANCELLED').length;
+            const completionRate = allTasks.length > 0 ? Math.round((doneTasks / allTasks.length) * 100) : 0;
+
+            // Unique team members across all projects
+            const memberSet = new Set<string>();
+            projectsRes.projects.forEach((p: any) => {
+                if (p.members) p.members.forEach((m: any) => memberSet.add(m.userId || m.user?.id));
+                if (p.owner) memberSet.add(p.owner.id);
+            });
 
             setStats({
                 totalProjects,
                 activeProjects,
-                totalTasks: myTotalTasks,
-                completedTasks: 0,
-                pendingTasks: myTotalTasks,
+                totalTasks: allTasks.length,
+                completedTasks: doneTasks,
+                pendingTasks,
                 overdueTasks: 0,
-                completionRate: 65,
+                completionRate,
+                teamMembers: memberSet.size || totalProjects,
             });
 
             setRecentProjects(projectsRes.projects.slice(0, 4));
-            setMyTasks(tasksRes.tasks.slice(0, 5));
+            setMyTasks(allTasks.filter((t: any) => t.status === 'IN_PROGRESS').slice(0, 5));
             setRecentActivities(activitiesRes?.data?.activities || []);
         } catch (error) {
             console.error('Failed to load dashboard data', error);
@@ -201,8 +217,18 @@ export const DashboardPage: React.FC = () => {
 
                     <Spin spinning={loading}>
                         {/* Stats Row */}
-                        <Row gutter={[16, 16]} className="stats-row">
-                            <Col xs={24} sm={12} lg={6}>
+                        <div className="stats-row" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                            <div style={{ flex: '1 1 180px', minWidth: 180 }}>
+                                <StatCardItem
+                                    title="Total Projects"
+                                    value={stats.totalProjects}
+                                    icon={<FolderOutlined />}
+                                    iconClass="icon-slate"
+                                    gradientFrom="#F1F5F9"
+                                    onClick={() => navigate('/projects')}
+                                />
+                            </div>
+                            <div style={{ flex: '1 1 180px', minWidth: 180 }}>
                                 <StatCardItem
                                     title="Active Projects"
                                     value={stats.activeProjects}
@@ -211,8 +237,8 @@ export const DashboardPage: React.FC = () => {
                                     gradientFrom="#DBEAFE"
                                     onClick={() => navigate('/projects')}
                                 />
-                            </Col>
-                            <Col xs={24} sm={12} lg={6}>
+                            </div>
+                            <div style={{ flex: '1 1 180px', minWidth: 180 }}>
                                 <StatCardItem
                                     title="My Pending Tasks"
                                     value={stats.pendingTasks}
@@ -221,18 +247,18 @@ export const DashboardPage: React.FC = () => {
                                     gradientFrom="#FEF3C7"
                                     onClick={() => navigate('/my-tasks')}
                                 />
-                            </Col>
-                            <Col xs={24} sm={12} lg={6}>
+                            </div>
+                            <div style={{ flex: '1 1 180px', minWidth: 180 }}>
                                 <StatCardItem
                                     title="Team Members"
-                                    value={8}
+                                    value={stats.teamMembers}
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
                                     gradientFrom="#D1FAE5"
                                     onClick={() => navigate('/projects')}
                                 />
-                            </Col>
-                            <Col xs={24} sm={12} lg={6}>
+                            </div>
+                            <div style={{ flex: '1 1 180px', minWidth: 180 }}>
                                 <StatCardItem
                                     title="Completion Rate"
                                     value={stats.completionRate}
@@ -240,10 +266,11 @@ export const DashboardPage: React.FC = () => {
                                     icon={<RocketOutlined />}
                                     iconClass="icon-purple"
                                     gradientFrom="#EDE9FE"
+                                    description="DONE tasks / total tasks × 100"
                                     onClick={() => navigate('/projects')}
                                 />
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
 
                         <div className="dashboard-grid">
                             {/* Left Column */}

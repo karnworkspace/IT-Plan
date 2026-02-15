@@ -8,6 +8,7 @@ import notificationRoutes from './notification.routes';
 import activityLogRoutes from './activityLog.routes';
 import groupRoutes from './group.routes';
 import uploadRoutes from './upload.routes';
+import userRoutes from './user.routes';
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use('/', notificationRoutes);
 router.use('/', activityLogRoutes);
 router.use('/groups', groupRoutes);
 router.use('/', uploadRoutes);
+router.use('/users', userRoutes);
 
 export default router;

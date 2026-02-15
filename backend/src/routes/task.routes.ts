@@ -11,6 +11,7 @@ import {
   getSubTasks,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { validateUUID } from '../middlewares/validate.middleware';
 
 const router = Router();
 
@@ -18,18 +19,18 @@ const router = Router();
 router.use(authenticate);
 
 // Project-specific task routes
-router.get('/projects/:projectId/tasks', getTasks);
-router.get('/projects/:projectId/tasks/stats', getTaskStats);
-router.post('/projects/:projectId/tasks', createTask);
+router.get('/projects/:projectId/tasks', validateUUID('projectId'), getTasks);
+router.get('/projects/:projectId/tasks/stats', validateUUID('projectId'), getTaskStats);
+router.post('/projects/:projectId/tasks', validateUUID('projectId'), createTask);
 
 // My tasks route (tasks assigned to or created by current user)
 router.get('/my-tasks', getMyTasks);
 
 // Individual task routes
-router.get('/tasks/:id', getTask);
-router.get('/tasks/:id/subtasks', getSubTasks);
-router.put('/tasks/:id', updateTask);
-router.delete('/tasks/:id', deleteTask);
-router.patch('/tasks/:id/status', updateTaskStatus);
+router.get('/tasks/:id', validateUUID('id'), getTask);
+router.get('/tasks/:id/subtasks', validateUUID('id'), getSubTasks);
+router.put('/tasks/:id', validateUUID('id'), updateTask);
+router.delete('/tasks/:id', validateUUID('id'), deleteTask);
+router.patch('/tasks/:id/status', validateUUID('id'), updateTaskStatus);
 
 export default router;

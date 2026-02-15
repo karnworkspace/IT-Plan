@@ -20,8 +20,8 @@ export class AuthController {
             const user = await authService.register(email, password, name);
 
             sendSuccess(res, user, 'User registered successfully', 201);
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -41,8 +41,8 @@ export class AuthController {
             const result = await authService.login(email, password);
 
             sendSuccess(res, result, 'Login successful');
-        } catch (error: any) {
-            sendError(res, error.message, 401);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 401);
         }
     }
 
@@ -62,8 +62,8 @@ export class AuthController {
             const result = await authService.loginWithPin(email, pin);
 
             sendSuccess(res, result, 'Login successful');
-        } catch (error: any) {
-            sendError(res, error.message, 401);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 401);
         }
     }
 
@@ -89,8 +89,8 @@ export class AuthController {
             const user = await authService.setupPin(userId, pin, confirmPin);
 
             sendSuccess(res, user, 'PIN setup successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -125,8 +125,8 @@ export class AuthController {
             );
 
             sendSuccess(res, result, 'PIN changed successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -152,8 +152,8 @@ export class AuthController {
             const result = await authService.resetPin(userId, password);
 
             sendSuccess(res, result, 'PIN reset successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -173,8 +173,8 @@ export class AuthController {
             const result = await authService.requestPasswordReset(email);
 
             sendSuccess(res, result, 'Password reset requested');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -198,8 +198,8 @@ export class AuthController {
             );
 
             sendSuccess(res, result, 'Password reset successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -219,8 +219,8 @@ export class AuthController {
             const result = await authService.requestPinReset(email);
 
             sendSuccess(res, result, 'PIN reset requested');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -244,8 +244,8 @@ export class AuthController {
             );
 
             sendSuccess(res, result, 'PIN reset successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -265,8 +265,8 @@ export class AuthController {
             const result = await authService.refreshAccessToken(refreshToken);
 
             sendSuccess(res, result, 'Token refreshed successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 401);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 401);
         }
     }
 
@@ -286,8 +286,8 @@ export class AuthController {
             const result = await authService.logout(refreshToken);
 
             sendSuccess(res, result, 'Logged out successfully');
-        } catch (error: any) {
-            sendError(res, error.message, 400);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 400);
         }
     }
 
@@ -306,8 +306,8 @@ export class AuthController {
             const user = await authService.getCurrentUser(userId);
 
             sendSuccess(res, user);
-        } catch (error: any) {
-            sendError(res, error.message, 404);
+        } catch (error) {
+            sendError(res, error instanceof Error ? error.message : 'An unexpected error occurred', 404);
         }
     }
 }

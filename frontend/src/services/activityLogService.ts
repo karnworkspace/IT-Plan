@@ -1,19 +1,7 @@
 import api from './api';
 
-export interface ActivityLog {
-  id: string;
-  userId: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  metadata?: string;
-  projectId?: string;
-  taskId?: string;
-  createdAt: string;
-  user?: { id: string; name: string };
-  project?: { id: string; name: string };
-  task?: { id: string; title: string };
-}
+// Re-export entity type for backward compatibility
+export type { ActivityLog } from '../types';
 
 export const activityLogService = {
   getProjectActivities: async (projectId: string, limit = 50, offset = 0) => {

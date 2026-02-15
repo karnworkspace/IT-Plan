@@ -3,6 +3,7 @@ import dailyUpdateService, {
   CreateDailyUpdateInput,
   UpdateDailyUpdateInput,
 } from '../services/dailyUpdate.service';
+import { DAILY_UPDATE_STATUSES } from '../constants';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
 
@@ -62,8 +63,7 @@ export const createDailyUpdate = async (req: Request, res: Response, next: NextF
       return sendError(res, 'Status is required', 400);
     }
 
-    const validStatuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE', 'BLOCKED'];
-    if (!validStatuses.includes(status)) {
+    if (!(DAILY_UPDATE_STATUSES as readonly string[]).includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
 

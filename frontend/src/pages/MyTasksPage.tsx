@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { taskService, type Task } from '../services/taskService';
-import { projectService } from '../services/projectService';
+import { taskService, type Task, type CreateTaskInput } from '../services/taskService';
+import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import dayjs from 'dayjs';
 import {
@@ -11,7 +11,6 @@ import {
     Typography,
     Space,
     Tag,
-    Progress,
     Checkbox,
     Badge,
     Button,
@@ -20,7 +19,6 @@ import {
     Input,
     Select,
     DatePicker,
-    Statistic,
     message,
     Spin,
 } from 'antd';
@@ -35,30 +33,51 @@ import {
     DownloadOutlined,
     FilePdfOutlined,
 } from '@ant-design/icons';
+import { useCountUp } from '../hooks/useCountUp';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
+import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-// Status columns config (ไม่มี BLOCKED, IN_REVIEW)
-const STATUS_COLUMNS: { key: string; label: string; color: string; dotColor: string }[] = [
-    { key: 'TODO', label: 'To Do', color: '#8c8c8c', dotColor: '#8c8c8c' },
-    { key: 'IN_PROGRESS', label: 'In Progress', color: '#1890ff', dotColor: '#1890ff' },
-    { key: 'DONE', label: 'Done', color: '#52c41a', dotColor: '#52c41a' },
-    { key: 'HOLD', label: 'Hold', color: '#fa8c16', dotColor: '#fa8c16' },
-    { key: 'CANCELLED', label: 'Cancelled', color: '#8c8c8c', dotColor: '#595959' },
-];
+// Derive STATUS_COLUMNS from centralized config
+const STATUS_COLUMNS = STATUS_COLUMN_ORDER.map(key => ({
+    key,
+    label: STATUS_CONFIG[key].label,
+    color: STATUS_CONFIG[key].dotColor,
+    dotColor: STATUS_CONFIG[key].dotColor,
+}));
 
-// Priority config
-const PRIORITY_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
+// --- Stat Card with count-up animation + gradient ---
+const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    iconClass: string;
+    gradientFrom?: string;
+}) => {
+    const animatedValue = useCountUp(value, 1000);
+    return (
+        <Card
+            className="stat-card"
+            bordered={false}
+            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
+        >
+            <div className="stat-card-inner">
+                <div>
+                    <div className="stat-label">{title}</div>
+                    <div className="stat-value">{animatedValue}</div>
+                </div>
+                <div className={`stat-icon-box ${iconClass}`}>
+                    {icon}
+                </div>
+            </div>
+        </Card>
+    );
 };
 
 export const MyTasksPage: React.FC = () => {
@@ -67,7 +86,7 @@ export const MyTasksPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -167,21 +186,19 @@ export const MyTasksPage: React.FC = () => {
     const handleCreateTask = async () => {
         try {
             const values = await form.validateFields();
-            const payload: any = {
+            const payload: CreateTaskInput = {
                 title: values.title,
                 description: values.description,
                 priority: values.priority || 'MEDIUM',
                 status: values.status || 'TODO',
+                dueDate: values.dueDate ? values.dueDate.toISOString() : undefined,
             };
-            if (values.dueDate) {
-                payload.dueDate = values.dueDate.toISOString();
-            }
             await taskService.createTask(values.projectId, payload);
             message.success('Task created');
             setIsModalVisible(false);
             loadMyTasks();
-        } catch (error: any) {
-            if (error?.errorFields) return; // form validation
+        } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'errorFields' in error) return; // form validation
             message.error('Failed to create task');
             console.error(error);
         }
@@ -231,66 +248,24 @@ export const MyTasksPage: React.FC = () => {
                 <Content className="my-tasks-content">
                     <Spin spinning={loading}>
                         {/* Stats Cards */}
-                        <Row gutter={16} className="mytasks-stats-row">
+                        <Row gutter={16} className="stats-row">
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-total">
-                                    <Statistic
-                                        title="Total"
-                                        value={filteredTasks.length}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<FolderOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-todo">
-                                    <Statistic
-                                        title="To Do"
-                                        value={todoCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<CheckCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-purple" gradientFrom="#EDE9FE" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-inprogress">
-                                    <Statistic
-                                        title="In Progress"
-                                        value={inProgressCount}
-                                        valueStyle={{ color: '#1890ff' }}
-                                        prefix={<SyncOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-done">
-                                    <Statistic
-                                        title="Done"
-                                        value={doneCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<CheckCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-hold">
-                                    <Statistic
-                                        title="Hold"
-                                        value={holdCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<PauseCircleOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <Card className="mytasks-stat-card mytasks-stat-cancelled">
-                                    <Statistic
-                                        title="Cancelled"
-                                        value={cancelledCount}
-                                        valueStyle={{ color: '#1a1a2e' }}
-                                        prefix={<StopOutlined />}
-                                    />
-                                </Card>
+                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
                             </Col>
                         </Row>
 
@@ -392,12 +367,12 @@ export const MyTasksPage: React.FC = () => {
 
                                                                                 {/* Progress */}
                                                                                 <div className="mytasks-card-progress">
-                                                                                    <Progress
-                                                                                        percent={task.progress}
-                                                                                        size="small"
-                                                                                        showInfo={false}
-                                                                                        strokeColor={task.project?.color || '#1890ff'}
-                                                                                    />
+                                                                                    <div className="progress-bar-track">
+                                                                                        <div
+                                                                                            className="progress-bar-fill"
+                                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
+                                                                                        />
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -435,7 +410,7 @@ export const MyTasksPage: React.FC = () => {
                         rules={[{ required: true, message: 'Please select a project' }]}
                     >
                         <Select placeholder="Select project" showSearch optionFilterProp="children">
-                            {projects.map((p: any) => (
+                            {projects.map((p: Project) => (
                                 <Select.Option key={p.id} value={p.id}>
                                     {p.name}
                                 </Select.Option>

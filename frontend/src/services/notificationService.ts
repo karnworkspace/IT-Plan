@@ -1,46 +1,16 @@
 import api from './api';
+import type { Notification, NotificationsResponse } from '../types';
 
-// Types
-export interface Notification {
-  id: string;
-  userId: string;
-  type:
-    | 'TASK_ASSIGNED'
-    | 'TASK_DUE_SOON'
-    | 'TASK_OVERDUE'
-    | 'TASK_COMPLETED'
-    | 'COMMENT_ADDED'
-    | 'PROJECT_INVITE'
-    | 'DAILY_REMINDER';
-  title: string;
-  message: string;
-  isRead: boolean;
-  projectId?: string;
-  taskId?: string;
-  createdAt: string;
-  task?: {
-    id: string;
-    title: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-  };
-}
+// Re-export entity types for backward compatibility
+export type { Notification, NotificationsResponse } from '../types';
 
+// Input types (request-specific, kept here)
 export interface CreateNotificationInput {
   type: string;
   title: string;
   message: string;
   taskId?: string;
   projectId?: string;
-}
-
-export interface NotificationsResponse {
-  notifications: Notification[];
-  total: number;
-  page: number;
-  pageSize: number;
 }
 
 // Notification Service

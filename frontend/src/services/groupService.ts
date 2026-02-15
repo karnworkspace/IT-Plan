@@ -1,26 +1,8 @@
 import api from './api';
+import type { Group } from '../types';
 
-export interface Group {
-  id: string;
-  name: string;
-  description?: string;
-  type: 'USER_GROUP' | 'PROJECT_GROUP';
-  color: string;
-  createdAt: string;
-  updatedAt: string;
-  members?: {
-    id: string;
-    user: { id: string; name: string; email: string };
-  }[];
-  projects?: {
-    id: string;
-    project: { id: string; name: string; color: string; status: string };
-  }[];
-  _count?: {
-    members: number;
-    projects: number;
-  };
-}
+// Re-export entity type for backward compatibility
+export type { Group } from '../types';
 
 export const groupService = {
   async getGroups(type?: string): Promise<Group[]> {

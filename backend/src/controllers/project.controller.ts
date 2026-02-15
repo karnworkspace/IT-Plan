@@ -2,19 +2,36 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
 import projectService from '../services/project.service';
+import { PROJECT_STATUSES, MEMBER_ROLES } from '../constants';
+
+/**
+ * Get timeline data (Annual Plan view)
+ */
+export const getTimeline = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await projectService.getTimelineData();
+    return sendSuccess(res, { projects: data });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * Get all projects
  */
 export const getProjects = async (
-  _req: Request,
+  req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
-    const { status, owner_id, page, limit } = _req.query;
+    const { status, owner_id, page, limit } = req.query;
 
-    const filters: any = {};
+    const filters: Record<string, string | number> = {};
     if (status) filters.status = status as string;
     if (owner_id) filters.ownerId = owner_id as string;
     if (page) filters.page = parseInt(page as string, 10);
@@ -27,7 +44,7 @@ export const getProjects = async (
       pagination: result.pagination,
     });
   } catch (error) {
-    return sendError(res, 'Failed to fetch projects', 500);
+    next(error);
   }
 };
 
@@ -37,7 +54,7 @@ export const getProjects = async (
 export const getProject = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -50,7 +67,7 @@ export const getProject = async (
 
     return sendSuccess(res, { project });
   } catch (error) {
-    return sendError(res, 'Failed to fetch project', 500);
+    next(error);
   }
 };
 
@@ -60,7 +77,7 @@ export const getProject = async (
 export const createProject = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const userId = extractUserId(req);
@@ -77,9 +94,8 @@ export const createProject = async (
 
     // Validate status if provided
     if (status) {
-      const validStatuses = ['ACTIVE', 'DELAY', 'COMPLETED', 'HOLD', 'CANCELLED', 'POSTPONE', 'ARCHIVED'];
-      if (!validStatuses.includes(status)) {
-        return sendError(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
+      if (!(PROJECT_STATUSES as readonly string[]).includes(status)) {
+        return sendError(res, `Invalid status. Must be one of: ${PROJECT_STATUSES.join(', ')}`, 400);
       }
     }
 
@@ -96,7 +112,7 @@ export const createProject = async (
 
     return sendSuccess(res, { project }, undefined, 201);
   } catch (error) {
-    return sendError(res, 'Failed to create project', 500);
+    next(error);
   }
 };
 
@@ -106,7 +122,7 @@ export const createProject = async (
 export const updateProject = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -126,9 +142,8 @@ export const updateProject = async (
 
     // Validate status if provided
     if (status !== undefined) {
-      const validStatuses = ['ACTIVE', 'DELAY', 'COMPLETED', 'HOLD', 'CANCELLED', 'POSTPONE', 'ARCHIVED'];
-      if (!validStatuses.includes(status)) {
-        return sendError(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
+      if (!(PROJECT_STATUSES as readonly string[]).includes(status)) {
+        return sendError(res, `Invalid status. Must be one of: ${PROJECT_STATUSES.join(', ')}`, 400);
       }
     }
 
@@ -149,11 +164,8 @@ export const updateProject = async (
     }
 
     return sendSuccess(res, { project });
-  } catch (error: any) {
-    if (error.message === 'You do not have permission to update this project') {
-      return sendError(res, 'You do not have permission to update this project', 403);
-    }
-    return sendError(res, 'Failed to update project', 500);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -163,7 +175,7 @@ export const updateProject = async (
 export const deleteProject = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -176,11 +188,8 @@ export const deleteProject = async (
     }
 
     return sendSuccess(res, { message: 'Project deleted successfully' });
-  } catch (error: any) {
-    if (error.message === 'You do not have permission to delete this project') {
-      return sendError(res, 'You do not have permission to delete this project', 403);
-    }
-    return sendError(res, 'Failed to delete project', 500);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -190,7 +199,7 @@ export const deleteProject = async (
 export const getProjectStats = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -199,7 +208,7 @@ export const getProjectStats = async (
 
     return sendSuccess(res, { stats });
   } catch (error) {
-    return sendError(res, 'Failed to fetch project statistics', 500);
+    next(error);
   }
 };
 
@@ -209,7 +218,7 @@ export const getProjectStats = async (
 export const getProjectMembers = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -218,7 +227,7 @@ export const getProjectMembers = async (
 
     return sendSuccess(res, { members });
   } catch (error) {
-    return sendError(res, 'Failed to fetch project members', 500);
+    next(error);
   }
 };
 
@@ -228,7 +237,7 @@ export const getProjectMembers = async (
 export const addProjectMember = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -242,14 +251,8 @@ export const addProjectMember = async (
     const member = await projectService.addProjectMember(id as string, userId, role, requesterId);
 
     return sendSuccess(res, { member }, undefined, 201);
-  } catch (error: any) {
-    if (error.message === 'Only project owners and admins can add members') {
-      return sendError(res, 'Only project owners and admins can add members', 403);
-    }
-    if (error.message === 'User is already a member of this project') {
-      return sendError(res, 'User is already a member of this project', 400);
-    }
-    return sendError(res, 'Failed to add member', 500);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -259,25 +262,22 @@ export const addProjectMember = async (
 export const updateProjectMemberRole = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id, memberId } = req.params;
     const { role } = req.body;
     const requesterId = extractUserId(req);
 
-    if (!role || !['OWNER', 'ADMIN', 'MEMBER'].includes(role)) {
-      return sendError(res, 'Valid role is required (OWNER, ADMIN, MEMBER)', 400);
+    if (!role || !(MEMBER_ROLES as readonly string[]).includes(role)) {
+      return sendError(res, `Valid role is required (${MEMBER_ROLES.join(', ')})`, 400);
     }
 
     const member = await projectService.updateMemberRole(String(id), String(memberId), role, requesterId);
 
     return sendSuccess(res, { member });
-  } catch (error: any) {
-    if (error.message === 'Only project owners can change member roles') {
-      return sendError(res, 'Only project owners can change member roles', 403);
-    }
-    return sendError(res, 'Failed to update member role', 500);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -287,7 +287,7 @@ export const updateProjectMemberRole = async (
 export const removeProjectMember = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   try {
     const { id, memberId } = req.params;
@@ -296,13 +296,7 @@ export const removeProjectMember = async (
     await projectService.removeProjectMember(String(id), String(memberId), requesterId);
 
     return sendSuccess(res, { message: 'Member removed successfully' });
-  } catch (error: any) {
-    if (error.message === 'Only project owners and admins can remove members') {
-      return sendError(res, 'Only project owners and admins can remove members', 403);
-    }
-    if (error.message === 'Cannot remove project owner') {
-      return sendError(res, 'Cannot remove project owner', 400);
-    }
-    return sendError(res, 'Failed to remove member', 500);
+  } catch (error) {
+    next(error);
   }
 };

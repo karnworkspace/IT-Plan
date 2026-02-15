@@ -22,17 +22,10 @@ import {
     SyncOutlined,
 } from '@ant-design/icons';
 import { taskService, type Task } from '../services/taskService';
+import { STATUS_CONFIG } from '../constants';
 
 const { Text } = Typography;
 const { Option } = Select;
-
-const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
-    TODO: { color: 'default', label: 'To Do' },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress' },
-    DONE: { color: 'success', label: 'Done' },
-    HOLD: { color: 'orange', label: 'Hold' },
-    CANCELLED: { color: 'error', label: 'Cancelled' },
-};
 
 interface SubTaskListProps {
     parentTask: Task;

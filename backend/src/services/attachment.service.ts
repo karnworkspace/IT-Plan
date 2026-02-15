@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database';
+import { AppError } from '../utils/AppError';
 import fs from 'fs';
 import path from 'path';
-
-const prisma = new PrismaClient();
 
 export interface CreateAttachmentInput {
   commentId: string;
@@ -75,7 +74,7 @@ export class AttachmentService {
 
     // Only comment author can delete attachment
     if (attachment.comment.userId !== userId) {
-      throw new Error('Permission denied');
+      throw new AppError('Permission denied', 403);
     }
 
     // Delete file from disk

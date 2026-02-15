@@ -65,22 +65,8 @@ interface TaskDetailModalProps {
     onUpdate: () => void;
 }
 
-// Configs
-const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
-    URGENT: { color: '#ff4d4f', label: 'Urgent' },
-    HIGH: { color: '#fa8c16', label: 'High' },
-    MEDIUM: { color: '#fadb14', label: 'Medium' },
-    LOW: { color: '#52c41a', label: 'Low' },
-};
-
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined /> },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin /> },
-    IN_REVIEW: { color: 'warning', label: 'In Review', icon: <ExclamationCircleOutlined /> },
-    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined /> },
-    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined /> },
-    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined /> },
-};
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
+import { STATUS_ICONS } from '../constants/statusIcons';
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     visible,
@@ -150,7 +136,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 description: taskData.description,
                 status: taskData.status,
                 priority: taskData.priority,
-                assigneeId: taskData.assigneeId || undefined,
+                assigneeIds: taskData.taskAssignees?.map((ta: { user: { id: string } }) => ta.user.id) || (taskData.assigneeId ? [taskData.assigneeId] : []),
                 startDate: taskData.startDate ? dayjs(taskData.startDate) : null,
                 dueDate: taskData.dueDate ? dayjs(taskData.dueDate) : null,
             });
@@ -285,7 +271,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     <Tag color={PRIORITY_CONFIG[task.priority]?.color}>
                                         {PRIORITY_CONFIG[task.priority]?.label} Priority
                                     </Tag>
-                                    <Tag color={STATUS_CONFIG[task.status]?.color} icon={STATUS_CONFIG[task.status]?.icon}>
+                                    <Tag color={STATUS_CONFIG[task.status]?.color} icon={STATUS_ICONS[task.status]}>
                                         {STATUS_CONFIG[task.status]?.label}
                                     </Tag>
                                 </div>
@@ -313,8 +299,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                             ))}
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item name="assigneeId" style={{ marginBottom: 0, width: 180 }}>
-                                        <Select placeholder="Assignee" allowClear showSearch optionFilterProp="children">
+                                    <Form.Item name="assigneeIds" style={{ marginBottom: 0, minWidth: 200 }}>
+                                        <Select mode="multiple" placeholder="Assignees" allowClear showSearch optionFilterProp="children" maxTagCount={2}>
                                             {projectMembers.map(member => (
                                                 <Option key={member.id} value={member.id}>{member.name}</Option>
                                             ))}
@@ -371,11 +357,18 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         {!isEditing && (
                             <div className="metadata-grid">
                                 <div className="meta-item">
-                                    <Text type="secondary">Assignee</Text>
-                                    <Space style={{ marginTop: 4 }}>
-                                        <Avatar size="small" icon={<UserOutlined />} />
-                                        <Text>{task.assignee?.name || 'Unassigned'}</Text>
-                                    </Space>
+                                    <Text type="secondary">Assignees</Text>
+                                    <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                        {task.taskAssignees && task.taskAssignees.length > 0 ? (
+                                            task.taskAssignees.map(ta => (
+                                                <Tag key={ta.id} icon={<UserOutlined />}>{ta.user.name}</Tag>
+                                            ))
+                                        ) : task.assignee ? (
+                                            <Tag icon={<UserOutlined />}>{task.assignee.name}</Tag>
+                                        ) : (
+                                            <Text type="secondary">Unassigned</Text>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="meta-item">
                                     <Text type="secondary">Start Date</Text>

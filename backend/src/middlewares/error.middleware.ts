@@ -1,21 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendError } from '../utils/response';
+import { AppError } from '../utils/AppError';
 
 /**
  * Global error handler middleware
  */
 export const errorHandler = (
-    err: any,
+    err: Error | AppError,
     _req: Request,
     res: Response,
     _next: NextFunction
 ): void => {
-    console.error('Error:', err);
+    console.error('Error:', err.message);
 
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal server error';
+    // AppError — use statusCode from error
+    if (err instanceof AppError) {
+        sendError(res, err.message, err.statusCode);
+        return;
+    }
 
-    sendError(res, message, statusCode);
+    // Prisma known errors
+    if ('code' in err && (err as Record<string, unknown>).code === 'P2002') {
+        sendError(res, 'Duplicate entry', 409);
+        return;
+    }
+    if ('code' in err && (err as Record<string, unknown>).code === 'P2025') {
+        sendError(res, 'Record not found', 404);
+        return;
+    }
+
+    // Unknown errors
+    sendError(res, 'Internal server error', 500);
 };
 
 /**

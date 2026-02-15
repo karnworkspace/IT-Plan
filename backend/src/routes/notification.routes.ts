@@ -10,6 +10,7 @@ import {
   clearOldNotifications,
 } from '../controllers/notification.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { validateUUID } from '../middlewares/validate.middleware';
 
 const router = Router();
 
@@ -22,9 +23,9 @@ router.get('/notifications/unread/count', getUnreadCount);
 router.post('/notifications', createNotification);
 
 // Individual notification routes
-router.get('/notifications/:id', getNotification);
-router.put('/notifications/:id/read', markAsRead);
-router.delete('/notifications/:id', deleteNotification);
+router.get('/notifications/:id', validateUUID('id'), getNotification);
+router.put('/notifications/:id/read', validateUUID('id'), markAsRead);
+router.delete('/notifications/:id', validateUUID('id'), deleteNotification);
 
 // Bulk actions
 router.put('/notifications/read-all', markAllAsRead);

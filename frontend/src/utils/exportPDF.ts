@@ -1,19 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Active', DELAY: 'Delay', COMPLETED: 'Completed',
-  HOLD: 'Hold', CANCELLED: 'Cancelled',
-};
-
-const TASK_STATUS_LABELS: Record<string, string> = {
-  TODO: 'To Do', IN_PROGRESS: 'In Progress', IN_REVIEW: 'In Review',
-  DONE: 'Done', BLOCKED: 'Blocked', HOLD: 'Hold', CANCELLED: 'Cancelled',
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-  LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', URGENT: 'Urgent',
-};
+import type { Project, Task } from '../types';
+import { PROJECT_STATUS_LABELS as STATUS_LABELS, TASK_STATUS_LABELS, PRIORITY_LABELS } from '../constants';
 
 function formatDate(val: string | undefined): string {
   if (!val) return '-';
@@ -61,7 +49,7 @@ function addHeader(doc: jsPDF, title: string, subtitle?: string) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('Sarabun', 'bold');
-  doc.text('TaskFlow', 14, 12);
+  doc.text('SENA', 14, 12);
   doc.setFontSize(10);
   doc.setFont('Sarabun', 'normal');
   doc.text(title, 14, 20);
@@ -81,7 +69,7 @@ function addHeader(doc: jsPDF, title: string, subtitle?: string) {
   doc.setTextColor(0, 0, 0);
 }
 
-export async function exportProjectsPDF(projects: any[]) {
+export async function exportProjectsPDF(projects: Project[]) {
   const doc = new jsPDF('landscape');
   await loadThaiFont(doc);
 
@@ -122,10 +110,10 @@ export async function exportProjectsPDF(projects: any[]) {
   });
 
   const today = new Date().toISOString().slice(0, 10);
-  doc.save(`TaskFlow_Projects_${today}.pdf`);
+  doc.save(`SENA_Projects_${today}.pdf`);
 }
 
-export async function exportTasksPDF(tasks: any[], projectName: string) {
+export async function exportTasksPDF(tasks: Task[], projectName: string) {
   const doc = new jsPDF('landscape');
   await loadThaiFont(doc);
 
@@ -161,5 +149,5 @@ export async function exportTasksPDF(tasks: any[], projectName: string) {
 
   const safeName = projectName.replace(/[^a-zA-Z0-9\u0E00-\u0E7F]/g, '_');
   const today = new Date().toISOString().slice(0, 10);
-  doc.save(`TaskFlow_Tasks_${safeName}_${today}.pdf`);
+  doc.save(`SENA_Tasks_${safeName}_${today}.pdf`);
 }

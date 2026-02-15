@@ -4,14 +4,9 @@ import {
     Card,
     Row,
     Col,
-    Progress,
-    Avatar,
     Typography,
     Space,
-    Statistic,
     List,
-    Timeline,
-    Tag,
     Spin,
     Button,
 } from 'antd';
@@ -32,6 +27,7 @@ import { projectService } from '../services/projectService';
 import { taskService } from '../services/taskService';
 import { activityLogService } from '../services/activityLogService';
 import { useAuthStore } from '../store/authStore';
+import { useCountUp } from '../hooks/useCountUp';
 import './DashboardPage.css';
 
 dayjs.extend(relativeTime);
@@ -39,12 +35,87 @@ dayjs.extend(relativeTime);
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
+// --- Stat Card with count-up animation + gradient ---
+const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradientFrom }: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    iconClass: string;
+    suffix?: string;
+    onClick?: () => void;
+    gradientFrom?: string;
+}) => {
+    const animatedValue = useCountUp(value, 1000);
+
+    return (
+        <Card
+            className="stat-card"
+            bordered={false}
+            onClick={onClick}
+            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
+        >
+            <div className="stat-card-inner">
+                <div>
+                    <div className="stat-label">{title}</div>
+                    <div className="stat-value">
+                        {animatedValue}{suffix}
+                    </div>
+                </div>
+                <div className={`stat-icon-box ${iconClass}`}>
+                    {icon}
+                </div>
+            </div>
+        </Card>
+    );
+};
+
+// --- Status helpers ---
+const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return 'badge-active';
+        case 'DELAY': return 'badge-delay';
+        case 'COMPLETED': return 'badge-completed';
+        case 'HOLD': return 'badge-hold';
+        case 'CANCELLED': return 'badge-cancelled';
+        default: return 'badge-active';
+    }
+};
+
+const getStatusProgressColor = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#10B981';
+        case 'DELAY': return '#EF4444';
+        case 'COMPLETED': return '#3B82F6';
+        case 'HOLD': return '#F59E0B';
+        default: return '#6B7280';
+    }
+};
+
+const getStatusIconBg = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#D1FAE5';
+        case 'DELAY': return '#FEE2E2';
+        case 'COMPLETED': return '#DBEAFE';
+        case 'HOLD': return '#FEF3C7';
+        default: return '#F1F5F9';
+    }
+};
+
+const getStatusIconColor = (status: string) => {
+    switch (status) {
+        case 'ACTIVE': return '#10B981';
+        case 'DELAY': return '#EF4444';
+        case 'COMPLETED': return '#3B82F6';
+        case 'HOLD': return '#F59E0B';
+        default: return '#6B7280';
+    }
+};
+
 export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
 
-    // Stats State
     const [stats, setStats] = useState({
         totalProjects: 0,
         activeProjects: 0,
@@ -55,9 +126,11 @@ export const DashboardPage: React.FC = () => {
         completionRate: 0,
     });
 
-    // Data State
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentProjects, setRecentProjects] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [myTasks, setMyTasks] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
     useEffect(() => {
@@ -72,68 +145,33 @@ export const DashboardPage: React.FC = () => {
         try {
             setLoading(true);
 
-            // Parallel data loading
-            const [
-                projectsRes,
-                tasksRes,
-                activitiesRes
-            ] = await Promise.all([
-                projectService.getProjects({ pageSize: 5 }), // Get recent 5 projects
-                taskService.getMyTasks({ pageSize: 5, status: 'IN_PROGRESS' }), // Get my top 5 tasks
-                activityLogService.getUserActivities(user.id, 10) // Get recent 10 activities
+            const [projectsRes, tasksRes, activitiesRes] = await Promise.all([
+                projectService.getProjects({ pageSize: 5 }),
+                taskService.getMyTasks({ pageSize: 5, status: 'IN_PROGRESS' }),
+                activityLogService.getUserActivities(user.id, 10)
             ]);
 
-            // Calculate aggregated stats (In real app, backend should provide a stats endpoint)
             const totalProjects = projectsRes.total || projectsRes.projects.length;
-            const activeProjects = projectsRes.projects.filter((p: any) => p.status === 'ACTIVE').length;
-
+            const activeProjects = projectsRes.projects.filter((p) => p.status === 'ACTIVE').length;
             const myTotalTasks = tasksRes.total || 0;
 
             setStats({
                 totalProjects,
                 activeProjects,
                 totalTasks: myTotalTasks,
-                completedTasks: 0, // Placeholder
+                completedTasks: 0,
                 pendingTasks: myTotalTasks,
-                overdueTasks: 0, // Placeholder
-                completionRate: 65, // Mock for visual
+                overdueTasks: 0,
+                completionRate: 65,
             });
 
             setRecentProjects(projectsRes.projects.slice(0, 4));
             setMyTasks(tasksRes.tasks.slice(0, 5));
-            setRecentActivities(activitiesRes?.data?.activities || []); // Handle response structure
+            setRecentActivities(activitiesRes?.data?.activities || []);
         } catch (error) {
             console.error('Failed to load dashboard data', error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const StatusCard = ({ title, value, icon, color, suffix, onClick }: any) => (
-        <Card
-            className="stat-card"
-            bordered={false}
-            hoverable={!!onClick}
-            onClick={onClick}
-            style={onClick ? { cursor: 'pointer' } : undefined}
-        >
-            <Statistic
-                title={<Text type="secondary">{title}</Text>}
-                value={value}
-                valueStyle={{ color: '#1f2937', fontWeight: 600 }}
-                prefix={<span style={{ color, marginRight: 8, fontSize: 20 }}>{icon}</span>}
-                suffix={suffix}
-            />
-        </Card>
-    );
-
-    const getActionColor = (action: string) => {
-        switch (action) {
-            case 'CREATED': return 'green';
-            case 'UPDATED': return 'blue';
-            case 'DELETED': return 'red';
-            case 'COMPLETED': return 'purple';
-            default: return 'gray';
         }
     };
 
@@ -145,176 +183,180 @@ export const DashboardPage: React.FC = () => {
                 <Content className="dashboard-content">
                     <div className="dashboard-header-section">
                         <div>
-                            <Title level={2} style={{ margin: 0 }}>
+                            <Title level={2} style={{ margin: 0, color: '#1E293B' }}>
                                 Welcome back, {user?.name?.split(' ')[0]}! 👋
                             </Title>
-                            <Text type="secondary">Here's what's happening with your projects today.</Text>
+                            <Text style={{ color: '#64748B' }}>Here's what's happening with your projects today.</Text>
                         </div>
-                        <Button type="primary" size="large" onClick={() => navigate('/projects')}>
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={() => navigate('/projects')}
+                            style={{ background: '#3B82F6', borderColor: '#3B82F6' }}
+                            icon={<ArrowRightOutlined />}
+                        >
                             View All Projects
                         </Button>
                     </div>
 
                     <Spin spinning={loading}>
                         {/* Stats Row */}
-                        <Row gutter={[20, 20]} className="stats-row">
+                        <Row gutter={[16, 16]} className="stats-row">
                             <Col xs={24} sm={12} lg={6}>
-                                <StatusCard
+                                <StatCardItem
                                     title="Active Projects"
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
-                                    color="#1890ff"
+                                    iconClass="icon-blue"
+                                    gradientFrom="#DBEAFE"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
-                                <StatusCard
+                                <StatCardItem
                                     title="My Pending Tasks"
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
-                                    color="#fa8c16"
+                                    iconClass="icon-amber"
+                                    gradientFrom="#FEF3C7"
                                     onClick={() => navigate('/my-tasks')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
-                                <StatusCard
+                                <StatCardItem
                                     title="Team Members"
-                                    value={8} // Mock for demo
+                                    value={8}
                                     icon={<TeamOutlined />}
-                                    color="#52c41a"
+                                    iconClass="icon-emerald"
+                                    gradientFrom="#D1FAE5"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>
                             <Col xs={24} sm={12} lg={6}>
-                                <StatusCard
+                                <StatCardItem
                                     title="Completion Rate"
                                     value={stats.completionRate}
                                     suffix="%"
                                     icon={<RocketOutlined />}
-                                    color="#722ed1"
+                                    iconClass="icon-purple"
+                                    gradientFrom="#EDE9FE"
                                     onClick={() => navigate('/projects')}
                                 />
                             </Col>
                         </Row>
 
                         <div className="dashboard-grid">
-                            {/* Left Column: Recent Projects & My Tasks */}
+                            {/* Left Column */}
                             <div className="main-col">
                                 {/* Recent Projects */}
                                 <div className="section-header">
-                                    <Title level={4}>Recent Projects</Title>
-                                    <Button type="link" onClick={() => navigate('/projects')}>View all</Button>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Projects</Title>
+                                    <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
                                 </div>
                                 <Row gutter={[16, 16]}>
                                     {recentProjects.map(project => (
                                         <Col xs={24} md={12} key={project.id}>
-                                            <Card
-                                                hoverable
-                                                className="project-summary-card"
+                                            <div
+                                                className="project-card-v2"
                                                 onClick={() => navigate(`/projects/${project.id}`)}
                                             >
                                                 <div className="card-header">
-                                                    <div className="project-icon" style={{ backgroundColor: project.color }}>
-                                                        <FolderOutlined />
+                                                    <div className="project-icon-v2" style={{ backgroundColor: getStatusIconBg(project.status) }}>
+                                                        <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 18 }} />
                                                     </div>
-                                                    <Tag color={
-                                                        project.status === 'ACTIVE' ? 'success' :
-                                                        project.status === 'DELAY' ? 'error' :
-                                                        project.status === 'COMPLETED' ? 'processing' :
-                                                        project.status === 'HOLD' ? 'orange' :
-                                                        'default'
-                                                    }>
+                                                    <span className={`status-badge ${getStatusBadgeClass(project.status)}`}>
                                                         {project.status}
-                                                    </Tag>
+                                                    </span>
                                                 </div>
-                                                <Title level={5} ellipsis className="mt-4 mb-2">
-                                                    {project.name}
-                                                </Title>
-                                                <Text type="secondary" ellipsis>
-                                                    {project.description || 'No description'}
-                                                </Text>
-                                                <div className="mt-4">
-                                                    <div className="flex justify-between mb-1">
-                                                        <Text type="secondary" style={{ fontSize: 12 }}>Progress</Text>
-                                                        <Text strong style={{ fontSize: 12 }}>65%</Text>
+                                                <h3 className="project-card-title">{project.name}</h3>
+                                                <p className="project-card-id">{project.description || 'No description'}</p>
+                                                <div className="project-card-progress">
+                                                    <div className="progress-header">
+                                                        <span className="progress-label">Progress</span>
+                                                        <span className="progress-value">65%</span>
                                                     </div>
-                                                    <Progress percent={65} showInfo={false} strokeColor={project.color} />
+                                                    <div className="progress-bar-track">
+                                                        <div
+                                                            className="progress-bar-fill"
+                                                            style={{ width: '65%', background: getStatusProgressColor(project.status) }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </Card>
+                                            </div>
                                         </Col>
                                     ))}
                                 </Row>
 
                                 {/* My Tasks */}
-                                <div className="section-header mt-8">
-                                    <Title level={4}>My Active Tasks</Title>
-                                    <Button type="link" onClick={() => navigate('/my-tasks')}>View all</Button>
+                                <div className="section-header" style={{ marginTop: 32 }}>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>My Active Tasks</Title>
+                                    <button className="view-all-link" onClick={() => navigate('/my-tasks')}>View all</button>
                                 </div>
                                 <Card className="tasks-list-card" bordered={false}>
-                                    <List
-                                        dataSource={myTasks}
-                                        renderItem={task => (
-                                            <List.Item
-                                                actions={[
-                                                    <Button
-                                                        type="text"
-                                                        icon={<ArrowRightOutlined />}
-                                                        onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
-                                                    />
-                                                ]}
-                                            >
-                                                <List.Item.Meta
-                                                    avatar={
-                                                        <Avatar
-                                                            style={{
-                                                                backgroundColor: task.priority === 'URGENT' ? '#ff4d4f' : '#e6f4ff',
-                                                                color: task.priority === 'URGENT' ? 'white' : '#1677ff'
-                                                            }}
-                                                            icon={<CheckCircleOutlined />}
+                                    {myTasks.length > 0 ? (
+                                        <List
+                                            dataSource={myTasks}
+                                            renderItem={task => (
+                                                <List.Item
+                                                    actions={[
+                                                        <Button
+                                                            type="text"
+                                                            icon={<ArrowRightOutlined />}
+                                                            onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
                                                         />
-                                                    }
-                                                    title={<Text strong>{task.title}</Text>}
-                                                    description={
-                                                        <Space split={<div className="divider-dot" />}>
-                                                            <Text type="secondary">{task.project?.name}</Text>
-                                                            <Text type="secondary">
-                                                                Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
-                                                            </Text>
-                                                        </Space>
-                                                    }
-                                                />
-                                            </List.Item>
-                                        )}
-                                    />
+                                                    ]}
+                                                >
+                                                    <List.Item.Meta
+                                                        avatar={
+                                                            <div className={`task-priority-icon ${task.priority === 'URGENT' ? 'priority-urgent' : 'priority-normal'}`}>
+                                                                <CheckCircleOutlined />
+                                                            </div>
+                                                        }
+                                                        title={<Text strong style={{ color: '#1E293B' }}>{task.title}</Text>}
+                                                        description={
+                                                            <Space split={<span style={{ color: '#CBD5E1' }}>·</span>}>
+                                                                <Text style={{ color: '#64748B', fontSize: 13 }}>{task.project?.name}</Text>
+                                                                <Text style={{ color: '#64748B', fontSize: 13 }}>
+                                                                    Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
+                                                                </Text>
+                                                            </Space>
+                                                        }
+                                                    />
+                                                </List.Item>
+                                            )}
+                                        />
+                                    ) : (
+                                        <div className="empty-state">No active tasks</div>
+                                    )}
                                 </Card>
                             </div>
 
                             {/* Right Column: Activity Feed */}
                             <div className="side-col">
                                 <div className="section-header">
-                                    <Title level={4}>Recent Activity</Title>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Activity</Title>
                                 </div>
-                                <Card className="activity-card" bordered={false}>
-                                    <Timeline>
-                                        {recentActivities.length > 0 ? recentActivities.map(log => (
-                                            <Timeline.Item
-                                                key={log.id}
-                                                color={getActionColor(log.action)}
-                                            >
-                                                <Text strong>{log.user?.name}</Text>
-                                                <Text type="secondary"> {log.action.toLowerCase()} </Text>
-                                                <Text strong>{log.entityType}</Text>
-                                                <br />
-                                                <Text style={{ fontSize: 13 }}>
-                                                    {log.task?.title || log.project?.name || 'an item'}
-                                                </Text>
-                                                <div className="time-caption">
-                                                    {dayjs(log.createdAt).fromNow()}
-                                                </div>
-                                            </Timeline.Item>
-                                        )) : <Text type="secondary">No recent activities</Text>}
-                                    </Timeline>
-                                </Card>
+                                <div className="activity-feed">
+                                    {recentActivities.length > 0 ? recentActivities.map((log, index) => (
+                                        <div key={log.id} className="activity-item">
+                                            {index < recentActivities.length - 1 && (
+                                                <div className="activity-line" />
+                                            )}
+                                            <div className="activity-dot" />
+                                            <div className="activity-content">
+                                                <p className="activity-text">
+                                                    <span className="activity-action">{log.action?.toLowerCase()}</span>{' '}
+                                                    <span className="activity-entity">
+                                                        {log.task?.title || log.project?.name || log.entityType}
+                                                    </span>
+                                                </p>
+                                                <span className="activity-time">{dayjs(log.createdAt).fromNow()}</span>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div className="empty-state">No recent activities</div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </Spin>

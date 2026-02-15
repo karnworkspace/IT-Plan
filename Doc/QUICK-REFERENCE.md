@@ -190,6 +190,7 @@ cd frontend && npm run dev
 - ✅ Image Attachment in Comments (multer upload)
 - ✅ Export Excel (xlsx@0.18.5, Projects + Tasks)
 - ✅ Save as PDF (jspdf + html2canvas, Projects + Tasks)
+- ✅ Annual Plan Timeline — Redesign จาก Gantt → table + monthly bars (Q1-Q4, 5 categories)
 
 ---
 
@@ -251,6 +252,7 @@ npx prisma migrate reset
 - `POST /api/v1/projects` - สร้าง project ใหม่
 - `PUT /api/v1/projects/:id` - อัปเดต project
 - `DELETE /api/v1/projects/:id` - ลบ project
+- `GET /api/v1/projects/timeline` - Annual Plan Timeline data
 
 **ไฟล์ที่สร้าง:**
 - `backend/src/services/project.service.ts`
@@ -290,5 +292,5 @@ curl -X GET "http://localhost:3000/api/v1/projects" \
 
 ---
 
-**Last Updated:** 2026-02-10
-**Status:** ✅ All Complete | Core System 100% | User Feedback 100% (18/18) | Tests 64/64 PASSED
+**Last Updated:** 2026-02-15
+**Status:** ✅ All Complete | Core System 100% | User Feedback 100% (18/18) | Timeline Redesign 100% | Tests 64/64 PASSED

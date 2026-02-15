@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projectService, type Project } from '../services/projectService';
 import { taskService, type Task } from '../services/taskService';
+import type { ProjectMember } from '../types';
 import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
@@ -53,6 +54,8 @@ import dayjs from 'dayjs';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
+import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT } from '../constants';
+import { STATUS_ICONS } from '../constants/statusIcons';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;
@@ -60,30 +63,8 @@ const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-// Priority colors
-const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
-    URGENT: { color: '#ff4d4f', label: 'Urgent' },
-    HIGH: { color: '#fa8c16', label: 'High' },
-    MEDIUM: { color: '#fadb14', label: 'Medium' },
-    LOW: { color: '#52c41a', label: 'Low' },
-};
-
-// Status colors
-const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode; dotColor: string; badgeColor: string }> = {
-    TODO: { color: 'default', label: 'To Do', icon: <ClockCircleOutlined />, dotColor: '#8c8c8c', badgeColor: '#8c8c8c' },
-    IN_PROGRESS: { color: 'processing', label: 'In Progress', icon: <SyncOutlined spin />, dotColor: '#1890ff', badgeColor: '#1890ff' },
-    DONE: { color: 'success', label: 'Done', icon: <CheckCircleOutlined />, dotColor: '#52c41a', badgeColor: '#52c41a' },
-    HOLD: { color: 'orange', label: 'Hold', icon: <PauseCircleOutlined />, dotColor: '#fa8c16', badgeColor: '#fa8c16' },
-    CANCELLED: { color: 'error', label: 'Cancelled', icon: <StopOutlined />, dotColor: '#595959', badgeColor: '#595959' },
-};
-
-// Priority badge config (rounded rectangle style)
-const PRIORITY_BADGE: Record<string, { color: string; bg: string; label: string }> = {
-    URGENT: { color: '#cf1322', bg: '#fff1f0', label: 'Urgent' },
-    HIGH: { color: '#d4380d', bg: '#fff2e8', label: 'High' },
-    MEDIUM: { color: '#d48806', bg: '#fffbe6', label: 'Medium' },
-    LOW: { color: '#389e0d', bg: '#f6ffed', label: 'Low' },
-};
+// PRIORITY_BADGE uses same values as centralized PRIORITY_CONFIG (color + bg + label)
+const PRIORITY_BADGE = PRIORITY_CONFIG;
 
 import { TaskDetailModal } from './TaskDetailModal';
 import { GanttChart } from '../components/GanttChart';
@@ -144,12 +125,15 @@ export const ProjectDetailPage: React.FC = () => {
 
     const handleEditTask = (task: Task) => {
         setEditingTask(task);
+        const assigneeIds = task.taskAssignees?.length
+            ? task.taskAssignees.map(ta => ta.user.id)
+            : (task.assigneeId ? [task.assigneeId] : []);
         form.setFieldsValue({
             title: task.title,
             description: task.description,
             priority: task.priority,
             status: task.status,
-            assigneeId: task.assigneeId || undefined,
+            assigneeIds,
             startDate: task.startDate ? dayjs(task.startDate) : null,
             dueDate: task.dueDate ? dayjs(task.dueDate) : null,
         });
@@ -309,7 +293,7 @@ export const ProjectDetailPage: React.FC = () => {
 
             <Layout className="project-detail-main">
                 {/* Header */}
-                <div className="project-detail-header" style={{ borderTop: `4px solid ${project.color}` }}>
+                <div className="project-detail-header" style={{ borderTop: `4px solid ${(PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE).accentColor}` }}>
                     <div className="header-top">
                         <Breadcrumb
                             items={[
@@ -342,7 +326,7 @@ export const ProjectDetailPage: React.FC = () => {
                                     <span style={{ fontSize: 13, color: '#8c8c8c', marginRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <TeamOutlined /> Members:
                                     </span>
-                                    {project.members.map((m: any) => (
+                                    {project.members.map((m: ProjectMember) => (
                                         <span key={m.id} style={{
                                             display: 'inline-block',
                                             padding: '2px 10px',
@@ -363,7 +347,7 @@ export const ProjectDetailPage: React.FC = () => {
                                 size="large"
                                 icon={<DownloadOutlined />}
                                 onClick={() => exportTasks(filteredTasks, project.name)}
-                                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: 12 }}
+                                style={{ borderRadius: 12 }}
                             >
                                 Export Excel
                             </Button>
@@ -371,7 +355,7 @@ export const ProjectDetailPage: React.FC = () => {
                                 size="large"
                                 icon={<FilePdfOutlined />}
                                 onClick={() => exportTasksPDF(filteredTasks, project.name)}
-                                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', borderRadius: 12 }}
+                                style={{ borderRadius: 12 }}
                             >
                                 Save PDF
                             </Button>
@@ -388,17 +372,19 @@ export const ProjectDetailPage: React.FC = () => {
                     </div>
 
                     {/* Timeline & Countdown Section */}
-                    {(project.startDate || tasks.length > 0 || project.endDate) && (
+                    {(project.startDate || tasks.length > 0 || project.endDate) && (() => {
+                        const sg = PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE;
+                        return (
                         <div style={{ marginTop: 24, marginBottom: 8 }}>
                             <Row gutter={[16, 16]}>
                                 {/* Start Date */}
                                 {project.startDate && (
                                     <Col xs={24} sm={8}>
-                                        <Card bordered={false} className="timeline-card start-date" style={{ background: '#f6ffed', border: '1px solid #b7eb8f' }}>
+                                        <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                             <Statistic
-                                                title={<span style={{ color: '#389e0d', fontWeight: 600 }}><CalendarOutlined /> Project Start</span>}
+                                                title={<span style={{ color: sg.textColor, fontWeight: 600 }}><CalendarOutlined /> Project Start</span>}
                                                 value={dayjs(project.startDate).format('DD MMM YYYY')}
-                                                valueStyle={{ color: '#389e0d', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                                valueStyle={{ color: sg.textColor, fontSize: '1.2rem', fontWeight: 'bold' }}
                                             />
                                         </Card>
                                     </Col>
@@ -406,9 +392,9 @@ export const ProjectDetailPage: React.FC = () => {
 
                                 {/* Due Date */}
                                 <Col xs={24} sm={8}>
-                                    <Card bordered={false} className="timeline-card due-date" style={{ background: '#e6f7ff', border: '1px solid #91d5ff' }}>
+                                    <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
-                                            title={<span style={{ color: '#096dd9', fontWeight: 600 }}><ClockCircleOutlined /> Target Finish</span>}
+                                            title={<span style={{ color: sg.textColor, fontWeight: 600 }}><ClockCircleOutlined /> Target Finish</span>}
                                             value={
                                                 project.endDate
                                                     ? dayjs(project.endDate).format('DD MMM YYYY')
@@ -416,16 +402,16 @@ export const ProjectDetailPage: React.FC = () => {
                                                         ? dayjs(Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime()))).format('DD MMM YYYY')
                                                         : 'No finish date set')
                                             }
-                                            valueStyle={{ color: '#096dd9', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                            valueStyle={{ color: sg.textColor, fontSize: '1.2rem', fontWeight: 'bold' }}
                                         />
                                     </Card>
                                 </Col>
 
                                 {/* Days Remaining */}
                                 <Col xs={24} sm={8}>
-                                    <Card bordered={false} className="timeline-card remaining" style={{ background: '#fff7e6', border: '1px solid #ffd591' }}>
+                                    <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
-                                            title={<span style={{ color: '#d46b08', fontWeight: 600 }}><SyncOutlined spin /> Time Remaining</span>}
+                                            title={<span style={{ color: sg.textColor, fontWeight: 600 }}><SyncOutlined spin /> Time Remaining</span>}
                                             value={
                                                 (() => {
                                                     const targetDate = project.endDate
@@ -436,57 +422,63 @@ export const ProjectDetailPage: React.FC = () => {
                                                     return Math.ceil((targetDate - Date.now()) / (1000 * 60 * 60 * 24));
                                                 })()
                                             }
-                                            suffix={<span style={{ fontSize: '1rem', color: '#d46b08' }}>days left</span>}
-                                            valueStyle={{ color: '#d46b08', fontSize: '1.5rem', fontWeight: 'bold' }}
+                                            suffix={<span style={{ fontSize: '1rem', color: sg.textColor }}>days left</span>}
+                                            valueStyle={{ color: sg.textColor, fontSize: '1.5rem', fontWeight: 'bold' }}
                                         />
                                     </Card>
                                 </Col>
                             </Row>
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {/* Stats */}
+                    {(() => {
+                        const sg = PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE;
+                        return (
                     <Row gutter={16} className="project-stats">
                         <Col xs={6}>
-                            <Card className="stat-card">
+                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
                                 <Statistic
                                     title="Total Tasks"
                                     value={stats?.total_tasks || tasks.length}
-                                    prefix={<FolderOutlined />}
+                                    prefix={<FolderOutlined style={{ color: sg.accentColor }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card">
+                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
                                 <Statistic
                                     title="Completed"
                                     value={stats?.completed_tasks || tasksByStatus.DONE.length}
-                                    valueStyle={{ color: '#52c41a' }}
-                                    prefix={<CheckCircleOutlined />}
+                                    valueStyle={{ color: '#10B981' }}
+                                    prefix={<CheckCircleOutlined style={{ color: '#10B981' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card">
+                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
                                 <Statistic
                                     title="In Progress"
                                     value={stats?.in_progress_tasks || tasksByStatus.IN_PROGRESS.length}
-                                    valueStyle={{ color: '#1890ff' }}
-                                    prefix={<SyncOutlined />}
+                                    valueStyle={{ color: '#3B82F6' }}
+                                    prefix={<SyncOutlined style={{ color: '#3B82F6' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card">
+                            <Card className="stat-card" style={{ borderTop: `3px solid ${sg.accentColor}` }}>
                                 <Statistic
                                     title="Progress"
                                     value={stats?.progress || 0}
                                     suffix="%"
-                                    valueStyle={{ color: project.color }}
+                                    valueStyle={{ color: sg.accentColor }}
                                 />
                             </Card>
                         </Col>
                     </Row>
+                        );
+                    })()}
                 </div>
 
                 {/* Content */}
@@ -555,15 +547,25 @@ export const ProjectDetailPage: React.FC = () => {
                                                                                         </div>
                                                                                     )}
 
-                                                                                    {/* Footer: Assignee + Menu */}
+                                                                                    {/* Footer: Assignees + Menu */}
                                                                                     <div className="task-card-footer">
-                                                                                        {task.assignee && (
-                                                                                            <Tooltip title={task.assignee.name}>
-                                                                                                <span className="task-card-assignee">
-                                                                                                    <UserOutlined /> {task.assignee.name}
-                                                                                                </span>
-                                                                                            </Tooltip>
-                                                                                        )}
+                                                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, flex: 1 }}>
+                                                                                            {task.taskAssignees && task.taskAssignees.length > 0 ? (
+                                                                                                task.taskAssignees.map(ta => (
+                                                                                                    <Tooltip key={ta.id} title={ta.user.name}>
+                                                                                                        <Tag style={{ fontSize: 11, margin: 0, padding: '0 4px' }}>
+                                                                                                            <UserOutlined /> {ta.user.name}
+                                                                                                        </Tag>
+                                                                                                    </Tooltip>
+                                                                                                ))
+                                                                                            ) : task.assignee ? (
+                                                                                                <Tooltip title={task.assignee.name}>
+                                                                                                    <span className="task-card-assignee">
+                                                                                                        <UserOutlined /> {task.assignee.name}
+                                                                                                    </span>
+                                                                                                </Tooltip>
+                                                                                            ) : null}
+                                                                                        </div>
                                                                                         <Dropdown
                                                                                             menu={{ items: getTaskMenuItems(task) }}
                                                                                             trigger={['click']}
@@ -741,8 +743,8 @@ export const ProjectDetailPage: React.FC = () => {
                         </Col>
                     </Row>
 
-                    <Form.Item name="assigneeId" label="Assignee">
-                        <Select placeholder="Select assignee" allowClear showSearch optionFilterProp="children">
+                    <Form.Item name="assigneeIds" label="Assignees">
+                        <Select mode="multiple" placeholder="Select assignees" allowClear showSearch optionFilterProp="children">
                             {project?.members?.map(member => (
                                 <Option key={member.user.id} value={member.user.id}>
                                     <Space>

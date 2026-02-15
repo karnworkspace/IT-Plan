@@ -1,14 +1,8 @@
 // Authentication Store using Zustand
 import { create } from 'zustand';
 import { authService } from '../services/authService';
-
-interface User {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    pinSetAt?: string | null;
-}
+import type { User } from '../types';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 interface AuthState {
     user: User | null;
@@ -41,8 +35,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             await authService.register({ email, password, name });
             set({ isLoading: false });
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Registration failed';
+        } catch (error) {
+            const errorMessage = getErrorMessage(error);
             set({ error: errorMessage, isLoading: false });
             throw error;
         }
@@ -71,8 +65,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 isAuthenticated: true,
                 isLoading: false,
             });
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Login failed';
+        } catch (error) {
+            const errorMessage = getErrorMessage(error);
             set({ error: errorMessage, isLoading: false });
             throw error;
         }
@@ -96,8 +90,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 isAuthenticated: true,
                 isLoading: false,
             });
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Login failed';
+        } catch (error) {
+            const errorMessage = getErrorMessage(error);
             set({ error: errorMessage, isLoading: false });
             throw error;
         }
@@ -140,8 +134,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             } else {
                 set({ isLoading: false });
             }
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Failed to setup PIN';
+        } catch (error) {
+            const errorMessage = getErrorMessage(error);
             set({ error: errorMessage, isLoading: false });
             throw error;
         }

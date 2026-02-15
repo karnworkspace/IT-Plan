@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../config/database';
+import { AppError } from '../utils/AppError';
 
 // Types
 export interface CreateProjectInput {
@@ -41,6 +40,45 @@ export interface PaginationResult<T> {
 }
 
 export class ProjectService {
+  /**
+   * Get projects for Annual Plan Timeline view
+   */
+  async getTimelineData(): Promise<any[]> {
+    const projects = await prisma.project.findMany({
+      where: { category: { not: null } },
+      include: {
+        owner: { select: { id: true, name: true, email: true } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
+        tasks: {
+          where: { parentTaskId: null },
+          select: {
+            id: true, title: true, status: true, priority: true, progress: true,
+            assignee: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        _count: { select: { tasks: true } },
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+
+    return projects.map(p => {
+      const totalTasks = p.tasks.length;
+      const doneTasks = p.tasks.filter(t => t.status === 'DONE').length;
+      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      return {
+        id: p.id, name: p.name, projectCode: p.projectCode, category: p.category,
+        status: p.status, color: p.color, businessOwner: p.businessOwner,
+        sortOrder: p.sortOrder, timeline: p.timeline, progress, totalTasks, doneTasks,
+        owner: p.owner,
+        members: p.members.map(m => ({ id: m.user.id, name: m.user.name, role: m.role })),
+        tasks: p.tasks,
+      };
+    });
+  }
+
   /**
    * Get all projects with filters and pagination
    */
@@ -209,7 +247,7 @@ export class ProjectService {
     // Allow owner, ADMIN, or OWNER role
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (project.ownerId !== userId && user?.role !== 'ADMIN' && user?.role !== 'OWNER') {
-      throw new Error('You do not have permission to update this project');
+      throw new AppError('You do not have permission to update this project', 403);
     }
 
     return await prisma.project.update({
@@ -231,7 +269,6 @@ export class ProjectService {
    * Delete project
    */
   async deleteProject(id: string, userId: string): Promise<boolean> {
-    // Check if user is owner
     const project = await prisma.project.findUnique({
       where: { id },
     });
@@ -240,8 +277,10 @@ export class ProjectService {
       return false;
     }
 
-    if (project.ownerId !== userId) {
-      throw new Error('You do not have permission to delete this project');
+    // System ADMIN can delete any project
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (project.ownerId !== userId && user?.role !== 'ADMIN') {
+      throw new AppError('You do not have permission to delete this project', 403);
     }
 
     await prisma.project.delete({
@@ -295,13 +334,17 @@ export class ProjectService {
    * Add member to project
    */
   async addProjectMember(projectId: string, userId: string, role: string, requesterId: string): Promise<any> {
-    // Check if requester is owner or admin
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new Error('Only project owners and admins can add members');
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+        throw new AppError('Only project owners and admins can add members', 403);
+      }
     }
 
     // Check if user already exists
@@ -310,7 +353,7 @@ export class ProjectService {
     });
 
     if (existingMember) {
-      throw new Error('User is already a member of this project');
+      throw new AppError('User is already a member of this project', 400);
     }
 
     return await prisma.projectMember.create({
@@ -325,13 +368,17 @@ export class ProjectService {
    * Update member role
    */
   async updateMemberRole(projectId: string, memberId: string, role: string, requesterId: string): Promise<any> {
-    // Check if requester has permission
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || requesterMember.role !== 'OWNER') {
-      throw new Error('Only project owners can change member roles');
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || requesterMember.role !== 'OWNER') {
+        throw new AppError('Only project owners can change member roles', 403);
+      }
     }
 
     return await prisma.projectMember.update({
@@ -347,13 +394,17 @@ export class ProjectService {
    * Remove member from project
    */
   async removeProjectMember(projectId: string, memberId: string, requesterId: string): Promise<void> {
-    // Check if requester has permission
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new Error('Only project owners and admins can remove members');
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+        throw new AppError('Only project owners and admins can remove members', 403);
+      }
     }
 
     // Prevent removing the owner
@@ -362,7 +413,7 @@ export class ProjectService {
     });
 
     if (targetMember?.role === 'OWNER') {
-      throw new Error('Cannot remove project owner');
+      throw new AppError('Cannot remove project owner', 400);
     }
 
     await prisma.projectMember.delete({ where: { id: memberId } });

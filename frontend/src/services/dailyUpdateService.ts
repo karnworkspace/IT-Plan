@@ -1,20 +1,10 @@
 import api from './api';
+import type { DailyUpdate } from '../types';
 
-// Types
-export interface DailyUpdate {
-  id: string;
-  taskId: string;
-  date: string;
-  progress: number;
-  status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED';
-  notes?: string;
-  createdAt: string;
-  task?: {
-    id: string;
-    title: string;
-  };
-}
+// Re-export entity type for backward compatibility
+export type { DailyUpdate } from '../types';
 
+// Input types (request-specific, kept here)
 export interface CreateDailyUpdateInput {
   date?: string;
   progress: number;

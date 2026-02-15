@@ -1,49 +1,17 @@
 import api from './api';
+import type { Task, TasksResponse, TaskStats } from '../types';
 
-// Types
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'BLOCKED' | 'HOLD' | 'CANCELLED';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  projectId: string;
-  assigneeId?: string;
-  createdById: string;
-  parentTaskId?: string;
-  dueDate?: string;
-  startDate?: string;
-  progress: number;
-  createdAt: string;
-  updatedAt: string;
-  assignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-    color?: string;
-  };
-  parentTask?: {
-    id: string;
-    title: string;
-  };
-  subTasks?: Task[];
-  _count?: {
-    subTasks?: number;
-    comments?: number;
-    dailyUpdates?: number;
-  };
-}
+// Re-export entity types for backward compatibility
+export type { Task, TasksResponse, TaskStats } from '../types';
 
+// Input types (request-specific, kept here)
 export interface CreateTaskInput {
   title: string;
   description?: string;
   status?: string;
   priority?: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   dueDate?: string;
   startDate?: string;
   progress?: number;
@@ -56,26 +24,10 @@ export interface UpdateTaskInput {
   status?: string;
   priority?: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   dueDate?: string;
   startDate?: string;
   progress?: number;
-}
-
-export interface TasksResponse {
-  tasks: Task[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-export interface TaskStats {
-  total: number;
-  todo: number;
-  inProgress: number;
-  inReview: number;
-  done: number;
-  blocked: number;
-  overdue: number;
 }
 
 // Task Service

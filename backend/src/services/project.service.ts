@@ -269,7 +269,6 @@ export class ProjectService {
    * Delete project
    */
   async deleteProject(id: string, userId: string): Promise<boolean> {
-    // Check if user is owner
     const project = await prisma.project.findUnique({
       where: { id },
     });
@@ -278,7 +277,9 @@ export class ProjectService {
       return false;
     }
 
-    if (project.ownerId !== userId) {
+    // System ADMIN can delete any project
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (project.ownerId !== userId && user?.role !== 'ADMIN') {
       throw new AppError('You do not have permission to delete this project', 403);
     }
 
@@ -333,13 +334,17 @@ export class ProjectService {
    * Add member to project
    */
   async addProjectMember(projectId: string, userId: string, role: string, requesterId: string): Promise<any> {
-    // Check if requester is owner or admin
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new AppError('Only project owners and admins can add members', 403);
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+        throw new AppError('Only project owners and admins can add members', 403);
+      }
     }
 
     // Check if user already exists
@@ -363,13 +368,17 @@ export class ProjectService {
    * Update member role
    */
   async updateMemberRole(projectId: string, memberId: string, role: string, requesterId: string): Promise<any> {
-    // Check if requester has permission
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || requesterMember.role !== 'OWNER') {
-      throw new AppError('Only project owners can change member roles', 403);
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || requesterMember.role !== 'OWNER') {
+        throw new AppError('Only project owners can change member roles', 403);
+      }
     }
 
     return await prisma.projectMember.update({
@@ -385,13 +394,17 @@ export class ProjectService {
    * Remove member from project
    */
   async removeProjectMember(projectId: string, memberId: string, requesterId: string): Promise<void> {
-    // Check if requester has permission
-    const requesterMember = await prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: requesterId } }
-    });
+    // System ADMIN bypasses project-level check
+    const requesterUser = await prisma.user.findUnique({ where: { id: requesterId }, select: { role: true } });
+    const isSystemAdmin = requesterUser?.role === 'ADMIN';
 
-    if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
-      throw new AppError('Only project owners and admins can remove members', 403);
+    if (!isSystemAdmin) {
+      const requesterMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: requesterId } }
+      });
+      if (!requesterMember || !['OWNER', 'ADMIN'].includes(requesterMember.role)) {
+        throw new AppError('Only project owners and admins can remove members', 403);
+      }
     }
 
     // Prevent removing the owner

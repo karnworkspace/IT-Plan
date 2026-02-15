@@ -11,6 +11,7 @@ export interface CreateTaskInput {
   status?: string;
   priority?: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   dueDate?: string;
   startDate?: string;
   progress?: number;
@@ -23,6 +24,7 @@ export interface UpdateTaskInput {
   status?: string;
   priority?: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   dueDate?: string;
   startDate?: string;
   progress?: number;

@@ -65,7 +65,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     const userId = extractUserId(req);
 
     // Validation
-    const { title, description, assigneeId, priority, dueDate, startDate, status, parentTaskId } = req.body;
+    const { title, description, assigneeId, assigneeIds, priority, dueDate, startDate, status, parentTaskId } = req.body;
 
     if (!title) {
       return sendError(res, 'Title is required', 400);
@@ -105,22 +105,15 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       return sendError(res, 'Start date must be before due date', 400);
     }
 
-    // Validate assigneeId if provided
-    if (assigneeId) {
-      const user = await prisma.user.findUnique({
-        where: { id: assigneeId },
-      });
-      if (!user) {
-        return sendError(res, 'Assignee not found', 404);
-      }
-    }
+    // Resolve assignee(s)
+    const resolvedAssigneeIds: string[] = assigneeIds?.length ? assigneeIds : (assigneeId ? [assigneeId] : []);
 
     const taskData: CreateTaskInput = {
       title,
       description,
       projectId,
       createdById: userId,
-      assigneeId,
+      assigneeIds: resolvedAssigneeIds,
       priority,
       status,
       startDate: startDateObj,
@@ -144,7 +137,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     const userId = extractUserId(req);
 
     // Validation
-    const { title, description, status, priority, assigneeId, dueDate, startDate, progress } = req.body;
+    const { title, description, status, priority, assigneeId, assigneeIds, dueDate, startDate, progress } = req.body;
 
     if (title && title.length > 200) {
       return sendError(res, 'Title must be less than 200 characters', 400);
@@ -185,22 +178,17 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       return sendError(res, 'Start date must be before due date', 400);
     }
 
-    // Validate assigneeId if provided
-    if (assigneeId) {
-      const user = await prisma.user.findUnique({
-        where: { id: assigneeId },
-      });
-      if (!user) {
-        return sendError(res, 'Assignee not found', 404);
-      }
-    }
+    // Resolve assignee(s)
+    const resolvedAssigneeIds: string[] | undefined = assigneeIds !== undefined
+      ? assigneeIds
+      : (assigneeId !== undefined ? [assigneeId] : undefined);
 
     const taskData: UpdateTaskInput = {
       title,
       description,
       status,
       priority,
-      assigneeId,
+      assigneeIds: resolvedAssigneeIds,
       startDate: startDateObj,
       dueDate: dueDateObj,
       progress,

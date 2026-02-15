@@ -83,6 +83,54 @@ export const PRIORITY_LABELS: Record<string, string> = {
   URGENT: 'Urgent',
 };
 
+// --- Project Status Gradient Config ---
+
+export interface ProjectStatusGradient {
+  gradient: string;        // Full gradient for header
+  lightBg: string;         // Light background for cards
+  lightBorder: string;     // Border color for light cards
+  textColor: string;       // Text color on light bg
+  accentColor: string;     // Primary accent color
+}
+
+export const PROJECT_STATUS_GRADIENT: Record<string, ProjectStatusGradient> = {
+  ACTIVE: {
+    gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    lightBg: '#ECFDF5',
+    lightBorder: '#A7F3D0',
+    textColor: '#065F46',
+    accentColor: '#10B981',
+  },
+  DELAY: {
+    gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+    lightBg: '#FEF2F2',
+    lightBorder: '#FECACA',
+    textColor: '#991B1B',
+    accentColor: '#EF4444',
+  },
+  COMPLETED: {
+    gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+    lightBg: '#EFF6FF',
+    lightBorder: '#BFDBFE',
+    textColor: '#1E40AF',
+    accentColor: '#3B82F6',
+  },
+  HOLD: {
+    gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+    lightBg: '#FFFBEB',
+    lightBorder: '#FDE68A',
+    textColor: '#92400E',
+    accentColor: '#F59E0B',
+  },
+  CANCELLED: {
+    gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
+    lightBg: '#F9FAFB',
+    lightBorder: '#D1D5DB',
+    textColor: '#374151',
+    accentColor: '#6B7280',
+  },
+};
+
 // --- Project Color Picker ---
 
 export const PROJECT_COLORS = [

@@ -98,9 +98,15 @@
 }
 
 .project-stats .stat-card {
-    background: #fafafa;
-    border: 1px solid #f0f0f0;
+    background: white;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.project-stats .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .project-stats .stat-card .ant-statistic-title {
@@ -110,6 +116,17 @@
 
 .project-stats .stat-card .ant-statistic-content {
     font-size: 28px;
+}
+
+/* Timeline Cards */
+.timeline-card {
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.timeline-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Content */

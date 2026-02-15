@@ -65,6 +65,7 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   assignee?: UserRef;
+  taskAssignees?: { id: string; user: UserRef }[];
   project?: ProjectRef;
   parentTask?: TaskRef;
   subTasks?: Task[];

@@ -8,6 +8,7 @@ export interface CreateTaskInput {
   description?: string;
   projectId: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   createdById: string;
   priority?: string;
   status?: string;
@@ -22,6 +23,7 @@ export interface UpdateTaskInput {
   status?: string;
   priority?: string;
   assigneeId?: string;
+  assigneeIds?: string[];
   dueDate?: Date;
   startDate?: Date;
   progress?: number;
@@ -102,6 +104,7 @@ export class TaskService {
             name: true,
           },
         },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
         _count: {
           select: {
             comments: true,
@@ -181,6 +184,7 @@ export class TaskService {
             date: 'desc',
           },
         },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
         _count: {
           select: {
             comments: true,
@@ -198,12 +202,16 @@ export class TaskService {
    * Create new task
    */
   async createTask(data: CreateTaskInput): Promise<any> {
+    // Resolve assignees: use assigneeIds array or fall back to single assigneeId
+    const assigneeIds = data.assigneeIds?.length ? data.assigneeIds : (data.assigneeId ? [data.assigneeId] : []);
+    const primaryAssigneeId = assigneeIds[0] || null;
+
     const task = await prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
         projectId: data.projectId,
-        assigneeId: data.assigneeId || null,
+        assigneeId: primaryAssigneeId,
         createdById: data.createdById,
         priority: data.priority || 'MEDIUM',
         dueDate: data.dueDate || null,
@@ -211,39 +219,30 @@ export class TaskService {
         status: data.status || 'TODO',
         progress: 0,
         parentTaskId: data.parentTaskId || null,
+        taskAssignees: assigneeIds.length > 0 ? {
+          create: assigneeIds.map(uid => ({ userId: uid })),
+        } : undefined,
       },
       include: {
-        project: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        assignee: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        project: { select: { id: true, name: true } },
+        assignee: { select: { id: true, name: true } },
+        createdBy: { select: { id: true, name: true } },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
       },
     });
 
-    // Trigger notification for assignee
-    if (data.assigneeId && data.assigneeId !== data.createdById) {
-      await notificationService.createNotification({
-        userId: data.assigneeId,
-        type: 'TASK_ASSIGNED',
-        title: 'New Task Assigned',
-        message: `You have been assigned to task: ${task.title}`,
-        taskId: task.id,
-        projectId: task.projectId,
-      });
+    // Trigger notifications for all assignees
+    for (const uid of assigneeIds) {
+      if (uid !== data.createdById) {
+        await notificationService.createNotification({
+          userId: uid,
+          type: 'TASK_ASSIGNED',
+          title: 'New Task Assigned',
+          message: `You have been assigned to task: ${task.title}`,
+          taskId: task.id,
+          projectId: task.projectId,
+        });
+      }
     }
 
     // Log activity
@@ -286,8 +285,34 @@ export class TaskService {
       throw new Error('You do not have permission to update this task');
     }
 
-    // Trigger notification when assignee changes
-    if (data.assigneeId && data.assigneeId !== existingTask.assigneeId) {
+    // Handle multiple assignees
+    const { assigneeIds, ...updateData } = data;
+    if (assigneeIds !== undefined) {
+      // Set primary assignee
+      updateData.assigneeId = assigneeIds[0] || undefined;
+
+      // Replace all task assignees
+      await prisma.taskAssignee.deleteMany({ where: { taskId: id } });
+      if (assigneeIds.length > 0) {
+        await prisma.taskAssignee.createMany({
+          data: assigneeIds.map(uid => ({ taskId: id, userId: uid })),
+        });
+      }
+
+      // Notify new assignees
+      for (const uid of assigneeIds) {
+        if (uid !== existingTask.assigneeId && uid !== userId) {
+          await notificationService.createNotification({
+            userId: uid,
+            type: 'TASK_ASSIGNED',
+            title: 'Task Assigned to You',
+            message: `You have been assigned to task: ${existingTask.title}`,
+            taskId: id,
+            projectId: existingTask.projectId,
+          });
+        }
+      }
+    } else if (data.assigneeId && data.assigneeId !== existingTask.assigneeId) {
       await notificationService.createNotification({
         userId: data.assigneeId,
         type: 'TASK_ASSIGNED',
@@ -300,26 +325,12 @@ export class TaskService {
 
     const updatedTask = await prisma.task.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
-        project: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        assignee: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        project: { select: { id: true, name: true } },
+        assignee: { select: { id: true, name: true } },
+        createdBy: { select: { id: true, name: true } },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
       },
     });
 
@@ -357,7 +368,11 @@ export class TaskService {
     const isCreator = task.createdById === userId;
     const isProjectOwner = task.project.ownerId === userId;
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    // System ADMIN can delete any task
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isSystemAdmin = user?.role === 'ADMIN';
+
+    if (!isAssignee && !isCreator && !isProjectOwner && !isSystemAdmin) {
       throw new Error('You do not have permission to delete this task');
     }
 

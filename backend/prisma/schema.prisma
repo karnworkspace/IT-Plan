@@ -55,6 +55,7 @@ model User {
   notifications     Notification[]
   activityLogs      ActivityLog[]
   groupMembers      GroupMember[]
+  taskAssignments   TaskAssignee[]
 
   @@map("users")
 }
@@ -169,6 +170,8 @@ model Task {
   notifications Notification[]
   activityLogs ActivityLog[]
 
+  taskAssignees TaskAssignee[]
+
   @@index([projectId])
   @@index([assigneeId])
   @@index([createdById])
@@ -176,6 +179,21 @@ model Task {
   @@index([dueDate])
   @@index([parentTaskId])
   @@map("tasks")
+}
+
+model TaskAssignee {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_assignees")
 }
 
 // ============================================

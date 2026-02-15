@@ -136,7 +136,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 description: taskData.description,
                 status: taskData.status,
                 priority: taskData.priority,
-                assigneeId: taskData.assigneeId || undefined,
+                assigneeIds: taskData.taskAssignees?.map((ta: { user: { id: string } }) => ta.user.id) || (taskData.assigneeId ? [taskData.assigneeId] : []),
                 startDate: taskData.startDate ? dayjs(taskData.startDate) : null,
                 dueDate: taskData.dueDate ? dayjs(taskData.dueDate) : null,
             });
@@ -299,8 +299,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                             ))}
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item name="assigneeId" style={{ marginBottom: 0, width: 180 }}>
-                                        <Select placeholder="Assignee" allowClear showSearch optionFilterProp="children">
+                                    <Form.Item name="assigneeIds" style={{ marginBottom: 0, minWidth: 200 }}>
+                                        <Select mode="multiple" placeholder="Assignees" allowClear showSearch optionFilterProp="children" maxTagCount={2}>
                                             {projectMembers.map(member => (
                                                 <Option key={member.id} value={member.id}>{member.name}</Option>
                                             ))}
@@ -357,11 +357,18 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         {!isEditing && (
                             <div className="metadata-grid">
                                 <div className="meta-item">
-                                    <Text type="secondary">Assignee</Text>
-                                    <Space style={{ marginTop: 4 }}>
-                                        <Avatar size="small" icon={<UserOutlined />} />
-                                        <Text>{task.assignee?.name || 'Unassigned'}</Text>
-                                    </Space>
+                                    <Text type="secondary">Assignees</Text>
+                                    <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                        {task.taskAssignees && task.taskAssignees.length > 0 ? (
+                                            task.taskAssignees.map(ta => (
+                                                <Tag key={ta.id} icon={<UserOutlined />}>{ta.user.name}</Tag>
+                                            ))
+                                        ) : task.assignee ? (
+                                            <Tag icon={<UserOutlined />}>{task.assignee.name}</Tag>
+                                        ) : (
+                                            <Text type="secondary">Unassigned</Text>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="meta-item">
                                     <Text type="secondary">Start Date</Text>

@@ -150,9 +150,7 @@ export const MyTasksPage: React.FC = () => {
         }
     };
 
-    const handlePriorityFilter = (checkedValues: string[]) => {
-        setPriorityFilter(checkedValues);
-    };
+
 
     // Filter tasks
     const filteredTasks = tasks.filter(task => {
@@ -320,12 +318,15 @@ export const MyTasksPage: React.FC = () => {
                                     <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
                                     <Checkbox.Group
                                         value={priorityFilter}
-                                        onChange={handlePriorityFilter}
+                                        onChange={(values) => setPriorityFilter(values as string[])}
                                     >
-                                        <Checkbox value="URGENT">Urgent</Checkbox>
-                                        <Checkbox value="HIGH">High</Checkbox>
-                                        <Checkbox value="MEDIUM">Medium</Checkbox>
-                                        <Checkbox value="LOW">Low</Checkbox>
+                                        {Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => (
+                                            <Checkbox key={key} value={key}>
+                                                <span style={{ color: cfg.color, fontWeight: 500 }}>
+                                                    {cfg.label}
+                                                </span>
+                                            </Checkbox>
+                                        ))}
                                     </Checkbox.Group>
                                 </div>
                             </Space>

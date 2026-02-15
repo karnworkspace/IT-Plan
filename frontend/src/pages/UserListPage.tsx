@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Typography, Table, Tag, message, Spin, Button, Modal, Input, Select, Form } from 'antd';
-import { UserOutlined, ArrowLeftOutlined, EditOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, ArrowLeftOutlined, EditOutlined, LockOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import api from '../services/api';
@@ -189,6 +189,46 @@ export const UserListPage: React.FC = () => {
                             </Title>
                             <Text type="secondary">{users.length} users total</Text>
                         </div>
+                    </div>
+
+                    {/* Role Reference Table */}
+                    <div style={{
+                        background: '#fff',
+                        borderRadius: 12,
+                        border: '1px solid #E2E8F0',
+                        padding: '16px 20px',
+                        marginBottom: 20,
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                            <InfoCircleOutlined style={{ color: '#64748B' }} />
+                            <Text strong style={{ color: '#334155' }}>Role Permissions</Text>
+                        </div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
+                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748B', fontWeight: 600, width: 120 }}>Role</th>
+                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748B', fontWeight: 600 }}>Permissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                    <td style={{ padding: '8px 12px' }}><Tag color="blue">ADMIN</Tag></td>
+                                    <td style={{ padding: '8px 12px', color: '#475569' }}>เข้าถึง Configuration/User management, แก้ไข/ลบ project ทุกตัวได้ (ไม่ต้องเป็นสมาชิก), จัดการ tasks ข้ามโครงการได้</td>
+                                </tr>
+                                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                    <td style={{ padding: '8px 12px' }}><Tag color="gold">OWNER</Tag></td>
+                                    <td style={{ padding: '8px 12px', color: '#475569' }}>เจ้าของโครงการ, สิทธิ์เทียบเท่า ADMIN ในเรื่อง project/task, เพิ่ม/ลบสมาชิกในโครงการตัวเองได้, แต่เข้า Configuration ไม่ได้</td>
+                                </tr>
+                                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                    <td style={{ padding: '8px 12px' }}><Tag>MEMBER</Tag></td>
+                                    <td style={{ padding: '8px 12px', color: '#475569' }}>สมาชิกทั่วไป, เห็น/แก้ไขเฉพาะ project ที่ตัวเองเป็นสมาชิก, ทำ task ที่ assign ให้ได้</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '8px 12px' }}><Tag color="default">USER</Tag></td>
+                                    <td style={{ padding: '8px 12px', color: '#94A3B8' }}>Legacy role — ไม่ได้ใช้งานจริงในระบบปัจจุบัน</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <Spin spinning={loading}>

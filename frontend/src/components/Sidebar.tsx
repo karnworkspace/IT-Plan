@@ -9,6 +9,7 @@ import {
     FieldTimeOutlined,
     UsergroupAddOutlined,
     AppstoreOutlined,
+    SettingOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { NotificationPopover } from './NotificationPopover';
@@ -27,6 +28,8 @@ export const Sidebar: React.FC = () => {
         navigate('/login');
     };
 
+    const isAdmin = user?.role === 'ADMIN';
+
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: <DashboardOutlined /> },
         { path: '/projects', label: 'Projects', icon: <FolderOutlined /> },
@@ -34,6 +37,7 @@ export const Sidebar: React.FC = () => {
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
         { path: '/timeline', label: 'Timeline', icon: <FieldTimeOutlined /> },
         { path: '/groups', label: 'Groups', icon: <UsergroupAddOutlined /> },
+        ...(isAdmin ? [{ path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> }] : []),
     ];
 
     return (

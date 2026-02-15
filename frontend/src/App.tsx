@@ -12,6 +12,8 @@ import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { TimelinePage } from './pages/TimelinePage';
 import { GroupsPage } from './pages/GroupsPage';
+import { ConfigurationPage } from './pages/ConfigurationPage';
+import { UserListPage } from './pages/UserListPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -88,6 +90,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <GroupsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/configuration"
+            element={
+              <ProtectedRoute>
+                <ConfigurationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/configuration/users"
+            element={
+              <ProtectedRoute>
+                <UserListPage />
               </ProtectedRoute>
             }
           />

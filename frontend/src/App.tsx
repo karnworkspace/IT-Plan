@@ -11,7 +11,6 @@ import { MyTasksPage } from './pages/MyTasksPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { TimelinePage } from './pages/TimelinePage';
-import { GroupsPage } from './pages/GroupsPage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import { UserListPage } from './pages/UserListPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -82,14 +81,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <TimelinePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/groups"
-            element={
-              <ProtectedRoute>
-                <GroupsPage />
               </ProtectedRoute>
             }
           />

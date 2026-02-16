@@ -37,7 +37,6 @@ export const Sidebar: React.FC = () => {
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
         { path: '/timeline', label: 'Timeline', icon: <FieldTimeOutlined /> },
         ...(isAdmin ? [
-            { path: '/groups', label: 'Groups', icon: <UsergroupAddOutlined /> },
             { path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> },
         ] : []),
     ];

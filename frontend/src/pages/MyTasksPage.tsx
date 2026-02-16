@@ -40,7 +40,7 @@ import {
     DeleteOutlined,
 } from '@ant-design/icons';
 import { useCountUp } from '../hooks/useCountUp';
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { DndContext, DragOverlay, useDroppable, useDraggable, PointerSensor, useSensor, useSensors, closestCorners, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
@@ -85,6 +85,31 @@ const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
     );
 };
 
+function MyTasksDroppableColumn({ id, className, children }: { id: string; className: string; children: React.ReactNode }) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+    return (
+        <div ref={setNodeRef} className={`${className} ${isOver ? 'mytasks-column-over' : ''}`}>
+            {children}
+        </div>
+    );
+}
+
+function MyTasksDraggableCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+    return (
+        <div
+            ref={setNodeRef}
+            {...attributes}
+            {...listeners}
+            style={{ opacity: isDragging ? 0.3 : 1 }}
+            className={`mytasks-card ${isDragging ? 'mytasks-card-dragging' : ''}`}
+            onClick={() => !isDragging && onClick()}
+        >
+            {children}
+        </div>
+    );
+}
+
 export const MyTasksPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -94,6 +119,10 @@ export const MyTasksPage: React.FC = () => {
     const [form] = Form.useForm();
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+
+    // DnD State
+    const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
+    const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     const getTaskMenuItems = (task: Task): MenuProps['items'] => [
         {
@@ -183,25 +212,32 @@ export const MyTasksPage: React.FC = () => {
     const getTasksByStatus = (status: string) =>
         filteredTasks.filter(t => t.status === status).sort(sortByPriority);
 
-    // Drag and drop handler
-    const handleDragEnd = async (result: DropResult) => {
-        const { draggableId, destination } = result;
-        if (!destination) return;
+    // Drag and drop handlers
+    const handleDragStart = (event: DragStartEvent) => {
+        const task = tasks.find(t => t.id === event.active.id);
+        setActiveDragTask(task || null);
+    };
 
-        const newStatus = destination.droppableId;
-        const task = tasks.find(t => t.id === draggableId);
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveDragTask(null);
+        if (!over) return;
+
+        const taskId = active.id as string;
+        const newStatus = over.id as string;
+        const task = tasks.find(t => t.id === taskId);
         if (!task || task.status === newStatus) return;
 
         // Optimistic update
         const oldTasks = [...tasks];
         setTasks(prev => prev.map(t =>
-            t.id === draggableId
+            t.id === taskId
                 ? { ...t, status: newStatus as Task['status'], progress: newStatus === 'DONE' ? 100 : t.progress }
                 : t
         ));
 
         try {
-            await taskService.updateTaskStatus(draggableId, {
+            await taskService.updateTaskStatus(taskId, {
                 status: newStatus,
                 progress: newStatus === 'DONE' ? 100 : task.progress,
             });
@@ -333,7 +369,7 @@ export const MyTasksPage: React.FC = () => {
                         </Card>
 
                         {/* Kanban Board */}
-                        <DragDropContext onDragEnd={handleDragEnd}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                             <div className="mytasks-board">
                                 {STATUS_COLUMNS.map(col => {
                                     const columnTasks = getTasksByStatus(col.key);
@@ -351,100 +387,91 @@ export const MyTasksPage: React.FC = () => {
                                             </div>
 
                                             {/* Droppable Area */}
-                                            <Droppable droppableId={col.key}>
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.droppableProps}
-                                                        className={`mytasks-column-content ${snapshot.isDraggingOver ? 'mytasks-column-over' : ''}`}
-                                                    >
-                                                        {columnTasks.length === 0 && (
-                                                            <div className="mytasks-empty">No tasks</div>
-                                                        )}
-                                                        {columnTasks.map((task, index) => {
-                                                            const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
-                                                            return (
-                                                                <Draggable key={task.id} draggableId={task.id} index={index}>
-                                                                    {(dragProvided, dragSnapshot) => (
-                                                                        <div
-                                                                            ref={dragProvided.innerRef}
-                                                                            {...dragProvided.draggableProps}
-                                                                            {...dragProvided.dragHandleProps}
-                                                                            className={`mytasks-card ${dragSnapshot.isDragging ? 'mytasks-card-dragging' : ''}`}
-                                                                            onClick={() => { if (!dragSnapshot.isDragging) { setSelectedTaskId(task.id); setDetailModalVisible(true); } }}
-                                                                        >
-                                                                            {/* Project Color Bar */}
-                                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
-
-                                                                            <div className="mytasks-card-body">
-                                                                                {/* Project Name + Menu */}
-                                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                                    <div className="mytasks-card-project">
-                                                                                        <FolderOutlined />
-                                                                                        <span>{task.project?.name || 'Unknown'}</span>
-                                                                                    </div>
-                                                                                    <Dropdown menu={{ items: getTaskMenuItems(task) }} trigger={['click']}>
-                                                                                        <Button
-                                                                                            type="text"
-                                                                                            size="small"
-                                                                                            icon={<MoreOutlined />}
-                                                                                            onClick={(e) => e.stopPropagation()}
-                                                                                            style={{ flexShrink: 0, color: '#94A3B8' }}
-                                                                                        />
-                                                                                    </Dropdown>
-                                                                                </div>
-
-                                                                                {/* Task Title */}
-                                                                                <div className="mytasks-card-title">
-                                                                                    {task.title}
-                                                                                </div>
-
-                                                                                {/* Priority Badge */}
-                                                                                <span
-                                                                                    className="mytasks-priority-badge"
-                                                                                    style={{ color: pConfig.color, background: pConfig.bg, borderColor: pConfig.color }}
-                                                                                >
-                                                                                    {pConfig.label}
-                                                                                </span>
-
-                                                                                {/* Due Date */}
-                                                                                {task.dueDate && (
-                                                                                    <div className="mytasks-card-due">
-                                                                                        <CalendarOutlined />
-                                                                                        <span>{dayjs(task.dueDate).format('DD MMM YYYY')}</span>
-                                                                                        {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
-                                                                                            const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
-                                                                                            if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
-                                                                                            if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
-                                                                                            return null;
-                                                                                        })()}
-                                                                                    </div>
-                                                                                )}
-
-                                                                                {/* Progress */}
-                                                                                <div className="mytasks-card-progress">
-                                                                                    <div className="progress-bar-track">
-                                                                                        <div
-                                                                                            className="progress-bar-fill"
-                                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
-                                                                                        />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </Draggable>
-                                                            );
-                                                        })}
-                                                        {provided.placeholder}
-                                                    </div>
+                                            <MyTasksDroppableColumn id={col.key} className="mytasks-column-content">
+                                                {columnTasks.length === 0 && (
+                                                    <div className="mytasks-empty">No tasks</div>
                                                 )}
-                                            </Droppable>
+                                                {columnTasks.map((task) => {
+                                                    const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                                                    return (
+                                                        <MyTasksDraggableCard key={task.id} id={task.id} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
+                                                            {/* Project Color Bar */}
+                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
+
+                                                            <div className="mytasks-card-body">
+                                                                {/* Project Name + Menu */}
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    <div className="mytasks-card-project">
+                                                                        <FolderOutlined />
+                                                                        <span>{task.project?.name || 'Unknown'}</span>
+                                                                    </div>
+                                                                    <Dropdown menu={{ items: getTaskMenuItems(task) }} trigger={['click']}>
+                                                                        <Button
+                                                                            type="text"
+                                                                            size="small"
+                                                                            icon={<MoreOutlined />}
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            style={{ flexShrink: 0, color: '#94A3B8' }}
+                                                                        />
+                                                                    </Dropdown>
+                                                                </div>
+
+                                                                {/* Task Title */}
+                                                                <div className="mytasks-card-title">
+                                                                    {task.title}
+                                                                </div>
+
+                                                                {/* Priority Badge */}
+                                                                <span
+                                                                    className="mytasks-priority-badge"
+                                                                    style={{ color: pConfig.color, background: pConfig.bg, borderColor: pConfig.color }}
+                                                                >
+                                                                    {pConfig.label}
+                                                                </span>
+
+                                                                {/* Due Date */}
+                                                                {task.dueDate && (
+                                                                    <div className="mytasks-card-due">
+                                                                        <CalendarOutlined />
+                                                                        <span>{dayjs(task.dueDate).format('DD MMM YYYY')}</span>
+                                                                        {task.status !== 'DONE' && task.status !== 'CANCELLED' && (() => {
+                                                                            const daysLeft = dayjs(task.dueDate).diff(dayjs(), 'day');
+                                                                            if (daysLeft < 0) return <Tag color="red" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Delay {Math.abs(daysLeft)}d</Tag>;
+                                                                            if (daysLeft <= 3) return <Tag color="orange" style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>Due soon</Tag>;
+                                                                            return null;
+                                                                        })()}
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Progress */}
+                                                                <div className="mytasks-card-progress">
+                                                                    <div className="progress-bar-track">
+                                                                        <div
+                                                                            className="progress-bar-fill"
+                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </MyTasksDraggableCard>
+                                                    );
+                                                })}
+                                            </MyTasksDroppableColumn>
                                         </div>
                                     );
                                 })}
                             </div>
-                        </DragDropContext>
+                            <DragOverlay>
+                                {activeDragTask && (
+                                    <div className="mytasks-card mytasks-card-dragging">
+                                        <div className="mytasks-card-color" style={{ background: activeDragTask.project?.color || '#1890ff' }} />
+                                        <div className="mytasks-card-body">
+                                            <div className="mytasks-card-title">{activeDragTask.title}</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </DragOverlay>
+                        </DndContext>
                     </Spin>
                 </Content>
             </Layout>

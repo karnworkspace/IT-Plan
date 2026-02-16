@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { DndContext, DragOverlay, useDroppable, useDraggable, PointerSensor, useSensor, useSensors, closestCorners, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
 import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import {
@@ -148,6 +148,31 @@ const getStatusIconColor = (status: string) => {
     }
 };
 
+function BoardDroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+    return (
+        <div ref={setNodeRef} className={`board-column-content ${isOver ? 'board-column-over' : ''}`}>
+            {children}
+        </div>
+    );
+}
+
+function BoardDraggableCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+    return (
+        <div
+            ref={setNodeRef}
+            {...attributes}
+            {...listeners}
+            style={{ opacity: isDragging ? 0.3 : 1 }}
+            className={`board-project-card ${isDragging ? 'board-card-dragging' : ''}`}
+            onClick={() => !isDragging && onClick()}
+        >
+            {children}
+        </div>
+    );
+}
+
 export const ProjectsPage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -167,6 +192,10 @@ export const ProjectsPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 9;
     const [form] = Form.useForm();
+
+    // DnD State
+    const [activeDragProject, setActiveDragProject] = useState<ProjectWithStats | null>(null);
+    const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     useEffect(() => {
         loadProjects();
@@ -362,21 +391,28 @@ export const ProjectsPage: React.FC = () => {
         { status: 'CANCELLED', label: 'Cancelled', dotColor: '#6B7280' },
     ];
 
-    const handleDragEnd = async (result: DropResult) => {
-        const { draggableId, destination } = result;
-        if (!destination) return;
-        const newStatus = destination.droppableId as Project['status'];
-        const project = projects.find(p => p.id === draggableId);
+    const handleDragStart = (event: DragStartEvent) => {
+        const proj = projects.find(p => p.id === event.active.id);
+        setActiveDragProject(proj || null);
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveDragProject(null);
+        if (!over) return;
+        const projectId = active.id as string;
+        const newStatus = over.id as string as Project['status'];
+        const project = projects.find(p => p.id === projectId);
         if (!project || project.status === newStatus) return;
 
         // Optimistic update
-        setProjects(prev => prev.map(p => p.id === draggableId ? { ...p, status: newStatus } : p));
+        setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: newStatus } : p));
         try {
-            await projectService.updateProject(draggableId, { status: newStatus });
+            await projectService.updateProject(projectId, { status: newStatus });
             message.success(`Moved "${project.name}" to ${newStatus}`);
         } catch {
             // Revert on error
-            setProjects(prev => prev.map(p => p.id === draggableId ? { ...p, status: project.status } : p));
+            setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: project.status } : p));
             message.error('Failed to update project status');
         }
     };
@@ -629,7 +665,7 @@ export const ProjectsPage: React.FC = () => {
                             </>
                         ) : viewMode === 'board' ? (
                             /* Board View (Kanban) with Drag & Drop */
-                            <DragDropContext onDragEnd={handleDragEnd}>
+                            <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                                 <div className="projects-board">
                                     {BOARD_COLUMNS.map(col => {
                                         const columnProjects = filteredProjects.filter(p => p.status === col.status);
@@ -640,90 +676,81 @@ export const ProjectsPage: React.FC = () => {
                                                     <span className="board-column-title">{col.label}</span>
                                                     <Badge count={columnProjects.length} showZero style={{ backgroundColor: col.dotColor }} />
                                                 </div>
-                                                <Droppable droppableId={col.status}>
-                                                    {(provided, snapshot) => (
-                                                        <div
-                                                            className={`board-column-content ${snapshot.isDraggingOver ? 'board-column-over' : ''}`}
-                                                            ref={provided.innerRef}
-                                                            {...provided.droppableProps}
-                                                        >
-                                                            {columnProjects.length === 0 && !snapshot.isDraggingOver && (
-                                                                <div className="board-empty">No projects</div>
-                                                            )}
-                                                            {columnProjects.map((project, index) => {
-                                                                const totalTasks = project.stats?.total || project._count?.tasks || 0;
-                                                                const completedTasks = project.stats?.completed || 0;
-                                                                const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                                                                const progress = project.stats?.progress ?? calculatedProgress;
-
-                                                                return (
-                                                                    <Draggable key={project.id} draggableId={project.id} index={index}>
-                                                                        {(provided, snapshot) => (
-                                                                            <div
-                                                                                ref={provided.innerRef}
-                                                                                {...provided.draggableProps}
-                                                                                {...provided.dragHandleProps}
-                                                                                className={`board-project-card ${snapshot.isDragging ? 'board-card-dragging' : ''}`}
-                                                                                onClick={() => handleViewProject(project.id)}
-                                                                            >
-                                                                                <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(project.status) }} />
-                                                                                <div className="board-card-body">
-                                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                                                        <div className="board-card-title" style={{ flex: 1 }}>{project.name}</div>
-                                                                                        <Dropdown menu={{ items: getProjectMenuItems(project) }} trigger={['click']}>
-                                                                                            <Button
-                                                                                                type="text"
-                                                                                                size="small"
-                                                                                                icon={<MoreOutlined />}
-                                                                                                onClick={(e) => e.stopPropagation()}
-                                                                                                style={{ flexShrink: 0, color: '#94A3B8' }}
-                                                                                            />
-                                                                                        </Dropdown>
-                                                                                    </div>
-                                                                                    <div className="board-card-progress">
-                                                                                        <div className="progress-header">
-                                                                                            <span className="progress-label">Progress</span>
-                                                                                            <span className="progress-value">{progress}%</span>
-                                                                                        </div>
-                                                                                        <div className="progress-bar-track">
-                                                                                            <div
-                                                                                                className="progress-bar-fill"
-                                                                                                style={{ width: `${progress}%`, background: getStatusProgressColor(project.status) }}
-                                                                                            />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div className="board-card-members">
-                                                                                        {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }, idx: number) => (
-                                                                                            <span key={idx} className="board-member-tag">
-                                                                                                {m.user?.name || 'Unknown'}
-                                                                                            </span>
-                                                                                        ))}
-                                                                                        {(project.members?.length || 0) > 3 && (
-                                                                                            <span className="board-member-tag board-member-more">
-                                                                                                +{(project.members?.length || 0) - 3}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="board-card-footer">
-                                                                                        <span className="board-card-stat">
-                                                                                            {completedTasks}/{totalTasks} tasks
-                                                                                        </span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </Draggable>
-                                                                );
-                                                            })}
-                                                            {provided.placeholder}
-                                                        </div>
+                                                <BoardDroppableColumn id={col.status}>
+                                                    {columnProjects.length === 0 && (
+                                                        <div className="board-empty">No projects</div>
                                                     )}
-                                                </Droppable>
+                                                    {columnProjects.map((project) => {
+                                                        const totalTasks = project.stats?.total || project._count?.tasks || 0;
+                                                        const completedTasks = project.stats?.completed || 0;
+                                                        const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                                                        const progress = project.stats?.progress ?? calculatedProgress;
+
+                                                        return (
+                                                            <BoardDraggableCard key={project.id} id={project.id} onClick={() => handleViewProject(project.id)}>
+                                                                <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(project.status) }} />
+                                                                <div className="board-card-body">
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                        <div className="board-card-title" style={{ flex: 1 }}>{project.name}</div>
+                                                                        <Dropdown menu={{ items: getProjectMenuItems(project) }} trigger={['click']}>
+                                                                            <Button
+                                                                                type="text"
+                                                                                size="small"
+                                                                                icon={<MoreOutlined />}
+                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                style={{ flexShrink: 0, color: '#94A3B8' }}
+                                                                            />
+                                                                        </Dropdown>
+                                                                    </div>
+                                                                    <div className="board-card-progress">
+                                                                        <div className="progress-header">
+                                                                            <span className="progress-label">Progress</span>
+                                                                            <span className="progress-value">{progress}%</span>
+                                                                        </div>
+                                                                        <div className="progress-bar-track">
+                                                                            <div
+                                                                                className="progress-bar-fill"
+                                                                                style={{ width: `${progress}%`, background: getStatusProgressColor(project.status) }}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="board-card-members">
+                                                                        {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }, idx: number) => (
+                                                                            <span key={idx} className="board-member-tag">
+                                                                                {m.user?.name || 'Unknown'}
+                                                                            </span>
+                                                                        ))}
+                                                                        {(project.members?.length || 0) > 3 && (
+                                                                            <span className="board-member-tag board-member-more">
+                                                                                +{(project.members?.length || 0) - 3}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="board-card-footer">
+                                                                        <span className="board-card-stat">
+                                                                            {completedTasks}/{totalTasks} tasks
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </BoardDraggableCard>
+                                                        );
+                                                    })}
+                                                </BoardDroppableColumn>
                                             </div>
                                         );
                                     })}
                                 </div>
-                            </DragDropContext>
+                                <DragOverlay>
+                                    {activeDragProject && (
+                                        <div className="board-project-card board-card-dragging">
+                                            <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(activeDragProject.status) }} />
+                                            <div className="board-card-body">
+                                                <div className="board-card-title">{activeDragProject.name}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </DragOverlay>
+                            </DndContext>
                         ) : (
                             /* List View */
                             <div className="project-list-view">

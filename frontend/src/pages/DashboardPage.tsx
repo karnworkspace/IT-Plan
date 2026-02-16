@@ -51,7 +51,7 @@ const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradient
     return (
         <Card
             className="stat-card"
-            bordered={false}
+            variant="borderless"
             onClick={onClick}
             style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
@@ -319,7 +319,7 @@ export const DashboardPage: React.FC = () => {
                                     <Title level={4} style={{ color: '#1E293B', margin: 0 }}>My Active Tasks</Title>
                                     <button className="view-all-link" onClick={() => navigate('/my-tasks')}>View all</button>
                                 </div>
-                                <Card className="tasks-list-card" bordered={false}>
+                                <Card className="tasks-list-card" variant="borderless">
                                     {myTasks.length > 0 ? (
                                         <List
                                             dataSource={myTasks}

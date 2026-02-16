@@ -288,7 +288,7 @@ export const TimelinePage: React.FC = () => {
                                                                     percent={project.progress}
                                                                     size="small"
                                                                     strokeColor={project.progress >= 100 ? '#10B981' : project.progress > 0 ? '#3B82F6' : '#E2E8F0'}
-                                                                    trailColor="#F1F5F9"
+                                                                    railColor="#F1F5F9"
                                                                     format={p => <span className="ap-progress-text">{p}%</span>}
                                                                 />
                                                             </div>
@@ -345,7 +345,7 @@ export const TimelinePage: React.FC = () => {
                                                                     percent={task.progress}
                                                                     size="small"
                                                                     strokeColor={task.status === 'DONE' ? '#10B981' : '#3B82F6'}
-                                                                    trailColor="#F1F5F9"
+                                                                    railColor="#F1F5F9"
                                                                     format={p => <span className="ap-progress-text">{p}%</span>}
                                                                 />
                                                             </div>

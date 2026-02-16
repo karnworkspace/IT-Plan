@@ -69,7 +69,7 @@ const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
     return (
         <Card
             className="stat-card"
-            bordered={false}
+            variant="borderless"
             style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
             <div className="stat-card-inner">

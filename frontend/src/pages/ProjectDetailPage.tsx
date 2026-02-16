@@ -380,7 +380,7 @@ export const ProjectDetailPage: React.FC = () => {
                                 {/* Start Date */}
                                 {project.startDate && (
                                     <Col xs={24} sm={8}>
-                                        <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
+                                        <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                             <Statistic
                                                 title={<span style={{ color: sg.textColor, fontWeight: 600 }}><CalendarOutlined /> Project Start</span>}
                                                 value={dayjs(project.startDate).format('DD MMM YYYY')}
@@ -392,7 +392,7 @@ export const ProjectDetailPage: React.FC = () => {
 
                                 {/* Due Date */}
                                 <Col xs={24} sm={8}>
-                                    <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
+                                    <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
                                             title={<span style={{ color: sg.textColor, fontWeight: 600 }}><ClockCircleOutlined /> Target Finish</span>}
                                             value={
@@ -409,7 +409,7 @@ export const ProjectDetailPage: React.FC = () => {
 
                                 {/* Days Remaining */}
                                 <Col xs={24} sm={8}>
-                                    <Card bordered={false} className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
+                                    <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
                                             title={<span style={{ color: sg.textColor, fontWeight: 600 }}><SyncOutlined spin /> Time Remaining</span>}
                                             value={

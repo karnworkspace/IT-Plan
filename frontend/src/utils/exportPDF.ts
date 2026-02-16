@@ -76,10 +76,8 @@ export async function exportProjectsPDF(projects: Project[]) {
   addHeader(doc, 'Projects Report', `Total: ${projects.length} projects`);
 
   const rows = projects.map((p, i) => {
-    const stats = p.stats;
-    const progress = stats && stats.total > 0
-      ? `${Math.round((stats.completed / stats.total) * 100)}%`
-      : '0%';
+    const totalTasks = p._count?.tasks ?? 0;
+    const progress = totalTasks > 0 ? `${totalTasks} tasks` : '0%';
     return [
       i + 1,
       p.name || '',

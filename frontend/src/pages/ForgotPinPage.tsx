@@ -1,7 +1,7 @@
 // Forgot PIN Page - Request PIN reset
 import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message, Steps, Result } from 'antd';
-import { MailOutlined, LockOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { MailOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { PinInput } from '../components/PinInput';
 import { authService } from '../services/authService';

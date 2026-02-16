@@ -1,5 +1,5 @@
 import api from './api';
-import type { Comment, Attachment, CommentsResponse } from '../types';
+import type { Comment, Attachment } from '../types';
 
 // Re-export entity types for backward compatibility
 export type { Comment, Attachment, CommentsResponse } from '../types';

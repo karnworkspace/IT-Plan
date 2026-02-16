@@ -41,11 +41,8 @@ import {
     CalendarOutlined,
     MoreOutlined,
     FolderOutlined,
-    ExclamationCircleOutlined,
     SyncOutlined,
     UserOutlined,
-    PauseCircleOutlined,
-    StopOutlined,
     DownloadOutlined,
     FilePdfOutlined,
     TeamOutlined,
@@ -55,7 +52,6 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT } from '../constants';
-import { STATUS_ICONS } from '../constants/statusIcons';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;

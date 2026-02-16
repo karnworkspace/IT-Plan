@@ -60,7 +60,6 @@ const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 // Month labels
-const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const MONTH_FULL = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const QUARTERS = [
     { label: 'Q1', months: [0, 1, 2] },

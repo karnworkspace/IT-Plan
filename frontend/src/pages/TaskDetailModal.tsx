@@ -22,10 +22,6 @@ import {
     Image,
 } from 'antd';
 import {
-    ClockCircleOutlined,
-    CheckCircleOutlined,
-    SyncOutlined,
-    ExclamationCircleOutlined,
     UserOutlined,
     CalendarOutlined,
     EditOutlined,
@@ -34,8 +30,6 @@ import {
     PlusOutlined,
     MessageOutlined,
     HistoryOutlined,
-    PauseCircleOutlined,
-    StopOutlined,
     PaperClipOutlined,
     PictureOutlined,
 } from '@ant-design/icons';

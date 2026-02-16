@@ -158,8 +158,8 @@ export const ProjectsPage: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
-    const [selectedProjectForMembers, setSelectedProjectForMembers] = useState<ProjectWithStats | null>(null);
+    const [isMembersModalVisible, _setIsMembersModalVisible] = useState(false);
+    const [selectedProjectForMembers, _setSelectedProjectForMembers] = useState<ProjectWithStats | null>(null);
     const [viewMode, setViewMode] = useState<'card' | 'list' | 'board'>(() => {
         return (localStorage.getItem('projectsViewMode') as 'card' | 'list' | 'board') || 'card';
     });
@@ -306,11 +306,6 @@ export const ProjectsPage: React.FC = () => {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handleShowMembers = (project: ProjectWithStats) => {
-        setSelectedProjectForMembers(project);
-        setIsMembersModalVisible(true);
     };
 
     const getStatusConfig = (status: string) => {
@@ -698,14 +693,14 @@ export const ProjectsPage: React.FC = () => {
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="board-card-members">
-                                                                                        {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }) => (
-                                                                                            <span key={m.id} className="board-member-tag">
+                                                                                        {project.members?.slice(0, 3).map((m: { user: { name: string; email: string } }, idx: number) => (
+                                                                                            <span key={idx} className="board-member-tag">
                                                                                                 {m.user?.name || 'Unknown'}
                                                                                             </span>
                                                                                         ))}
                                                                                         {(project.members?.length || 0) > 3 && (
                                                                                             <span className="board-member-tag board-member-more">
-                                                                                                +{project.members.length - 3}
+                                                                                                +{(project.members?.length || 0) - 3}
                                                                                             </span>
                                                                                         )}
                                                                                     </div>
@@ -928,7 +923,7 @@ export const ProjectsPage: React.FC = () => {
                     </Space>
                 }
                 open={isMembersModalVisible}
-                onCancel={() => setIsMembersModalVisible(false)}
+                onCancel={() => _setIsMembersModalVisible(false)}
                 footer={null}
                 width={500}
             >

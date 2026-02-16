@@ -40,7 +40,10 @@ import {
     DeleteOutlined,
 } from '@ant-design/icons';
 import { useCountUp } from '../hooks/useCountUp';
-import { DndContext, DragOverlay, useDroppable, useDraggable, PointerSensor, useSensor, useSensors, closestCorners, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { kanbanCollision } from '../utils/kanbanCollision';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
@@ -94,14 +97,19 @@ function MyTasksDroppableColumn({ id, className, children }: { id: string; class
     );
 }
 
-function MyTasksDraggableCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+function SortableMyTaskCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.3 : 1,
+    };
     return (
         <div
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            style={{ opacity: isDragging ? 0.3 : 1 }}
+            style={style}
             className={`mytasks-card ${isDragging ? 'mytasks-card-dragging' : ''}`}
             onClick={() => !isDragging && onClick()}
         >
@@ -196,21 +204,9 @@ export const MyTasksPage: React.FC = () => {
     const holdCount = filteredTasks.filter(t => t.status === 'HOLD').length;
     const cancelledCount = filteredTasks.filter(t => t.status === 'CANCELLED').length;
 
-    // Sort within each column by priority (URGENT first)
-    const priorityOrder = ['URGENT', 'HIGH', 'MEDIUM', 'LOW'];
-    const sortByPriority = (a: Task, b: Task) => {
-        const aIdx = priorityOrder.indexOf(a.priority);
-        const bIdx = priorityOrder.indexOf(b.priority);
-        if (aIdx !== bIdx) return aIdx - bIdx;
-        if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        if (a.dueDate) return -1;
-        if (b.dueDate) return 1;
-        return 0;
-    };
-
-    // Group tasks by status
+    // Group tasks by status (order from backend: sortOrder → dueDate → priority)
     const getTasksByStatus = (status: string) =>
-        filteredTasks.filter(t => t.status === status).sort(sortByPriority);
+        filteredTasks.filter(t => t.status === status);
 
     // Drag and drop handlers
     const handleDragStart = (event: DragStartEvent) => {
@@ -224,11 +220,31 @@ export const MyTasksPage: React.FC = () => {
         if (!over) return;
 
         const taskId = active.id as string;
-        const newStatus = over.id as string;
+        let newStatus = over.id as string;
+        const overTask = tasks.find(t => t.id === newStatus);
+        if (overTask) newStatus = overTask.status;
         const task = tasks.find(t => t.id === taskId);
-        if (!task || task.status === newStatus) return;
+        if (!task) return;
 
-        // Optimistic update
+        // Same column — reorder and persist
+        if (task.status === newStatus) {
+            if (overTask && active.id !== over.id) {
+                setTasks(prev => {
+                    const updated = [...prev];
+                    const oldIdx = updated.findIndex(t => t.id === active.id);
+                    const newIdx = updated.findIndex(t => t.id === over.id);
+                    const [moved] = updated.splice(oldIdx, 1);
+                    updated.splice(newIdx, 0, moved);
+                    // Persist new order
+                    const columnIds = updated.filter(t => t.status === newStatus).map(t => t.id);
+                    taskService.reorderTasks(columnIds).catch(() => {});
+                    return updated;
+                });
+            }
+            return;
+        }
+
+        // Cross-column — optimistic update
         const oldTasks = [...tasks];
         setTasks(prev => prev.map(t =>
             t.id === taskId
@@ -369,7 +385,7 @@ export const MyTasksPage: React.FC = () => {
                         </Card>
 
                         {/* Kanban Board */}
-                        <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                        <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                             <div className="mytasks-board">
                                 {STATUS_COLUMNS.map(col => {
                                     const columnTasks = getTasksByStatus(col.key);
@@ -388,13 +404,14 @@ export const MyTasksPage: React.FC = () => {
 
                                             {/* Droppable Area */}
                                             <MyTasksDroppableColumn id={col.key} className="mytasks-column-content">
+                                                <SortableContext items={columnTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                                                 {columnTasks.length === 0 && (
                                                     <div className="mytasks-empty">No tasks</div>
                                                 )}
                                                 {columnTasks.map((task) => {
                                                     const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
                                                     return (
-                                                        <MyTasksDraggableCard key={task.id} id={task.id} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
+                                                        <SortableMyTaskCard key={task.id} id={task.id} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
                                                             {/* Project Color Bar */}
                                                             <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
 
@@ -453,9 +470,10 @@ export const MyTasksPage: React.FC = () => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </MyTasksDraggableCard>
+                                                        </SortableMyTaskCard>
                                                     );
                                                 })}
+                                                </SortableContext>
                                             </MyTasksDroppableColumn>
                                         </div>
                                     );

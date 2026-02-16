@@ -156,7 +156,8 @@ model Task {
   startDate DateTime?
 
   // Progress
-  progress Int @default(0) // 0-100
+  progress  Int @default(0) // 0-100
+  sortOrder Int @default(0)
 
   // Metadata
   createdAt DateTime @default(now())

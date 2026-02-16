@@ -84,6 +84,13 @@ export const projectService = {
   async deleteProject(id: string): Promise<void> {
     await api.delete(`/projects/${id}`);
   },
+
+  /**
+   * Reorder projects (persist sortOrder)
+   */
+  async reorderProjects(projectIds: string[]): Promise<void> {
+    await api.patch('/projects/reorder', { projectIds });
+  },
 };
 
 export default projectService;

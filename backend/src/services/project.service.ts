@@ -124,9 +124,10 @@ export class ProjectService {
       },
       skip: (page - 1) * limit,
       take: limit,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        { sortOrder: 'asc' },
+        { createdAt: 'desc' },
+      ],
     });
 
     return {
@@ -417,6 +418,20 @@ export class ProjectService {
     }
 
     await prisma.projectMember.delete({ where: { id: memberId } });
+  }
+
+  /**
+   * Reorder projects within a status column
+   */
+  async reorderProjects(projectIds: string[]): Promise<void> {
+    await prisma.$transaction(
+      projectIds.map((id, index) =>
+        prisma.project.update({
+          where: { id },
+          data: { sortOrder: index },
+        })
+      )
+    );
   }
 }
 

@@ -131,6 +131,13 @@ export const taskService = {
   async deleteTask(id: string): Promise<void> {
     await api.delete(`/tasks/${id}`);
   },
+
+  /**
+   * Reorder tasks (persist sortOrder)
+   */
+  async reorderTasks(taskIds: string[]): Promise<void> {
+    await api.patch('/tasks/reorder', { taskIds });
+  },
 };
 
 export default taskService;

@@ -301,6 +301,24 @@ export const getSubTasks = async (req: Request, res: Response, next: NextFunctio
 };
 
 /**
+ * Reorder tasks within a status column
+ */
+export const reorderTasks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { taskIds } = req.body;
+
+    if (!Array.isArray(taskIds) || taskIds.length === 0) {
+      return sendError(res, 'taskIds array is required', 400);
+    }
+
+    await taskService.reorderTasks(taskIds);
+    return sendSuccess(res, { message: 'Tasks reordered' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get task statistics for a project
  */
 export const getTaskStats = async (req: Request, res: Response, next: NextFunction) => {

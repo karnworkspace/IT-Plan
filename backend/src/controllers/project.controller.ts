@@ -300,3 +300,25 @@ export const removeProjectMember = async (
     next(error);
   }
 };
+
+/**
+ * Reorder projects within a status column
+ */
+export const reorderProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { projectIds } = req.body;
+
+    if (!Array.isArray(projectIds) || projectIds.length === 0) {
+      return sendError(res, 'projectIds array is required', 400);
+    }
+
+    await projectService.reorderProjects(projectIds);
+    return sendSuccess(res, { message: 'Projects reordered' });
+  } catch (error) {
+    next(error);
+  }
+};

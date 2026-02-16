@@ -9,6 +9,7 @@ import {
   updateProject,
   deleteProject,
   getProjectStats,
+  reorderProjects,
   getProjectMembers,
   addProjectMember,
   updateProjectMemberRole,
@@ -31,6 +32,7 @@ router.use(authenticate);
  * @access  Private
  */
 router.get('/timeline', getTimeline);
+router.patch('/reorder', reorderProjects);
 
 router.get('/', getProjects);
 

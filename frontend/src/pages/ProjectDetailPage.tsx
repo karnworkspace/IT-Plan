@@ -48,7 +48,10 @@ import {
     TeamOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { DndContext, DragOverlay, useDroppable, useDraggable, PointerSensor, useSensor, useSensors, closestCorners, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { kanbanCollision } from '../utils/kanbanCollision';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT } from '../constants';
@@ -74,14 +77,19 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
     );
 }
 
-function DraggableTaskCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+function SortableTaskCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.3 : 1,
+    };
     return (
         <div
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            style={{ opacity: isDragging ? 0.3 : 1 }}
+            style={style}
             className={`task-card ${isDragging ? 'task-card-dragging' : ''}`}
             onClick={() => !isDragging && onClick()}
         >
@@ -235,14 +243,36 @@ export const ProjectDetailPage: React.FC = () => {
         setActiveDragTask(null);
         if (!over) return;
         const taskId = active.id as string;
-        const newStatus = over.id as string;
+        // over.id could be a column status OR another task's id
+        let newStatus = over.id as string;
+        const overTask = tasks.find(t => t.id === newStatus);
+        if (overTask) newStatus = overTask.status;
         const task = tasks.find(t => t.id === taskId);
-        if (!task || task.status === newStatus) return;
+        if (!task) return;
 
-        // Optimistic update
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any } : t));
+        // Same column — reorder and persist
+        if (task.status === newStatus) {
+            if (overTask && active.id !== over.id) {
+                setTasks(prev => {
+                    const updated = [...prev];
+                    const oldIdx = updated.findIndex(t => t.id === active.id);
+                    const newIdx = updated.findIndex(t => t.id === over.id);
+                    const [moved] = updated.splice(oldIdx, 1);
+                    updated.splice(newIdx, 0, moved);
+                    // Persist new order
+                    const columnIds = updated.filter(t => t.status === newStatus).map(t => t.id);
+                    taskService.reorderTasks(columnIds).catch(() => {});
+                    return updated;
+                });
+            }
+            return;
+        }
+
+        // Cross-column — optimistic update
+        const newProgress = newStatus === 'DONE' ? 100 : task.progress;
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any, progress: newProgress } : t));
         try {
-            await taskService.updateTaskStatus(taskId, { status: newStatus });
+            await taskService.updateTaskStatus(taskId, { status: newStatus, progress: newProgress });
             message.success(`Moved "${task.title}" to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
         } catch {
             setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: task.status } : t));
@@ -513,7 +543,7 @@ export const ProjectDetailPage: React.FC = () => {
                     <Tabs defaultActiveKey="board" size="large">
                         {/* Board View */}
                         <TabPane tab="Board View" key="board">
-                            <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleTaskDragEnd}>
+                            <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleTaskDragEnd}>
                                 <div className="task-board">
                                     {Object.entries(tasksByStatus).map(([status, statusTasks]) => {
                                         const config = STATUS_CONFIG[status];
@@ -525,13 +555,14 @@ export const ProjectDetailPage: React.FC = () => {
                                                     <Badge count={statusTasks.length} showZero style={{ backgroundColor: config.badgeColor }} />
                                                 </div>
                                                 <DroppableColumn id={status}>
+                                                    <SortableContext items={statusTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                                                     {statusTasks.length === 0 && (
                                                         <div className="column-empty">No tasks</div>
                                                     )}
                                                     {statusTasks.map((task) => {
                                                         const pBadge = PRIORITY_BADGE[task.priority] || PRIORITY_BADGE.MEDIUM;
                                                         return (
-                                                            <DraggableTaskCard key={task.id} id={task.id} onClick={() => handleTaskClick(task.id)}>
+                                                            <SortableTaskCard key={task.id} id={task.id} onClick={() => handleTaskClick(task.id)}>
                                                                 {/* Color bar */}
                                                                 <div className="task-card-color" style={{ background: project?.color || '#1890ff' }} />
                                                                 <div className="task-card-body">
@@ -601,9 +632,10 @@ export const ProjectDetailPage: React.FC = () => {
                                                                         style={{ marginBottom: 0 }}
                                                                     />
                                                                 </div>
-                                                            </DraggableTaskCard>
+                                                            </SortableTaskCard>
                                                         );
                                                     })}
+                                                    </SortableContext>
                                                 </DroppableColumn>
                                             </div>
                                         );

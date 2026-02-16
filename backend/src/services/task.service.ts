@@ -116,6 +116,7 @@ export class TaskService {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: [
+        { sortOrder: 'asc' },
         { priority: 'desc' },
         { createdAt: 'desc' },
       ],
@@ -540,6 +541,7 @@ export class TaskService {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: [
+        { sortOrder: 'asc' },
         { dueDate: 'asc' },
         { priority: 'desc' },
         { createdAt: 'desc' },
@@ -605,6 +607,19 @@ export class TaskService {
       cancelled_tasks: cancelled,
       completion_rate: total > 0 ? Math.round((done / total) * 100) : 0,
     };
+  }
+  /**
+   * Reorder tasks within a status column
+   */
+  async reorderTasks(taskIds: string[]): Promise<void> {
+    await prisma.$transaction(
+      taskIds.map((id, index) =>
+        prisma.task.update({
+          where: { id },
+          data: { sortOrder: index },
+        })
+      )
+    );
   }
 }
 

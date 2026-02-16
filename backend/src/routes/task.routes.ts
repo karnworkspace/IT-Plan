@@ -6,6 +6,7 @@ import {
   updateTask,
   deleteTask,
   updateTaskStatus,
+  reorderTasks,
   getTaskStats,
   getMyTasks,
   getSubTasks,
@@ -25,6 +26,9 @@ router.post('/projects/:projectId/tasks', validateUUID('projectId'), createTask)
 
 // My tasks route (tasks assigned to or created by current user)
 router.get('/my-tasks', getMyTasks);
+
+// Reorder tasks (must be before :id routes)
+router.patch('/tasks/reorder', reorderTasks);
 
 // Individual task routes
 router.get('/tasks/:id', validateUUID('id'), getTask);

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DndContext, DragOverlay, useDroppable, useDraggable, PointerSensor, useSensor, useSensors, closestCorners, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
+import { kanbanCollision } from '../utils/kanbanCollision';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
 import {
@@ -157,14 +160,19 @@ function BoardDroppableColumn({ id, children }: { id: string; children: React.Re
     );
 }
 
-function BoardDraggableCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+function SortableBoardCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.3 : 1,
+    };
     return (
         <div
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            style={{ opacity: isDragging ? 0.3 : 1 }}
+            style={style}
             className={`board-project-card ${isDragging ? 'board-card-dragging' : ''}`}
             onClick={() => !isDragging && onClick()}
         >
@@ -401,15 +409,41 @@ export const ProjectsPage: React.FC = () => {
         setActiveDragProject(null);
         if (!over) return;
         const projectId = active.id as string;
-        const newStatus = over.id as string as Project['status'];
+        let newStatus = over.id as string;
+        const overProject = projects.find(p => p.id === newStatus);
+        if (overProject) newStatus = overProject.status;
+        const typedStatus = newStatus as Project['status'];
         const project = projects.find(p => p.id === projectId);
-        if (!project || project.status === newStatus) return;
+        if (!project) return;
 
-        // Optimistic update
-        setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: newStatus } : p));
+        // Same column — reorder and persist
+        if (project.status === typedStatus) {
+            if (overProject && active.id !== over.id) {
+                const reorder = (list: typeof projects) => {
+                    const updated = [...list];
+                    const oldIdx = updated.findIndex(p => p.id === active.id);
+                    const newIdx = updated.findIndex(p => p.id === over!.id);
+                    if (oldIdx === -1 || newIdx === -1) return list;
+                    const [moved] = updated.splice(oldIdx, 1);
+                    updated.splice(newIdx, 0, moved);
+                    return updated;
+                };
+                setProjects(prev => {
+                    const updated = reorder(prev);
+                    const columnIds = updated.filter(p => p.status === typedStatus).map(p => p.id);
+                    projectService.reorderProjects(columnIds).catch(() => {});
+                    return updated;
+                });
+                setFilteredProjects(prev => reorder(prev));
+            }
+            return;
+        }
+
+        // Cross-column — optimistic update
+        setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: typedStatus } : p));
         try {
-            await projectService.updateProject(projectId, { status: newStatus });
-            message.success(`Moved "${project.name}" to ${newStatus}`);
+            await projectService.updateProject(projectId, { status: typedStatus });
+            message.success(`Moved "${project.name}" to ${typedStatus}`);
         } catch {
             // Revert on error
             setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: project.status } : p));
@@ -665,7 +699,7 @@ export const ProjectsPage: React.FC = () => {
                             </>
                         ) : viewMode === 'board' ? (
                             /* Board View (Kanban) with Drag & Drop */
-                            <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                            <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                                 <div className="projects-board">
                                     {BOARD_COLUMNS.map(col => {
                                         const columnProjects = filteredProjects.filter(p => p.status === col.status);
@@ -677,6 +711,7 @@ export const ProjectsPage: React.FC = () => {
                                                     <Badge count={columnProjects.length} showZero style={{ backgroundColor: col.dotColor }} />
                                                 </div>
                                                 <BoardDroppableColumn id={col.status}>
+                                                    <SortableContext items={columnProjects.map(p => p.id)} strategy={verticalListSortingStrategy}>
                                                     {columnProjects.length === 0 && (
                                                         <div className="board-empty">No projects</div>
                                                     )}
@@ -687,7 +722,7 @@ export const ProjectsPage: React.FC = () => {
                                                         const progress = project.stats?.progress ?? calculatedProgress;
 
                                                         return (
-                                                            <BoardDraggableCard key={project.id} id={project.id} onClick={() => handleViewProject(project.id)}>
+                                                            <SortableBoardCard key={project.id} id={project.id} onClick={() => handleViewProject(project.id)}>
                                                                 <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(project.status) }} />
                                                                 <div className="board-card-body">
                                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -732,9 +767,10 @@ export const ProjectsPage: React.FC = () => {
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                            </BoardDraggableCard>
+                                                            </SortableBoardCard>
                                                         );
                                                     })}
+                                                    </SortableContext>
                                                 </BoardDroppableColumn>
                                             </div>
                                         );

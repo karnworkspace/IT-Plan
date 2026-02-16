@@ -44,3 +44,7 @@ coverage/
 
 # Internal review documents
 riskassetment.md
+
+# Deploy scripts & keys (server-only)
+deploy/
+key-dontpushgit/

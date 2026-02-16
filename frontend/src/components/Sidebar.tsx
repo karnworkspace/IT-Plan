@@ -7,7 +7,6 @@ import {
     CalendarOutlined,
     DashboardOutlined,
     FieldTimeOutlined,
-    UsergroupAddOutlined,
     AppstoreOutlined,
     SettingOutlined,
 } from '@ant-design/icons';

@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
         try {
             await loginWithEmail(values.email, values.password, values.remember);
             message.success('Login successful!');
-            window.location.href = '/dashboard';
+            window.location.href = import.meta.env.BASE_URL + 'dashboard';
         } catch (error) {
             console.error('Login Error:', error);
             message.error('Login failed. Please check your credentials.');

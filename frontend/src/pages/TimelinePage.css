@@ -31,16 +31,7 @@
     align-items: center;
 }
 
-.timeline-legend-inline {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    padding: 6px 14px;
-    background: #F1F5F9;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #64748B;
-}
+/* timeline-legend-inline: moved to shared.css as .shared-legend */
 
 .timeline-page-header .ant-select-selector {
     border-radius: 8px !important;
@@ -406,44 +397,22 @@
     color: #64748B;
 }
 
+/* Clickable names */
+.ap-clickable {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.ap-clickable:hover {
+    color: #3B82F6 !important;
+    text-decoration: underline;
+}
+
 .ap-task-bars {
     min-height: 30px;
 }
 
-/* ====================================
-   Legend
-   ==================================== */
-.ap-legend {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 16px;
-    border-top: 1px solid #E2E8F0;
-    background: #F8FAFC;
-    font-size: 12px;
-    color: #64748B;
-    flex-wrap: wrap;
-}
-
-.ap-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.ap-legend-bar {
-    width: 24px;
-    height: 10px;
-    border-radius: 3px;
-}
-
-.ap-legend-current {
-    width: 16px;
-    height: 16px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 3px;
-}
+/* Legend: moved to shared.css as .shared-legend-* */
 
 /* ====================================
    Responsive

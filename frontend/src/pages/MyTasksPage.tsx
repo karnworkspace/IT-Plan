@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { taskService, type Task, type CreateTaskInput } from '../services/taskService';
 import { projectService, type Project } from '../services/projectService';
 import { Sidebar } from '../components/Sidebar';
+import { TaskDetailModal } from './TaskDetailModal';
 import dayjs from 'dayjs';
 import {
     Layout,
@@ -19,9 +20,11 @@ import {
     Input,
     Select,
     DatePicker,
+    Dropdown,
     message,
     Spin,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import {
     CalendarOutlined,
     FolderOutlined,
@@ -32,10 +35,12 @@ import {
     PlusOutlined,
     DownloadOutlined,
     FilePdfOutlined,
+    MoreOutlined,
+    EyeOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import { useCountUp } from '../hooks/useCountUp';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
-import { useNavigate } from 'react-router-dom';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
 import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
@@ -81,13 +86,52 @@ const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
 };
 
 export const MyTasksPage: React.FC = () => {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
     const [form] = Form.useForm();
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+
+    const getTaskMenuItems = (task: Task): MenuProps['items'] => [
+        {
+            key: 'view',
+            icon: <EyeOutlined />,
+            label: 'View / Edit',
+            onClick: (info) => {
+                info.domEvent.stopPropagation();
+                setSelectedTaskId(task.id);
+                setDetailModalVisible(true);
+            },
+        },
+        { type: 'divider' },
+        {
+            key: 'delete',
+            icon: <DeleteOutlined />,
+            label: 'Delete Task',
+            danger: true,
+            onClick: (info) => {
+                info.domEvent.stopPropagation();
+                Modal.confirm({
+                    title: 'Delete Task',
+                    content: `Delete "${task.title}"? This cannot be undone.`,
+                    okText: 'Delete',
+                    okType: 'danger',
+                    onOk: async () => {
+                        try {
+                            await taskService.deleteTask(task.id);
+                            message.success('Task deleted');
+                            loadMyTasks();
+                        } catch {
+                            message.error('Failed to delete task');
+                        }
+                    },
+                });
+            },
+        },
+    ];
 
     useEffect(() => {
         loadMyTasks();
@@ -106,9 +150,7 @@ export const MyTasksPage: React.FC = () => {
         }
     };
 
-    const handlePriorityFilter = (checkedValues: string[]) => {
-        setPriorityFilter(checkedValues);
-    };
+
 
     // Filter tasks
     const filteredTasks = tasks.filter(task => {
@@ -212,8 +254,8 @@ export const MyTasksPage: React.FC = () => {
                 <Header className="my-tasks-header">
                     <div className="my-tasks-header-content">
                         <div>
-                            <Title level={3} style={{ margin: 0 }}>My Tasks</Title>
-                            <Text type="secondary">Tasks assigned to or created by you</Text>
+                            <Title level={2} style={{ margin: 0, fontSize: 48 }}>My Tasks</Title>
+                            <Text type="secondary" style={{ fontSize: 30 }}>Tasks assigned to or created by you</Text>
                         </div>
                         <Space>
                             <Button
@@ -276,12 +318,15 @@ export const MyTasksPage: React.FC = () => {
                                     <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
                                     <Checkbox.Group
                                         value={priorityFilter}
-                                        onChange={handlePriorityFilter}
+                                        onChange={(values) => setPriorityFilter(values as string[])}
                                     >
-                                        <Checkbox value="URGENT">Urgent</Checkbox>
-                                        <Checkbox value="HIGH">High</Checkbox>
-                                        <Checkbox value="MEDIUM">Medium</Checkbox>
-                                        <Checkbox value="LOW">Low</Checkbox>
+                                        {Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => (
+                                            <Checkbox key={key} value={key}>
+                                                <span style={{ color: cfg.color, fontWeight: 500 }}>
+                                                    {cfg.label}
+                                                </span>
+                                            </Checkbox>
+                                        ))}
                                     </Checkbox.Group>
                                 </div>
                             </Space>
@@ -326,16 +371,27 @@ export const MyTasksPage: React.FC = () => {
                                                                             {...dragProvided.draggableProps}
                                                                             {...dragProvided.dragHandleProps}
                                                                             className={`mytasks-card ${dragSnapshot.isDragging ? 'mytasks-card-dragging' : ''}`}
-                                                                            onClick={() => !dragSnapshot.isDragging && navigate(`/projects/${task.projectId}`)}
+                                                                            onClick={() => { if (!dragSnapshot.isDragging) { setSelectedTaskId(task.id); setDetailModalVisible(true); } }}
                                                                         >
                                                                             {/* Project Color Bar */}
                                                                             <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
 
                                                                             <div className="mytasks-card-body">
-                                                                                {/* Project Name */}
-                                                                                <div className="mytasks-card-project">
-                                                                                    <FolderOutlined />
-                                                                                    <span>{task.project?.name || 'Unknown'}</span>
+                                                                                {/* Project Name + Menu */}
+                                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                    <div className="mytasks-card-project">
+                                                                                        <FolderOutlined />
+                                                                                        <span>{task.project?.name || 'Unknown'}</span>
+                                                                                    </div>
+                                                                                    <Dropdown menu={{ items: getTaskMenuItems(task) }} trigger={['click']}>
+                                                                                        <Button
+                                                                                            type="text"
+                                                                                            size="small"
+                                                                                            icon={<MoreOutlined />}
+                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                            style={{ flexShrink: 0, color: '#94A3B8' }}
+                                                                                        />
+                                                                                    </Dropdown>
                                                                                 </div>
 
                                                                                 {/* Task Title */}
@@ -452,6 +508,13 @@ export const MyTasksPage: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Modal>
+
+            <TaskDetailModal
+                visible={detailModalVisible}
+                taskId={selectedTaskId}
+                onClose={() => { setDetailModalVisible(false); setSelectedTaskId(null); }}
+                onUpdate={loadMyTasks}
+            />
         </Layout>
     );
 };

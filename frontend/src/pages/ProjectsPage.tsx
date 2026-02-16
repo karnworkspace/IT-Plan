@@ -403,10 +403,10 @@ export const ProjectsPage: React.FC = () => {
                 <div className="projects-page-header">
                     <div className="header-content">
                         <div className="header-title-section">
-                            <Title level={2} className="page-title">
+                            <Title level={2} className="page-title" style={{ fontSize: 48, margin: 0 }}>
                                 <ProjectOutlined /> Projects
                             </Title>
-                            <Text type="secondary" className="page-subtitle">
+                            <Text type="secondary" className="page-subtitle" style={{ fontSize: 30 }}>
                                 Manage and track all your projects
                             </Text>
                         </div>
@@ -673,7 +673,18 @@ export const ProjectsPage: React.FC = () => {
                                                                             >
                                                                                 <div className="board-card-color" style={{ backgroundColor: getStatusProgressColor(project.status) }} />
                                                                                 <div className="board-card-body">
-                                                                                    <div className="board-card-title">{project.name}</div>
+                                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                                        <div className="board-card-title" style={{ flex: 1 }}>{project.name}</div>
+                                                                                        <Dropdown menu={{ items: getProjectMenuItems(project) }} trigger={['click']}>
+                                                                                            <Button
+                                                                                                type="text"
+                                                                                                size="small"
+                                                                                                icon={<MoreOutlined />}
+                                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                                style={{ flexShrink: 0, color: '#94A3B8' }}
+                                                                                            />
+                                                                                        </Dropdown>
+                                                                                    </div>
                                                                                     <div className="board-card-progress">
                                                                                         <div className="progress-header">
                                                                                             <span className="progress-label">Progress</span>

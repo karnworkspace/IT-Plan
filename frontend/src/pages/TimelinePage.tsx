@@ -13,7 +13,9 @@ import {
     CaretRightOutlined,
     CaretDownOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
+import { TaskDetailModal } from './TaskDetailModal';
 import api from '../services/api';
 import './TimelinePage.css';
 
@@ -85,10 +87,13 @@ const getMonthBarColor = (project: TimelineProject, monthIndex: number): string 
 const currentMonth = new Date().getMonth(); // 0-indexed
 
 export const TimelinePage: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<TimelineProject[]>([]);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
     const [filterCategory, setFilterCategory] = useState<string>('ALL');
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
 
     useEffect(() => {
         loadTimeline();
@@ -158,20 +163,20 @@ export const TimelinePage: React.FC = () => {
                 <div className="timeline-page-header">
                     <div className="timeline-header-top">
                         <div>
-                            <Title level={2} style={{ color: '#0F172A', margin: 0, fontSize: 22 }}>
+                            <Title level={2} style={{ color: '#0F172A', margin: 0, fontSize: 48 }}>
                                 <FieldTimeOutlined style={{ marginRight: 10 }} />
                                 IT Project Tracking 2026
                             </Title>
-                            <Text type="secondary" style={{ fontSize: 13 }}>
+                            <Text type="secondary" style={{ fontSize: 30 }}>
                                 Annual Plan View — {totalProjects} projects, {totalTasks} tasks, avg {avgProgress}% progress
                             </Text>
                         </div>
                         <div className="timeline-header-filters">
-                            <div className="timeline-legend-inline">
-                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Planned</span></div>
-                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Completed</span></div>
-                                <div className="ap-legend-item"><div className="ap-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Delayed</span></div>
-                                <div className="ap-legend-item"><div className="ap-legend-current" /><span>Current</span></div>
+                            <div className="shared-legend">
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Planned</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Completed</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Delayed</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-current" /><span>Current</span></div>
                             </div>
                             <Select
                                 value={filterCategory}
@@ -210,7 +215,7 @@ export const TimelinePage: React.FC = () => {
                                                                 key={m}
                                                                 className={`ap-month-header ${m === currentMonth ? 'ap-current-month' : ''}`}
                                                             >
-                                                                {MONTHS[m]}
+                                                                {MONTH_FULL[m]}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -259,7 +264,12 @@ export const TimelinePage: React.FC = () => {
                                                                 </span>
                                                             )}
                                                             <Tooltip title={project.name} placement="topLeft">
-                                                                <span className="ap-project-name">{project.name}</span>
+                                                                <span
+                                                                    className="ap-project-name ap-clickable"
+                                                                    onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project.id}`); }}
+                                                                >
+                                                                    {project.name}
+                                                                </span>
                                                             </Tooltip>
                                                             <span className={`ap-status-dot ap-status-${project.status.toLowerCase()}`} />
                                                         </div>
@@ -314,7 +324,12 @@ export const TimelinePage: React.FC = () => {
                                                             <div className="ap-col-code ap-cell" />
                                                             <div className="ap-col-name ap-cell ap-task-name-cell">
                                                                 <Tooltip title={task.title} placement="topLeft">
-                                                                    <span className="ap-task-name">{task.title}</span>
+                                                                    <span
+                                                                        className="ap-task-name ap-clickable"
+                                                                        onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}
+                                                                    >
+                                                                        {task.title}
+                                                                    </span>
                                                                 </Tooltip>
                                                                 <span className={`ap-task-status ap-task-status-${task.status.toLowerCase()}`}>
                                                                     {task.status.replace('_', ' ')}
@@ -364,6 +379,13 @@ export const TimelinePage: React.FC = () => {
                     </Spin>
                 </Content>
             </Layout>
+
+            <TaskDetailModal
+                visible={detailModalVisible}
+                taskId={selectedTaskId}
+                onClose={() => { setDetailModalVisible(false); setSelectedTaskId(null); }}
+                onUpdate={loadTimeline}
+            />
         </Layout>
     );
 };

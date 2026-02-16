@@ -48,11 +48,11 @@ export const ConfigurationPage: React.FC = () => {
             <Layout>
                 <Content className="config-content">
                     <div className="config-page-header">
-                        <Title level={3} style={{ margin: 0 }}>
+                        <Title level={2} style={{ margin: 0, fontSize: 48 }}>
                             <SettingOutlined style={{ marginRight: 10 }} />
                             Configuration
                         </Title>
-                        <Text type="secondary">System settings — Admin only</Text>
+                        <Text type="secondary" style={{ fontSize: 30 }}>System settings — Admin only</Text>
                     </div>
 
                     <div className="config-grid">

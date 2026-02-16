@@ -27,7 +27,7 @@ function App() {
         },
       }}
     >
-      <BrowserRouter>
+      <BrowserRouter basename="/taskflow">
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />

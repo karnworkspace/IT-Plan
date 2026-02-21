@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { projectService, type Project } from '../services/projectService';
 import { taskService, type Task } from '../services/taskService';
 import type { ProjectMember } from '../types';
+import api from '../services/api';
 import { Sidebar } from '../components/Sidebar';
 import {
     Layout,
@@ -46,6 +47,8 @@ import {
     DownloadOutlined,
     FilePdfOutlined,
     TeamOutlined,
+    UserAddOutlined,
+    CloseCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
@@ -120,6 +123,13 @@ export const ProjectDetailPage: React.FC = () => {
     const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
     const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
+    // Member Management State
+    const [memberModalVisible, setMemberModalVisible] = useState(false);
+    const [allUsers, setAllUsers] = useState<{ id: string; name: string; email: string }[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined);
+    const [memberRole, setMemberRole] = useState<string>('MEMBER');
+    const [addingMember, setAddingMember] = useState(false);
+
     useEffect(() => {
         if (projectId) {
             loadProjectData();
@@ -147,6 +157,54 @@ export const ProjectDetailPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // --- Member Management ---
+    const openMemberModal = async () => {
+        try {
+            const res = await api.get('/users');
+            setAllUsers(res.data.data.users || []);
+        } catch {
+            message.error('ไม่สามารถโหลดรายชื่อผู้ใช้ได้');
+        }
+        setSelectedUserId(undefined);
+        setMemberRole('MEMBER');
+        setMemberModalVisible(true);
+    };
+
+    const handleAddMember = async () => {
+        if (!projectId || !selectedUserId) return;
+        try {
+            setAddingMember(true);
+            await projectService.addProjectMember(projectId, selectedUserId, memberRole);
+            message.success('เพิ่มสมาชิกสำเร็จ');
+            setMemberModalVisible(false);
+            await loadProjectData();
+        } catch (error: any) {
+            message.error(error?.response?.data?.error || 'เพิ่มสมาชิกไม่สำเร็จ');
+        } finally {
+            setAddingMember(false);
+        }
+    };
+
+    const handleRemoveMember = (member: ProjectMember) => {
+        if (!projectId) return;
+        Modal.confirm({
+            title: 'ลบสมาชิก',
+            content: `ต้องการลบ ${member.user?.name || 'Unknown'} ออกจากโปรเจกต์?`,
+            okText: 'ลบ',
+            okType: 'danger',
+            cancelText: 'ยกเลิก',
+            onOk: async () => {
+                try {
+                    await projectService.removeProjectMember(projectId, member.id);
+                    message.success('ลบสมาชิกสำเร็จ');
+                    await loadProjectData();
+                } catch (error: any) {
+                    message.error(error?.response?.data?.error || 'ลบสมาชิกไม่สำเร็จ');
+                }
+            },
+        });
     };
 
     const handleCreateTask = () => {
@@ -383,25 +441,30 @@ export const ProjectDetailPage: React.FC = () => {
                                     {project.description}
                                 </Paragraph>
                             )}
-                            {project.members && project.members.length > 0 && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
                                     <span style={{ fontSize: 13, color: '#8c8c8c', marginRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <TeamOutlined /> Members:
                                     </span>
-                                    {project.members.map((m: ProjectMember) => (
-                                        <span key={m.id} style={{
-                                            display: 'inline-block',
-                                            padding: '2px 10px',
-                                            fontSize: 12,
-                                            color: '#595959',
-                                            background: '#f0f0f0',
-                                            borderRadius: 6,
-                                        }}>
-                                            {m.user?.name || 'Unknown'}
-                                        </span>
+                                    {project.members?.map((m: ProjectMember) => (
+                                        <Tag
+                                            key={m.id}
+                                            closable
+                                            onClose={(e) => { e.preventDefault(); handleRemoveMember(m); }}
+                                            style={{ fontSize: 12, borderRadius: 6 }}
+                                        >
+                                            {m.user?.name || 'Unknown'} <span style={{ color: '#999', fontSize: 10 }}>({m.role})</span>
+                                        </Tag>
                                     ))}
+                                    <Button
+                                        type="dashed"
+                                        size="small"
+                                        icon={<UserAddOutlined />}
+                                        onClick={openMemberModal}
+                                        style={{ fontSize: 12, borderRadius: 6 }}
+                                    >
+                                        เพิ่มสมาชิก
+                                    </Button>
                                 </div>
-                            )}
                         </div>
 
                         <Space>
@@ -834,6 +897,50 @@ export const ProjectDetailPage: React.FC = () => {
                 onClose={handleDetailClose}
                 onUpdate={handleDetailUpdate}
             />
+
+            {/* Add Member Modal */}
+            <Modal
+                title="เพิ่มสมาชิกในโปรเจกต์"
+                open={memberModalVisible}
+                onOk={handleAddMember}
+                onCancel={() => setMemberModalVisible(false)}
+                okText="เพิ่ม"
+                cancelText="ยกเลิก"
+                confirmLoading={addingMember}
+                okButtonProps={{ disabled: !selectedUserId }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+                    <div>
+                        <Text strong style={{ display: 'block', marginBottom: 8 }}>เลือกผู้ใช้</Text>
+                        <Select
+                            showSearch
+                            placeholder="ค้นหาชื่อหรืออีเมล"
+                            value={selectedUserId}
+                            onChange={setSelectedUserId}
+                            optionFilterProp="label"
+                            style={{ width: '100%' }}
+                            size="large"
+                            options={allUsers
+                                .filter(u => !project?.members?.some(m => m.user.id === u.id))
+                                .map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))}
+                        />
+                    </div>
+                    <div>
+                        <Text strong style={{ display: 'block', marginBottom: 8 }}>บทบาท</Text>
+                        <Select
+                            value={memberRole}
+                            onChange={setMemberRole}
+                            style={{ width: '100%' }}
+                            size="large"
+                            options={[
+                                { value: 'MEMBER', label: 'Member' },
+                                { value: 'ADMIN', label: 'Admin' },
+                                { value: 'OWNER', label: 'Owner' },
+                            ]}
+                        />
+                    </div>
+                </div>
+            </Modal>
         </Layout>
     );
 };

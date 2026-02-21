@@ -91,6 +91,29 @@ export const projectService = {
   async reorderProjects(projectIds: string[]): Promise<void> {
     await api.patch('/projects/reorder', { projectIds });
   },
+
+  /**
+   * Get project members
+   */
+  async getProjectMembers(projectId: string): Promise<any[]> {
+    const response = await api.get(`/projects/${projectId}/members`);
+    return response.data.data.members;
+  },
+
+  /**
+   * Add member to project
+   */
+  async addProjectMember(projectId: string, userId: string, role: string = 'MEMBER'): Promise<any> {
+    const response = await api.post(`/projects/${projectId}/members`, { userId, role });
+    return response.data.data;
+  },
+
+  /**
+   * Remove member from project
+   */
+  async removeProjectMember(projectId: string, memberId: string): Promise<void> {
+    await api.delete(`/projects/${projectId}/members/${memberId}`);
+  },
 };
 
 export default projectService;

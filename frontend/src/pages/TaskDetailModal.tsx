@@ -92,6 +92,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     useEffect(() => {
         if (visible && taskId) {
             loadTaskData(taskId);
+            setIsEditing(true);
         } else {
             setTask(null);
             setComments([]);
@@ -312,20 +313,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             </Form>
                         )}
 
-                        {!isEditing ? (
-                            <Button
-                                type="text"
-                                icon={<EditOutlined />}
-                                onClick={() => setIsEditing(true)}
-                            >
-                                Edit
-                            </Button>
-                        ) : (
-                            <Space>
-                                <Button onClick={() => setIsEditing(false)}>Cancel</Button>
-                                <Button type="primary" onClick={handleSaveTask}>Save</Button>
-                            </Space>
-                        )}
+                        <Button type="primary" onClick={handleSaveTask}>Save</Button>
                     </div>
                 </div>
 

@@ -356,6 +356,28 @@ export const DashboardPage: React.FC = () => {
                                         <div className="empty-state">No active tasks</div>
                                     )}
                                 </Card>
+
+                                {/* Annual Plan */}
+                                <div className="section-header" style={{ marginTop: 32 }}>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>IT Project Tracking 2026</Title>
+                                    <button className="view-all-link" onClick={() => navigate('/timeline')}>View Annual Plan →</button>
+                                </div>
+                                <Card
+                                    className="annual-plan-card"
+                                    variant="borderless"
+                                    style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%)' }}
+                                    onClick={() => navigate('/timeline')}
+                                >
+                                    <Space>
+                                        <ClockCircleOutlined style={{ fontSize: 24, color: '#667eea' }} />
+                                        <div>
+                                            <Text strong>Annual Plan View — Timeline</Text>
+                                            <br />
+                                            <Text type="secondary" style={{ fontSize: 12 }}>ดูภาพรวมโปรเจกต์ทั้งหมดในรูปแบบ Gantt Chart</Text>
+                                        </div>
+                                        <ArrowRightOutlined style={{ fontSize: 16, color: '#667eea' }} />
+                                    </Space>
+                                </Card>
                             </div>
 
                             {/* Right Column: Activity Feed */}

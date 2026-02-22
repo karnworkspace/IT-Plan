@@ -290,6 +290,9 @@ export const TimelinePage: React.FC = () => {
                                                                     railColor="#F1F5F9"
                                                                     format={p => <span className="ap-progress-text">{p}%</span>}
                                                                 />
+                                                                <span style={{ fontSize: 10, color: '#94A3B8', marginTop: 2, display: 'block' }}>
+                                                                    {project.doneTasks}/{project.totalTasks} done
+                                                                </span>
                                                             </div>
                                                         </div>
                                                         <div className="ap-col-timeline ap-cell">

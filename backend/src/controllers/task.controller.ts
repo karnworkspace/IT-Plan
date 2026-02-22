@@ -65,7 +65,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     const userId = extractUserId(req);
 
     // Validation
-    const { title, description, assigneeId, assigneeIds, priority, dueDate, startDate, status, parentTaskId } = req.body;
+    const { title, description, assigneeId, assigneeIds, priority, dueDate, startDate, status, parentTaskId, tagIds } = req.body;
 
     if (!title) {
       return sendError(res, 'Title is required', 400);
@@ -114,6 +114,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       projectId,
       createdById: userId,
       assigneeIds: resolvedAssigneeIds,
+      tagIds,
       priority,
       status,
       startDate: startDateObj,
@@ -137,7 +138,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     const userId = extractUserId(req);
 
     // Validation
-    const { title, description, status, priority, assigneeId, assigneeIds, dueDate, startDate, progress } = req.body;
+    const { title, description, status, priority, assigneeId, assigneeIds, dueDate, startDate, progress, tagIds } = req.body;
 
     if (title && title.length > 200) {
       return sendError(res, 'Title must be less than 200 characters', 400);
@@ -189,6 +190,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       status,
       priority,
       assigneeIds: resolvedAssigneeIds,
+      tagIds,
       startDate: startDateObj,
       dueDate: dueDateObj,
       progress,

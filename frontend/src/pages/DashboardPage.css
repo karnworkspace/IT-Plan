@@ -197,21 +197,97 @@
 }
 
 /* ==========================================
-   Activity Feed — Custom Timeline
+   Quick Access Panel
+   ========================================== */
+
+.quick-access-panel {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.quick-access-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.quick-access-item:last-child {
+    border-bottom: none;
+}
+
+.quick-access-item:hover {
+    background: #F8FAFC;
+}
+
+.quick-access-item.qa-highlight {
+    background: #F0F5FF;
+}
+
+.quick-access-item.qa-highlight:hover {
+    background: #E0EDFF;
+}
+
+.qa-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.qa-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.qa-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1E293B;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.qa-meta {
+    display: block;
+    font-size: 11px;
+    color: #94A3B8;
+}
+
+/* ==========================================
+   Activity Feed — Avatar Timeline
    ========================================== */
 
 .activity-feed {
     background: white;
     border: 1px solid #E2E8F0;
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    max-height: 480px;
+    overflow-y: auto;
 }
 
 .activity-item {
     position: relative;
-    padding-left: 24px;
-    padding-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    padding-bottom: 16px;
+    padding-left: 0;
+}
+
+.activity-item.clickable {
     cursor: pointer;
 }
 
@@ -221,45 +297,39 @@
 
 .activity-line {
     position: absolute;
-    left: 7px;
-    top: 14px;
+    left: 15px;
+    top: 32px;
     bottom: 0;
     width: 2px;
     background: #E2E8F0;
 }
 
-.activity-dot {
-    position: absolute;
-    left: 0;
-    top: 4px;
-    width: 16px;
-    height: 16px;
+.activity-avatar {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 2px solid #3B82F6;
-    background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.activity-dot::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #3B82F6;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
 }
 
 .activity-content {
-    padding: 2px 0 0 4px;
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
     border-radius: 8px;
     transition: background 0.2s;
 }
 
-.activity-item:hover .activity-content {
+.activity-item.clickable:hover .activity-content {
     background: #F8FAFC;
-    margin: -4px -8px;
-    padding: 6px 8px 6px 12px;
+    margin: -4px -6px;
+    padding: 6px 6px;
 }
 
 .activity-text {
@@ -268,13 +338,18 @@
     line-height: 1.4;
 }
 
+.activity-user {
+    font-weight: 600;
+    color: #1E293B;
+}
+
 .activity-action {
     color: #64748B;
 }
 
 .activity-entity {
-    font-weight: 600;
-    color: #1E293B;
+    font-weight: 500;
+    color: #3B82F6;
 }
 
 .activity-time {

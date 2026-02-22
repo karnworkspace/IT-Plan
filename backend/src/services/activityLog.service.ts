@@ -65,6 +65,19 @@ class ActivityLogService {
       skip: offset,
     });
   }
+
+  async getRecentActivities(limit: number = 20, offset: number = 0) {
+    return await prisma.activityLog.findMany({
+      include: {
+        user: { select: { id: true, name: true } },
+        project: { select: { id: true, name: true } },
+        task: { select: { id: true, title: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+    });
+  }
 }
 
 export default new ActivityLogService();

@@ -18,6 +18,8 @@ import {
     RocketOutlined,
     ArrowRightOutlined,
     FolderOutlined,
+    UserOutlined,
+    ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -115,6 +117,33 @@ const getStatusIconColor = (status: string) => {
     }
 };
 
+// --- Activity action labels ---
+const ACTION_LABELS: Record<string, string> = {
+    CREATED: 'created',
+    UPDATED: 'updated',
+    DELETED: 'deleted',
+    ASSIGNED: 'assigned',
+    COMPLETED: 'completed',
+    COMMENTED: 'commented on',
+};
+
+const ACTION_COLORS: Record<string, string> = {
+    CREATED: '#10B981',
+    UPDATED: '#3B82F6',
+    DELETED: '#EF4444',
+    ASSIGNED: '#8B5CF6',
+    COMPLETED: '#10B981',
+    COMMENTED: '#F59E0B',
+};
+
+const getInitials = (name: string) => {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    return parts.length >= 2
+        ? (parts[0][0] + parts[1][0]).toUpperCase()
+        : name.slice(0, 2).toUpperCase();
+};
+
 export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
@@ -153,7 +182,7 @@ export const DashboardPage: React.FC = () => {
             const [projectsRes, allTasksRes, activitiesRes] = await Promise.all([
                 projectService.getProjects({ pageSize: 500 }),
                 taskService.getMyTasks({ pageSize: 500 }),
-                activityLogService.getUserActivities(user.id, 10)
+                activityLogService.getRecentActivities(15)
             ]);
 
             const totalProjects = projectsRes.total || projectsRes.projects.length;
@@ -181,7 +210,7 @@ export const DashboardPage: React.FC = () => {
                 teamMembers: memberSet.size || totalProjects,
             });
 
-            setRecentProjects(projectsRes.projects.slice(0, 4));
+            setRecentProjects(projectsRes.projects);
             setMyTasks(allTasks.filter((t: any) => t.status === 'IN_PROGRESS').slice(0, 5));
             setRecentActivities(activitiesRes?.data?.activities || []);
         } catch (error) {
@@ -281,7 +310,7 @@ export const DashboardPage: React.FC = () => {
                                     <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
                                 </div>
                                 <Row gutter={[16, 16]}>
-                                    {recentProjects.map(project => (
+                                    {recentProjects.slice(0, 4).map(project => (
                                         <Col xs={24} md={12} key={project.id}>
                                             <div
                                                 className="project-card-v2"
@@ -380,29 +409,97 @@ export const DashboardPage: React.FC = () => {
                                 </Card>
                             </div>
 
-                            {/* Right Column: Activity Feed */}
+                            {/* Right Column: Quick Access + Activity Feed */}
                             <div className="side-col">
+                                {/* Quick Access Panel */}
                                 <div className="section-header">
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Activity</Title>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>
+                                        <ThunderboltOutlined style={{ marginRight: 8, color: '#F59E0B' }} />
+                                        Quick Access
+                                    </Title>
+                                </div>
+                                <div className="quick-access-panel">
+                                    {/* Active Projects Shortcuts */}
+                                    {recentProjects
+                                        .filter(p => p.status === 'ACTIVE')
+                                        .slice(0, 5)
+                                        .map(project => (
+                                            <div
+                                                key={project.id}
+                                                className="quick-access-item"
+                                                onClick={() => navigate(`/projects/${project.id}`)}
+                                            >
+                                                <div className="qa-icon" style={{ background: getStatusIconBg(project.status) }}>
+                                                    <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 14 }} />
+                                                </div>
+                                                <div className="qa-info">
+                                                    <span className="qa-name">{project.name}</span>
+                                                    <span className="qa-meta">{project._count?.tasks || 0} tasks</span>
+                                                </div>
+                                                <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
+                                            </div>
+                                        ))
+                                    }
+                                    {/* My Tasks Summary */}
+                                    <div
+                                        className="quick-access-item qa-highlight"
+                                        onClick={() => navigate('/my-tasks')}
+                                    >
+                                        <div className="qa-icon" style={{ background: '#DBEAFE' }}>
+                                            <CheckCircleOutlined style={{ color: '#3B82F6', fontSize: 14 }} />
+                                        </div>
+                                        <div className="qa-info">
+                                            <span className="qa-name">My Tasks</span>
+                                            <span className="qa-meta">
+                                                {stats.pendingTasks} pending · {stats.completedTasks} done
+                                            </span>
+                                        </div>
+                                        <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
+                                    </div>
+                                </div>
+
+                                {/* Activity Feed */}
+                                <div className="section-header" style={{ marginTop: 24 }}>
+                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Team Activity</Title>
                                 </div>
                                 <div className="activity-feed">
-                                    {recentActivities.length > 0 ? recentActivities.map((log, index) => (
-                                        <div key={log.id} className="activity-item">
-                                            {index < recentActivities.length - 1 && (
-                                                <div className="activity-line" />
-                                            )}
-                                            <div className="activity-dot" />
-                                            <div className="activity-content">
-                                                <p className="activity-text">
-                                                    <span className="activity-action">{log.action?.toLowerCase()}</span>{' '}
-                                                    <span className="activity-entity">
-                                                        {log.task?.title || log.project?.name || log.entityType}
-                                                    </span>
-                                                </p>
-                                                <span className="activity-time">{dayjs(log.createdAt).fromNow()}</span>
+                                    {recentActivities.length > 0 ? recentActivities.map((log, index) => {
+                                        const targetUrl = log.taskId && log.projectId
+                                            ? `/projects/${log.projectId}?taskId=${log.taskId}`
+                                            : log.projectId
+                                                ? `/projects/${log.projectId}`
+                                                : undefined;
+                                        return (
+                                            <div
+                                                key={log.id}
+                                                className={`activity-item ${targetUrl ? 'clickable' : ''}`}
+                                                onClick={() => targetUrl && navigate(targetUrl)}
+                                            >
+                                                {index < recentActivities.length - 1 && (
+                                                    <div className="activity-line" />
+                                                )}
+                                                <div
+                                                    className="activity-avatar"
+                                                    style={{ background: ACTION_COLORS[log.action] || '#6B7280' }}
+                                                    title={log.user?.name || 'Unknown'}
+                                                >
+                                                    {log.user ? getInitials(log.user.name) : <UserOutlined />}
+                                                </div>
+                                                <div className="activity-content">
+                                                    <p className="activity-text">
+                                                        <span className="activity-user">{log.user?.name || 'Someone'}</span>{' '}
+                                                        <span className="activity-action">
+                                                            {ACTION_LABELS[log.action] || log.action?.toLowerCase()}
+                                                        </span>{' '}
+                                                        <span className="activity-entity">
+                                                            {log.task?.title || log.project?.name || log.entityType}
+                                                        </span>
+                                                    </p>
+                                                    <span className="activity-time">{dayjs(log.createdAt).fromNow()}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )) : (
+                                        );
+                                    }) : (
                                         <div className="empty-state">No recent activities</div>
                                     )}
                                 </div>

@@ -24,4 +24,11 @@ export const activityLogService = {
     });
     return response.data;
   },
+
+  getRecentActivities: async (limit = 20, offset = 0) => {
+    const response = await api.get('/activities/recent', {
+      params: { limit, offset }
+    });
+    return response.data;
+  },
 };

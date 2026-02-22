@@ -52,3 +52,18 @@ export async function getUserActivities(req: Request, res: Response, next: NextF
     next(error);
   }
 }
+
+export async function getRecentActivities(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { limit = '20', offset = '0' } = req.query;
+
+    const activities = await activityLogService.getRecentActivities(
+      Number(limit),
+      Number(offset)
+    );
+
+    sendSuccess(res, { activities });
+  } catch (error) {
+    next(error);
+  }
+}

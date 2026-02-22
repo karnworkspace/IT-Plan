@@ -200,6 +200,7 @@ export const ProjectsPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 9;
     const [form] = Form.useForm();
+    const selectedColor = Form.useWatch('color', form);
 
     // DnD State
     const [activeDragProject, setActiveDragProject] = useState<ProjectWithStats | null>(null);
@@ -913,7 +914,7 @@ export const ProjectsPage: React.FC = () => {
                             {PROJECT_COLORS.map((color) => (
                                 <Tooltip key={color.value} title={color.label}>
                                     <div
-                                        className={`color-option ${form.getFieldValue('color') === color.value ? 'selected' : ''}`}
+                                        className={`color-option ${selectedColor === color.value ? 'selected' : ''}`}
                                         style={{ backgroundColor: color.value }}
                                         onClick={() => form.setFieldsValue({ color: color.value })}
                                     />

@@ -7,6 +7,13 @@ const PROTECTED_EMAILS = [
   'adinuna@sena.co.th',
 ];
 
+export const getUsersList = async () => {
+  return prisma.user.findMany({
+    select: { id: true, name: true, email: true },
+    orderBy: { name: 'asc' },
+  });
+};
+
 export const getAllUsers = async () => {
   const users = await prisma.user.findMany({
     select: {

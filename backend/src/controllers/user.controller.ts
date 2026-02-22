@@ -3,6 +3,15 @@ import { AuthRequest } from '../types';
 import * as userService from '../services/user.service';
 import { sendSuccess, sendError } from '../utils/response';
 
+export const getUsersList = async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const users = await userService.getUsersList();
+    sendSuccess(res, { users });
+  } catch (error) {
+    sendError(res, 'Failed to fetch users list', 500);
+  }
+};
+
 export const getUsers = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const users = await userService.getAllUsers();

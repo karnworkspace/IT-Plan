@@ -10,9 +10,10 @@ function formatDate(val: string | undefined): string {
 
 async function loadThaiFont(doc: jsPDF) {
   try {
+    const base = import.meta.env.BASE_URL || '/';
     const [regularRes, boldRes] = await Promise.all([
-      fetch('/fonts/Sarabun-Regular.ttf'),
-      fetch('/fonts/Sarabun-Bold.ttf'),
+      fetch(`${base}fonts/Sarabun-Regular.ttf`),
+      fetch(`${base}fonts/Sarabun-Bold.ttf`),
     ]);
 
     const regularBuf = await regularRes.arrayBuffer();

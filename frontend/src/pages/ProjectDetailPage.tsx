@@ -57,7 +57,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { exportTasks } from '../utils/exportExcel';
 import { exportTasksPDF } from '../utils/exportPDF';
-import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT } from '../constants';
+import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT, PROJECT_COLORS, PROJECT_STATUS_LABELS } from '../constants';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;
@@ -129,6 +129,12 @@ export const ProjectDetailPage: React.FC = () => {
     const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined);
     const [memberRole, setMemberRole] = useState<string>('MEMBER');
     const [addingMember, setAddingMember] = useState(false);
+    const [savingPdf, setSavingPdf] = useState(false);
+
+    // Edit Project State
+    const [editProjectModalVisible, setEditProjectModalVisible] = useState(false);
+    const [editProjectForm] = Form.useForm();
+    const [savingProject, setSavingProject] = useState(false);
 
     useEffect(() => {
         if (projectId) {
@@ -162,7 +168,7 @@ export const ProjectDetailPage: React.FC = () => {
     // --- Member Management ---
     const openMemberModal = async () => {
         try {
-            const res = await api.get('/users');
+            const res = await api.get('/users/list');
             setAllUsers(res.data.data.users || []);
         } catch {
             message.error('ไม่สามารถโหลดรายชื่อผู้ใช้ได้');
@@ -202,6 +208,62 @@ export const ProjectDetailPage: React.FC = () => {
                     await loadProjectData();
                 } catch (error: any) {
                     message.error(error?.response?.data?.error || 'ลบสมาชิกไม่สำเร็จ');
+                }
+            },
+        });
+    };
+
+    const openEditProjectModal = () => {
+        if (!project) return;
+        editProjectForm.setFieldsValue({
+            name: project.name,
+            description: project.description || '',
+            color: project.color,
+            status: project.status,
+            startDate: project.startDate ? dayjs(project.startDate) : null,
+            endDate: project.endDate ? dayjs(project.endDate) : null,
+        });
+        setEditProjectModalVisible(true);
+    };
+
+    const handleEditProjectSubmit = async () => {
+        if (!projectId) return;
+        try {
+            setSavingProject(true);
+            const values = await editProjectForm.validateFields();
+            await projectService.updateProject(projectId, {
+                name: values.name,
+                description: values.description,
+                color: values.color,
+                status: values.status,
+                startDate: values.startDate ? values.startDate.toISOString() : undefined,
+                endDate: values.endDate ? values.endDate.toISOString() : undefined,
+            });
+            message.success('บันทึกข้อมูลโปรเจกต์สำเร็จ');
+            setEditProjectModalVisible(false);
+            await loadProjectData();
+        } catch {
+            message.error('บันทึกข้อมูลไม่สำเร็จ');
+        } finally {
+            setSavingProject(false);
+        }
+    };
+
+    const handleDeleteProject = () => {
+        if (!projectId) return;
+        Modal.confirm({
+            title: 'ลบโปรเจกต์',
+            content: `ต้องการลบ "${project?.name}" หรือไม่? ข้อมูลทั้งหมดจะถูกลบ`,
+            okText: 'ลบ',
+            okType: 'danger',
+            cancelText: 'ยกเลิก',
+            onOk: async () => {
+                try {
+                    await projectService.deleteProject(projectId);
+                    message.success('ลบโปรเจกต์สำเร็จ');
+                    navigate('/projects');
+                } catch {
+                    message.error('ลบโปรเจกต์ไม่สำเร็จ');
                 }
             },
         });
@@ -470,6 +532,23 @@ export const ProjectDetailPage: React.FC = () => {
                         <Space>
                             <Button
                                 size="large"
+                                icon={<EditOutlined />}
+                                onClick={openEditProjectModal}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Edit
+                            </Button>
+                            <Button
+                                size="large"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={handleDeleteProject}
+                                style={{ borderRadius: 12 }}
+                            >
+                                Delete
+                            </Button>
+                            <Button
+                                size="large"
                                 icon={<DownloadOutlined />}
                                 onClick={() => exportTasks(filteredTasks, project.name)}
                                 style={{ borderRadius: 12 }}
@@ -479,7 +558,18 @@ export const ProjectDetailPage: React.FC = () => {
                             <Button
                                 size="large"
                                 icon={<FilePdfOutlined />}
-                                onClick={() => exportTasksPDF(filteredTasks, project.name)}
+                                loading={savingPdf}
+                                onClick={async () => {
+                                    try {
+                                        setSavingPdf(true);
+                                        await exportTasksPDF(filteredTasks, project.name);
+                                        message.success('บันทึก PDF สำเร็จ');
+                                    } catch {
+                                        message.error('บันทึก PDF ไม่สำเร็จ');
+                                    } finally {
+                                        setSavingPdf(false);
+                                    }
+                                }}
                                 style={{ borderRadius: 12 }}
                             >
                                 Save PDF
@@ -897,6 +987,68 @@ export const ProjectDetailPage: React.FC = () => {
                 onClose={handleDetailClose}
                 onUpdate={handleDetailUpdate}
             />
+
+            {/* Edit Project Modal */}
+            <Modal
+                title="แก้ไขข้อมูลโปรเจกต์"
+                open={editProjectModalVisible}
+                onOk={handleEditProjectSubmit}
+                onCancel={() => setEditProjectModalVisible(false)}
+                okText="บันทึก"
+                cancelText="ยกเลิก"
+                confirmLoading={savingProject}
+                width={600}
+            >
+                <Form form={editProjectForm} layout="vertical" size="large">
+                    <Form.Item name="name" label="ชื่อโปรเจกต์" rules={[{ required: true, message: 'กรุณาระบุชื่อ' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="description" label="รายละเอียด">
+                        <Input.TextArea rows={3} />
+                    </Form.Item>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="status" label="สถานะ" rules={[{ required: true }]}>
+                                <Select>
+                                    {Object.entries(PROJECT_STATUS_LABELS).map(([key, label]) => (
+                                        <Option key={key} value={key}>{label}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="color" label="สี">
+                                <div className="color-picker" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    {PROJECT_COLORS.map((c) => (
+                                        <Tooltip key={c.value} title={c.label}>
+                                            <div
+                                                style={{
+                                                    width: 32, height: 32, borderRadius: 8, backgroundColor: c.value, cursor: 'pointer',
+                                                    border: editProjectForm.getFieldValue('color') === c.value ? '3px solid #1E293B' : '3px solid transparent',
+                                                    boxShadow: editProjectForm.getFieldValue('color') === c.value ? '0 0 0 2px rgba(30,41,59,0.2)' : 'none',
+                                                }}
+                                                onClick={() => editProjectForm.setFieldsValue({ color: c.value })}
+                                            />
+                                        </Tooltip>
+                                    ))}
+                                </div>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="startDate" label="วันเริ่มต้น">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="endDate" label="วันสิ้นสุด">
+                                <DatePicker style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Form>
+            </Modal>
 
             {/* Add Member Modal */}
             <Modal

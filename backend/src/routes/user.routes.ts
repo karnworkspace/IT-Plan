@@ -1,10 +1,19 @@
 import { Router } from 'express';
 import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
-import { getUsers, updateUser, resetUserPassword } from '../controllers/user.controller';
+import { getUsers, getUsersList, updateUser, resetUserPassword } from '../controllers/user.controller';
 
 const router = Router();
 
 router.use(authenticate);
+
+/**
+ * @route   GET /api/v1/users/list
+ * @desc    Get user list (id, name, email) for dropdowns - any authenticated user
+ * @access  Private
+ */
+router.get('/list', getUsersList);
+
+// Admin-only routes below
 router.use(requireAdmin);
 
 /**

@@ -108,6 +108,33 @@
 
 ---
 
+## Phase 15: P5-3 — Tag System + Convert + Timeline Tags + Chat Comments (2026-02-21)
+
+**Phase A: Tag System**
+1. Prisma Schema — เพิ่ม `Tag` + `TaskTag` models (many-to-many)
+2. Backend — Tag CRUD service/controller/routes (`GET/POST/PUT/DELETE /tags`)
+3. Task Service — รองรับ `tagIds` ใน create/update + filter by tagId
+4. Project Service — `getTimelineData()` include tags
+5. Frontend — `tagService.ts`, Tag/TaskTag types, TaskDetailModal tag section
+6. Board/List view — tag badges บน task cards
+
+**Phase B: Convert Task↔Subtask**
+7. Backend — `convertToSubtask(taskId, parentTaskId)` + `convertToTask(taskId)` with validation
+8. Routes — `PATCH /tasks/:id/convert-to-subtask`, `PATCH /tasks/:id/convert-to-task`
+9. TaskDetailModal — Convert button + parent task selection modal
+10. SubTaskList — Convert to Task button
+
+**Phase C: Timeline-centric Tag Filter**
+11. TimelinePage — Tag filter dropdown + tag badges in task rows
+
+**Phase D: Chat-style Comments**
+12. Prisma — Comment model เพิ่ม `parentCommentId` + self-referential relation
+13. Comment Service — reply support (top-level + nested replies)
+14. TaskDetailModal — Chat bubble UI (left/right alignment, reply threading)
+15. @Mention autocomplete — Ant Design `<Mentions>` component
+
+---
+
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)

@@ -20,6 +20,7 @@ import {
     UserOutlined,
     DeleteOutlined,
     SyncOutlined,
+    SwapOutlined,
 } from '@ant-design/icons';
 import { taskService, type Task } from '../services/taskService';
 import { STATUS_CONFIG } from '../constants';
@@ -84,6 +85,16 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
         }
     };
 
+    const handleConvertToTask = async (subTaskId: string) => {
+        try {
+            await taskService.convertToTask(subTaskId);
+            message.success('Converted to independent task');
+            onRefresh();
+        } catch {
+            message.error('Convert failed');
+        }
+    };
+
     return (
         <div className="subtask-list">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -138,6 +149,14 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                         </Option>
                                     ))}
                                 </Select>,
+                                <Tooltip key="convert" title="Convert to Task">
+                                    <Button
+                                        type="text"
+                                        size="small"
+                                        icon={<SwapOutlined />}
+                                        onClick={() => handleConvertToTask(subTask.id)}
+                                    />
+                                </Tooltip>,
                                 <Tooltip key="delete" title="Delete sub-task">
                                     <Button
                                         type="text"

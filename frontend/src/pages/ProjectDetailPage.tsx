@@ -730,6 +730,17 @@ export const ProjectDetailPage: React.FC = () => {
                                                                         {pBadge.label}
                                                                     </span>
 
+                                                                    {/* Tags */}
+                                                                    {task.taskTags && task.taskTags.length > 0 && (
+                                                                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                                                                            {task.taskTags.map(tt => (
+                                                                                <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>
+                                                                                    {tt.tag.name}
+                                                                                </Tag>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+
                                                                     {/* Due Date */}
                                                                     {task.dueDate && (
                                                                         <div className="task-card-due">
@@ -845,6 +856,11 @@ export const ProjectDetailPage: React.FC = () => {
                                                     <Tag color={PRIORITY_CONFIG[task.priority]?.color}>
                                                         {PRIORITY_CONFIG[task.priority]?.label}
                                                     </Tag>
+                                                    {task.taskTags?.map(tt => (
+                                                        <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 11 }}>
+                                                            {tt.tag.name}
+                                                        </Tag>
+                                                    ))}
                                                     <Title level={5} style={{ margin: 0 }}>{task.title}</Title>
                                                 </div>
                                                 <div className="task-meta">

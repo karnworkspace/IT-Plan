@@ -10,6 +10,8 @@ import {
   getTaskStats,
   getMyTasks,
   getSubTasks,
+  convertToSubtask,
+  convertToTask,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
@@ -36,5 +38,7 @@ router.get('/tasks/:id/subtasks', validateUUID('id'), getSubTasks);
 router.put('/tasks/:id', validateUUID('id'), updateTask);
 router.delete('/tasks/:id', validateUUID('id'), deleteTask);
 router.patch('/tasks/:id/status', validateUUID('id'), updateTaskStatus);
+router.patch('/tasks/:id/convert-to-subtask', validateUUID('id'), convertToSubtask);
+router.patch('/tasks/:id/convert-to-task', validateUUID('id'), convertToTask);
 
 export default router;

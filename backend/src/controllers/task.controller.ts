@@ -332,3 +332,44 @@ export const getTaskStats = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+/**
+ * Convert a top-level task into a subtask
+ */
+export const convertToSubtask = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
+    const { parentTaskId } = req.body;
+
+    if (!parentTaskId) {
+      return sendError(res, 'parentTaskId is required', 400);
+    }
+
+    const task = await taskService.convertToSubtask(id, parentTaskId, userId);
+    return sendSuccess(res, { task });
+  } catch (error: any) {
+    if (error.message) {
+      return sendError(res, error.message, 400);
+    }
+    next(error);
+  }
+};
+
+/**
+ * Convert a subtask into an independent task
+ */
+export const convertToTask = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
+
+    const task = await taskService.convertToTask(id, userId);
+    return sendSuccess(res, { task });
+  } catch (error: any) {
+    if (error.message) {
+      return sendError(res, error.message, 400);
+    }
+    next(error);
+  }
+};

@@ -8,7 +8,6 @@ import {
     Divider,
     Avatar,
     Input,
-    List,
     Timeline,
     Select,
     Empty,
@@ -20,6 +19,7 @@ import {
     Slider,
     Upload,
     Image,
+    Mentions,
 } from 'antd';
 import {
     UserOutlined,
@@ -32,6 +32,8 @@ import {
     HistoryOutlined,
     PaperClipOutlined,
     PictureOutlined,
+    TagOutlined,
+    SwapOutlined,
 } from '@ant-design/icons';
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -40,6 +42,8 @@ import { taskService, type Task } from '../services/taskService';
 import { projectService } from '../services/projectService';
 import { commentService, type Comment, type Attachment } from '../services/commentService';
 import { dailyUpdateService, type DailyUpdate } from '../services/dailyUpdateService';
+import { tagService } from '../services/tagService';
+import type { Tag as TagType } from '../types';
 import { useAuthStore } from '../store/authStore';
 import { SubTaskList } from '../components/SubTaskList';
 import './TaskDetailModal.css';
@@ -74,6 +78,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const [comments, setComments] = useState<Comment[]>([]);
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
     const [projectMembers, setProjectMembers] = useState<{ id: string; name: string; email: string }[]>([]);
+    const [allTags, setAllTags] = useState<TagType[]>([]);
+    const [convertModalVisible, setConvertModalVisible] = useState(false);
+    const [parentTaskOptions, setParentTaskOptions] = useState<{ id: string; title: string }[]>([]);
 
     // Edit mode states
     const [isEditing, setIsEditing] = useState(false);
@@ -83,11 +90,19 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const [newComment, setNewComment] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyText, setReplyText] = useState('');
 
     // New update state
     const [showUpdateForm, setShowUpdateForm] = useState(false);
     const [updateForm] = Form.useForm();
     const [submittingUpdate, setSubmittingUpdate] = useState(false);
+
+    useEffect(() => {
+        if (visible) {
+            tagService.getAllTags().then(setAllTags).catch(() => {});
+        }
+    }, [visible]);
 
     useEffect(() => {
         if (visible && taskId) {
@@ -132,6 +147,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 status: taskData.status,
                 priority: taskData.priority,
                 assigneeIds: taskData.taskAssignees?.map((ta: { user: { id: string } }) => ta.user.id) || (taskData.assigneeId ? [taskData.assigneeId] : []),
+                tagIds: taskData.taskTags?.map((tt: { tag: { id: string } }) => tt.tag.id) || [],
                 startDate: taskData.startDate ? dayjs(taskData.startDate) : null,
                 dueDate: taskData.dueDate ? dayjs(taskData.dueDate) : null,
             });
@@ -186,6 +202,29 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             message.error('Failed to add comment');
         } finally {
             setSubmittingComment(false);
+        }
+    };
+
+    const handleReply = async (parentCommentId: string) => {
+        if (!task || !replyText.trim()) return;
+        try {
+            const reply = await commentService.createComment(task.id, {
+                content: replyText.trim(),
+                parentCommentId,
+            });
+            // Add reply under parent comment in state
+            setComments(prev =>
+                prev.map(c =>
+                    c.id === parentCommentId
+                        ? { ...c, replies: [...(c.replies || []), reply] }
+                        : c
+                )
+            );
+            setReplyText('');
+            setReplyingTo(null);
+            message.success('Reply added');
+        } catch {
+            message.error('Failed to reply');
         }
     };
 
@@ -248,6 +287,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     if (!task) return null;
 
     return (
+        <>
         <Modal
             open={visible}
             onCancel={onClose}
@@ -298,6 +338,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         <Select mode="multiple" placeholder="Assignees" allowClear showSearch optionFilterProp="children" maxTagCount={2}>
                                             {projectMembers.map(member => (
                                                 <Option key={member.id} value={member.id}>{member.name}</Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item name="tagIds" style={{ marginBottom: 0, minWidth: 200 }}>
+                                        <Select mode="multiple" placeholder="Tags" allowClear maxTagCount={3}>
+                                            {allTags.map(tag => (
+                                                <Option key={tag.id} value={tag.id}>
+                                                    <Tag color={tag.color} style={{ marginRight: 4 }}>{tag.name}</Tag>
+                                                </Option>
                                             ))}
                                         </Select>
                                     </Form.Item>
@@ -386,6 +435,64 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         {dayjs(task.createdAt).format('MMM D, YYYY')}
                                     </Text>
                                 </div>
+                                <div className="meta-item">
+                                    <Text type="secondary"><TagOutlined style={{ marginRight: 4 }} />Tags</Text>
+                                    <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                        {task.taskTags && task.taskTags.length > 0 ? (
+                                            task.taskTags.map((tt: { id: string; tag: { id: string; name: string; color: string } }) => (
+                                                <Tag key={tt.id} color={tt.tag.color}>{tt.tag.name}</Tag>
+                                            ))
+                                        ) : (
+                                            <Text type="secondary">No tags</Text>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Convert Task Button */}
+                        {!isEditing && (
+                            <div style={{ marginTop: 12 }}>
+                                {!task.parentTaskId ? (
+                                    <Button
+                                        size="small"
+                                        icon={<SwapOutlined />}
+                                        onClick={async () => {
+                                            if (!task.projectId) return;
+                                            try {
+                                                const res = await taskService.getTasks(task.projectId, { pageSize: 100 });
+                                                setParentTaskOptions(
+                                                    (res.tasks || [])
+                                                        .filter((t: Task) => t.id !== task.id && !t.parentTaskId)
+                                                        .map((t: Task) => ({ id: t.id, title: t.title }))
+                                                );
+                                                setConvertModalVisible(true);
+                                            } catch {
+                                                message.error('Failed to load tasks');
+                                            }
+                                        }}
+                                        disabled={(task._count?.subTasks || 0) > 0}
+                                    >
+                                        Convert to Subtask
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="small"
+                                        icon={<SwapOutlined />}
+                                        onClick={async () => {
+                                            try {
+                                                await taskService.convertToTask(task.id);
+                                                message.success('Converted to independent task');
+                                                if (taskId) loadTaskData(taskId);
+                                                onUpdate();
+                                            } catch {
+                                                message.error('Convert failed');
+                                            }
+                                        }}
+                                    >
+                                        Convert to Task
+                                    </Button>
+                                )}
                             </div>
                         )}
 
@@ -487,78 +594,144 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 }
                                 key="comments"
                             >
-                                <div className="comments-list">
+                                <div className="chat-comments-list">
                                     {comments.length === 0 ? (
                                         <Empty description="No comments yet" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                                     ) : (
-                                        <List
-                                            dataSource={comments}
-                                            renderItem={comment => (
-                                                <List.Item>
-                                                    <List.Item.Meta
-                                                        avatar={
-                                                            <Avatar style={{ backgroundColor: '#1890ff' }}>
+                                        comments.map(comment => {
+                                            const isOwn = user?.id === comment.userId;
+                                            return (
+                                                <div key={comment.id}>
+                                                    {/* Parent comment bubble */}
+                                                    <div className={`chat-bubble-row ${isOwn ? 'own' : ''}`}>
+                                                        {!isOwn && (
+                                                            <Avatar size={32} style={{ backgroundColor: '#1890ff', flexShrink: 0 }}>
                                                                 {comment.user?.name?.[0] || 'U'}
                                                             </Avatar>
-                                                        }
-                                                        title={
-                                                            <div className="comment-header">
-                                                                <Text strong>{comment.user?.name}</Text>
-                                                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                                                    {dayjs(comment.createdAt).fromNow()}
-                                                                </Text>
+                                                        )}
+                                                        <div className={`chat-bubble ${isOwn ? 'own' : ''}`}>
+                                                            <div className="chat-bubble-header">
+                                                                <Text strong style={{ fontSize: 12 }}>{comment.user?.name}</Text>
+                                                                <Text type="secondary" style={{ fontSize: 11 }}>{dayjs(comment.createdAt).fromNow()}</Text>
                                                             </div>
-                                                        }
-                                                        description={
-                                                            <div className="comment-content">
+                                                            <div className="chat-bubble-body">
                                                                 <Text>{comment.content}</Text>
-                                                                {comment.attachments && comment.attachments.length > 0 && (
-                                                                    <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                                        <Image.PreviewGroup>
-                                                                            {comment.attachments.map(att => (
-                                                                                <Image
-                                                                                    key={att.id}
-                                                                                    src={getImageUrl(att)}
-                                                                                    alt={att.filename}
-                                                                                    width={120}
-                                                                                    height={90}
-                                                                                    style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #f0f0f0' }}
-                                                                                    fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iOTAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSI2MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWEiIGZvbnQtc2l6ZT0iMTIiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=="
-                                                                                />
-                                                                            ))}
-                                                                        </Image.PreviewGroup>
-                                                                    </div>
-                                                                )}
-                                                                {user && user.id === comment.userId && (
-                                                                    <Popconfirm
-                                                                        title="Delete comment?"
-                                                                        onConfirm={() => handleDeleteComment(comment.id)}
-                                                                    >
-                                                                        <Button
-                                                                            type="text"
-                                                                            size="small"
-                                                                            danger
-                                                                            className="delete-comment-btn"
-                                                                            icon={<DeleteOutlined />}
-                                                                        />
+                                                            </div>
+                                                            {comment.attachments && comment.attachments.length > 0 && (
+                                                                <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                                    <Image.PreviewGroup>
+                                                                        {comment.attachments.map(att => (
+                                                                            <Image
+                                                                                key={att.id}
+                                                                                src={getImageUrl(att)}
+                                                                                alt={att.filename}
+                                                                                width={100}
+                                                                                height={75}
+                                                                                style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #e8e8e8' }}
+                                                                                fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iOTAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSI2MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWEiIGZvbnQtc2l6ZT0iMTIiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=="
+                                                                            />
+                                                                        ))}
+                                                                    </Image.PreviewGroup>
+                                                                </div>
+                                                            )}
+                                                            <div className="chat-bubble-actions">
+                                                                <Button type="link" size="small" onClick={() => { setReplyingTo(comment.id); setReplyText(''); }}>
+                                                                    Reply
+                                                                </Button>
+                                                                {isOwn && (
+                                                                    <Popconfirm title="Delete comment?" onConfirm={() => handleDeleteComment(comment.id)}>
+                                                                        <Button type="link" size="small" danger>Delete</Button>
                                                                     </Popconfirm>
                                                                 )}
                                                             </div>
-                                                        }
-                                                    />
-                                                </List.Item>
-                                            )}
-                                        />
+                                                        </div>
+                                                        {isOwn && (
+                                                            <Avatar size={32} style={{ backgroundColor: '#1890ff', flexShrink: 0 }}>
+                                                                {comment.user?.name?.[0] || 'U'}
+                                                            </Avatar>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Replies */}
+                                                    {comment.replies && comment.replies.length > 0 && (
+                                                        <div className="chat-replies">
+                                                            {comment.replies.map(reply => {
+                                                                const isReplyOwn = user?.id === reply.userId;
+                                                                return (
+                                                                    <div key={reply.id} className={`chat-bubble-row reply ${isReplyOwn ? 'own' : ''}`}>
+                                                                        {!isReplyOwn && (
+                                                                            <Avatar size={24} style={{ backgroundColor: '#722ED1', flexShrink: 0 }}>
+                                                                                {reply.user?.name?.[0] || 'U'}
+                                                                            </Avatar>
+                                                                        )}
+                                                                        <div className={`chat-bubble reply ${isReplyOwn ? 'own' : ''}`}>
+                                                                            <div className="chat-bubble-header">
+                                                                                <Text strong style={{ fontSize: 11 }}>{reply.user?.name}</Text>
+                                                                                <Text type="secondary" style={{ fontSize: 10 }}>{dayjs(reply.createdAt).fromNow()}</Text>
+                                                                            </div>
+                                                                            <div className="chat-bubble-body">
+                                                                                <Text style={{ fontSize: 13 }}>{reply.content}</Text>
+                                                                            </div>
+                                                                        </div>
+                                                                        {isReplyOwn && (
+                                                                            <Avatar size={24} style={{ backgroundColor: '#722ED1', flexShrink: 0 }}>
+                                                                                {reply.user?.name?.[0] || 'U'}
+                                                                            </Avatar>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Reply input */}
+                                                    {replyingTo === comment.id && (
+                                                        <div className="chat-reply-input">
+                                                            <Input
+                                                                size="small"
+                                                                placeholder={`Reply to ${comment.user?.name}...`}
+                                                                value={replyText}
+                                                                onChange={(e) => setReplyText(e.target.value)}
+                                                                onPressEnter={() => handleReply(comment.id)}
+                                                                autoFocus
+                                                                suffix={
+                                                                    <Space size={4}>
+                                                                        <Button
+                                                                            type="text"
+                                                                            size="small"
+                                                                            icon={<SendOutlined />}
+                                                                            onClick={() => handleReply(comment.id)}
+                                                                            disabled={!replyText.trim()}
+                                                                        />
+                                                                        <Button
+                                                                            type="text"
+                                                                            size="small"
+                                                                            onClick={() => setReplyingTo(null)}
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </Space>
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
                                     )}
                                 </div>
 
                                 <div className="comment-input-area">
-                                    <TextArea
+                                    <Mentions
                                         value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
-                                        placeholder="Write a comment..."
+                                        onChange={(val) => setNewComment(val)}
+                                        placeholder="Write a comment... Use @ to mention"
                                         rows={2}
                                         style={{ marginBottom: 8 }}
+                                        options={projectMembers.map(m => ({
+                                            value: m.name,
+                                            label: m.name,
+                                        }))}
                                     />
                                     {pendingFiles.length > 0 && (
                                         <div style={{ marginBottom: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -605,5 +778,49 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
             </div>
         </Modal>
+
+        {/* Convert to Subtask Modal */}
+        <Modal
+            title="Convert to Subtask — Select Parent Task"
+            open={convertModalVisible}
+            onCancel={() => setConvertModalVisible(false)}
+            footer={null}
+            width={500}
+        >
+            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                {parentTaskOptions.length === 0 ? (
+                    <Empty description="No available parent tasks" />
+                ) : (
+                    parentTaskOptions.map(opt => (
+                        <div
+                            key={opt.id}
+                            style={{
+                                padding: '10px 12px',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #f0f0f0',
+                                borderRadius: 6,
+                            }}
+                            className="convert-option-item"
+                            onClick={async () => {
+                                try {
+                                    await taskService.convertToSubtask(task.id, opt.id);
+                                    message.success(`Converted to subtask under "${opt.title}"`);
+                                    setConvertModalVisible(false);
+                                    if (taskId) loadTaskData(taskId);
+                                    onUpdate();
+                                } catch {
+                                    message.error('Convert failed');
+                                }
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                        >
+                            <Text strong>{opt.title}</Text>
+                        </div>
+                    ))
+                )}
+            </div>
+        </Modal>
+        </>
     );
 };

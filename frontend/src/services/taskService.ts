@@ -138,6 +138,22 @@ export const taskService = {
   async reorderTasks(taskIds: string[]): Promise<void> {
     await api.patch('/tasks/reorder', { taskIds });
   },
+
+  /**
+   * Convert task to subtask
+   */
+  async convertToSubtask(taskId: string, parentTaskId: string): Promise<Task> {
+    const response = await api.patch(`/tasks/${taskId}/convert-to-subtask`, { parentTaskId });
+    return response.data.data.task;
+  },
+
+  /**
+   * Convert subtask to independent task
+   */
+  async convertToTask(taskId: string): Promise<Task> {
+    const response = await api.patch(`/tasks/${taskId}/convert-to-task`);
+    return response.data.data.task;
+  },
 };
 
 export default taskService;

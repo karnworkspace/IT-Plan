@@ -6,6 +6,7 @@ import {
     Select,
     Tooltip,
     Progress,
+    Tag,
     message,
 } from 'antd';
 import {
@@ -17,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
 import api from '../services/api';
+import { tagService } from '../services/tagService';
+import type { Tag as TagType } from '../types';
 import './TimelinePage.css';
 
 const { Content } = Layout;
@@ -30,6 +33,7 @@ interface TimelineTask {
     priority: string;
     progress: number;
     assignee?: { id: string; name: string };
+    taskTags?: { id: string; tag: { id: string; name: string; color: string } }[];
 }
 
 interface TimelineProject {
@@ -91,11 +95,14 @@ export const TimelinePage: React.FC = () => {
     const [projects, setProjects] = useState<TimelineProject[]>([]);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
     const [filterCategory, setFilterCategory] = useState<string>('ALL');
+    const [filterTags, setFilterTags] = useState<string[]>([]);
+    const [allTags, setAllTags] = useState<TagType[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
 
     useEffect(() => {
         loadTimeline();
+        tagService.getAllTags().then(setAllTags).catch(() => {});
     }, []);
 
     const loadTimeline = async () => {
@@ -113,9 +120,19 @@ export const TimelinePage: React.FC = () => {
     // Group projects by category
     const groupedProjects = useMemo(() => {
         const groups: Record<string, TimelineProject[]> = {};
-        const filtered = filterCategory === 'ALL'
+        let filtered = filterCategory === 'ALL'
             ? projects
             : projects.filter(p => p.category === filterCategory);
+
+        // Tag filter: only show projects that have tasks matching selected tags
+        if (filterTags.length > 0) {
+            filtered = filtered.map(p => ({
+                ...p,
+                tasks: p.tasks.filter(t =>
+                    t.taskTags?.some(tt => filterTags.includes(tt.tag.id))
+                ),
+            })).filter(p => p.tasks.length > 0);
+        }
 
         filtered.forEach(p => {
             const cat = p.category || 'OTHER';
@@ -133,7 +150,7 @@ export const TimelinePage: React.FC = () => {
         });
 
         return sorted;
-    }, [projects, filterCategory]);
+    }, [projects, filterCategory, filterTags]);
 
     // Stats
     const totalProjects = projects.length;
@@ -188,6 +205,24 @@ export const TimelinePage: React.FC = () => {
                                     <Select.Option key={key} value={key}>{cfg.label}</Select.Option>
                                 ))}
                             </Select>
+                            {allTags.length > 0 && (
+                                <Select
+                                    mode="multiple"
+                                    value={filterTags}
+                                    onChange={setFilterTags}
+                                    placeholder="Filter by Tags"
+                                    allowClear
+                                    style={{ minWidth: 200 }}
+                                    size="middle"
+                                    maxTagCount={2}
+                                >
+                                    {allTags.map(tag => (
+                                        <Select.Option key={tag.id} value={tag.id}>
+                                            <Tag color={tag.color} style={{ margin: 0 }}>{tag.name}</Tag>
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -336,6 +371,11 @@ export const TimelinePage: React.FC = () => {
                                                                 <span className={`ap-task-status ap-task-status-${task.status.toLowerCase()}`}>
                                                                     {task.status.replace('_', ' ')}
                                                                 </span>
+                                                                {task.taskTags?.map(tt => (
+                                                                    <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>
+                                                                        {tt.tag.name}
+                                                                    </Tag>
+                                                                ))}
                                                             </div>
                                                             <div className="ap-col-team ap-cell">
                                                                 <span className="ap-task-assignee">

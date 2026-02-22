@@ -7,6 +7,7 @@ export type { Comment, Attachment, CommentsResponse } from '../types';
 // Input types (request-specific, kept here)
 export interface CreateCommentInput {
   content: string;
+  parentCommentId?: string;
 }
 
 export interface UpdateCommentInput {

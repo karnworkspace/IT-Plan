@@ -39,6 +39,23 @@ export interface TaskRef {
   title: string;
 }
 
+// --- Tag Types ---
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  createdAt?: string;
+  _count?: { taskTags: number };
+}
+
+export interface TaskTag {
+  id: string;
+  taskId: string;
+  tagId: string;
+  tag: Tag;
+}
+
 // --- Entity Types ---
 
 export interface User {
@@ -66,6 +83,7 @@ export interface Task {
   updatedAt: string;
   assignee?: UserRef;
   taskAssignees?: { id: string; user: UserRef }[];
+  taskTags?: TaskTag[];
   project?: ProjectRef;
   parentTask?: TaskRef;
   subTasks?: Task[];
@@ -106,10 +124,12 @@ export interface Comment {
   taskId: string;
   userId: string;
   content: string;
+  parentCommentId?: string;
   createdAt: string;
   updatedAt: string;
   user: UserRef;
   attachments?: Attachment[];
+  replies?: Comment[];
 }
 
 export interface Attachment {

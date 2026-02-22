@@ -173,6 +173,7 @@ model Task {
   activityLogs ActivityLog[]
 
   taskAssignees TaskAssignee[]
+  taskTags      TaskTag[]
 
   @@index([projectId])
   @@index([assigneeId])
@@ -196,6 +197,36 @@ model TaskAssignee {
   @@index([taskId])
   @@index([userId])
   @@map("task_assignees")
+}
+
+// ============================================
+// Tag Models
+// ============================================
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  color     String    @default("#3B82F6")
+  createdAt DateTime  @default(now())
+
+  taskTags  TaskTag[]
+
+  @@map("tags")
+}
+
+model TaskTag {
+  id        String   @id @default(uuid())
+  taskId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, tagId])
+  @@index([taskId])
+  @@index([tagId])
+  @@map("task_tags")
 }
 
 // ============================================
@@ -225,6 +256,11 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Reply threading
+  parentCommentId String?
+  parentComment   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         Comment[] @relation("CommentReplies")
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

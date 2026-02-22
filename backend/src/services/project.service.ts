@@ -56,6 +56,7 @@ export class ProjectService {
           select: {
             id: true, title: true, status: true, priority: true, progress: true,
             assignee: { select: { id: true, name: true } },
+            taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
           },
           orderBy: { createdAt: 'asc' },
         },

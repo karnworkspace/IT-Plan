@@ -5,6 +5,7 @@ export interface CreateCommentInput {
   taskId: string;
   userId: string;
   content: string;
+  parentCommentId?: string;
 }
 
 export interface UpdateCommentInput {
@@ -17,7 +18,7 @@ export class CommentService {
    */
   async getTaskComments(taskId: string): Promise<any[]> {
     const comments = await prisma.comment.findMany({
-      where: { taskId },
+      where: { taskId, parentCommentId: null },
       include: {
         user: {
           select: {
@@ -27,6 +28,19 @@ export class CommentService {
           },
         },
         attachments: true,
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            attachments: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -86,6 +100,7 @@ export class CommentService {
         taskId: data.taskId,
         userId: data.userId,
         content: data.content,
+        parentCommentId: data.parentCommentId || null,
       },
       include: {
         user: {

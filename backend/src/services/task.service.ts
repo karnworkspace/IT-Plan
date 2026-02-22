@@ -9,6 +9,7 @@ export interface CreateTaskInput {
   projectId: string;
   assigneeId?: string;
   assigneeIds?: string[];
+  tagIds?: string[];
   createdById: string;
   priority?: string;
   status?: string;
@@ -24,6 +25,7 @@ export interface UpdateTaskInput {
   priority?: string;
   assigneeId?: string;
   assigneeIds?: string[];
+  tagIds?: string[];
   dueDate?: Date;
   startDate?: Date;
   progress?: number;
@@ -34,6 +36,7 @@ export interface TaskFilters {
   status?: string;
   assigneeId?: string;
   priority?: string;
+  tagId?: string;
   dueDateFrom?: Date;
   dueDateTo?: Date;
   page?: number;
@@ -59,6 +62,7 @@ export class TaskService {
       status,
       assigneeId,
       priority,
+      tagId,
       dueDateFrom,
       dueDateTo,
       page = 1,
@@ -71,6 +75,7 @@ export class TaskService {
     if (status) where.status = status;
     if (assigneeId) where.assigneeId = assigneeId;
     if (priority) where.priority = priority;
+    if (tagId) where.taskTags = { some: { tagId } };
 
     if (dueDateFrom || dueDateTo) {
       where.dueDate = {};
@@ -105,6 +110,7 @@ export class TaskService {
           },
         },
         taskAssignees: { include: { user: { select: { id: true, name: true } } } },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
         _count: {
           select: {
             comments: true,
@@ -186,6 +192,7 @@ export class TaskService {
           },
         },
         taskAssignees: { include: { user: { select: { id: true, name: true } } } },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
         _count: {
           select: {
             comments: true,
@@ -223,12 +230,16 @@ export class TaskService {
         taskAssignees: assigneeIds.length > 0 ? {
           create: assigneeIds.map(uid => ({ userId: uid })),
         } : undefined,
+        taskTags: data.tagIds?.length ? {
+          create: data.tagIds.map(tid => ({ tagId: tid })),
+        } : undefined,
       },
       include: {
         project: { select: { id: true, name: true } },
         assignee: { select: { id: true, name: true } },
         createdBy: { select: { id: true, name: true } },
         taskAssignees: { include: { user: { select: { id: true, name: true } } } },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
       },
     });
 
@@ -286,8 +297,19 @@ export class TaskService {
       throw new Error('You do not have permission to update this task');
     }
 
+    // Handle tags
+    const { tagIds, ...dataWithoutTags } = data;
+    if (tagIds !== undefined) {
+      await prisma.taskTag.deleteMany({ where: { taskId: id } });
+      if (tagIds.length > 0) {
+        await prisma.taskTag.createMany({
+          data: tagIds.map(tid => ({ taskId: id, tagId: tid })),
+        });
+      }
+    }
+
     // Handle multiple assignees
-    const { assigneeIds, ...updateData } = data;
+    const { assigneeIds, ...updateData } = dataWithoutTags;
     if (assigneeIds !== undefined) {
       // Set primary assignee
       updateData.assigneeId = assigneeIds[0] || undefined;
@@ -332,6 +354,7 @@ export class TaskService {
         assignee: { select: { id: true, name: true } },
         createdBy: { select: { id: true, name: true } },
         taskAssignees: { include: { user: { select: { id: true, name: true } } } },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
       },
     });
 
@@ -620,6 +643,78 @@ export class TaskService {
         })
       )
     );
+  }
+
+  /**
+   * Convert a top-level task into a subtask under a parent
+   */
+  async convertToSubtask(taskId: string, parentTaskId: string, userId: string): Promise<any> {
+    if (taskId === parentTaskId) {
+      throw new Error('A task cannot be its own parent');
+    }
+
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: { _count: { select: { subTasks: true } } },
+    });
+    if (!task) throw new Error('Task not found');
+    if (task.parentTaskId) throw new Error('Task is already a subtask');
+    if (task._count.subTasks > 0) throw new Error('Cannot convert a task that has subtasks');
+
+    const parent = await prisma.task.findUnique({ where: { id: parentTaskId } });
+    if (!parent) throw new Error('Parent task not found');
+    if (parent.projectId !== task.projectId) throw new Error('Parent must be in the same project');
+    if (parent.parentTaskId) throw new Error('Cannot nest subtask under another subtask');
+
+    const updated = await prisma.task.update({
+      where: { id: taskId },
+      data: { parentTaskId },
+      include: {
+        project: { select: { id: true, name: true } },
+        parentTask: { select: { id: true, title: true } },
+      },
+    });
+
+    await activityLogService.createActivityLog({
+      userId,
+      action: 'UPDATED',
+      entityType: 'task',
+      entityId: taskId,
+      projectId: task.projectId,
+      taskId,
+      metadata: { convertedTo: 'subtask', parentTaskId },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Convert a subtask into an independent top-level task
+   */
+  async convertToTask(taskId: string, userId: string): Promise<any> {
+    const task = await prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new Error('Task not found');
+    if (!task.parentTaskId) throw new Error('Task is already a top-level task');
+
+    const updated = await prisma.task.update({
+      where: { id: taskId },
+      data: { parentTaskId: null },
+      include: {
+        project: { select: { id: true, name: true } },
+      },
+    });
+
+    await activityLogService.createActivityLog({
+      userId,
+      action: 'UPDATED',
+      entityType: 'task',
+      entityId: taskId,
+      projectId: task.projectId,
+      taskId,
+      metadata: { convertedTo: 'task', previousParentId: task.parentTaskId },
+    });
+
+    return updated;
   }
 }
 

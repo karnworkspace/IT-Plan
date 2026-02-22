@@ -62,10 +62,13 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
       return sendError(res, 'Content must be less than 1000 characters', 400);
     }
 
+    const { parentCommentId } = req.body;
+
     const commentData: CreateCommentInput = {
       taskId,
       userId,
       content,
+      parentCommentId: parentCommentId || undefined,
     };
 
     const comment = await commentService.createComment(commentData);

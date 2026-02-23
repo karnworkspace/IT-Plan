@@ -10,6 +10,17 @@ export const DAILY_UPDATE_STATUSES = [
 ] as const;
 export type DailyUpdateStatus = (typeof DAILY_UPDATE_STATUSES)[number];
 
+// Status → Default Progress mapping
+export const STATUS_PROGRESS: Record<string, number> = {
+  TODO: 0,
+  IN_PROGRESS: 25,
+  IN_REVIEW: 75,
+  DONE: 100,
+  BLOCKED: 0,
+  HOLD: 0,
+  CANCELLED: 0,
+};
+
 // ========== Priorities ==========
 export const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const;
 export type Priority = (typeof PRIORITIES)[number];

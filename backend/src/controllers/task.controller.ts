@@ -8,7 +8,7 @@ import taskService, {
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
 import prisma from '../config/database';
-import { TASK_STATUSES, PRIORITIES } from '../constants';
+import { TASK_STATUSES, PRIORITIES, STATUS_PROGRESS } from '../constants';
 
 /**
  * Get all tasks in a project
@@ -184,6 +184,11 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       ? assigneeIds
       : (assigneeId !== undefined ? [assigneeId] : undefined);
 
+    // Auto-calculate progress when status changes but progress not explicitly provided
+    const resolvedProgress = (status && progress === undefined)
+      ? STATUS_PROGRESS[status]
+      : progress;
+
     const taskData: UpdateTaskInput = {
       title,
       description,
@@ -193,7 +198,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       tagIds,
       startDate: startDateObj,
       dueDate: dueDateObj,
-      progress,
+      progress: resolvedProgress,
     };
 
     const task = await taskService.updateTask(id, taskData, userId);
@@ -236,7 +241,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
     const { id } = req.params as { id: string };
     const userId = extractUserId(req);
 
-    const { status, progress } = req.body;
+    const { status, progress: rawProgress } = req.body;
 
     // Validation
     if (!status) {
@@ -247,9 +252,8 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Invalid status value', 400);
     }
 
-    if (progress === undefined) {
-      return sendError(res, 'Progress is required', 400);
-    }
+    // Auto-calculate progress from status if not provided
+    const progress = rawProgress !== undefined ? rawProgress : (STATUS_PROGRESS[status] ?? 0);
 
     if (progress < 0 || progress > 100) {
       return sendError(res, 'Progress must be between 0 and 100', 400);

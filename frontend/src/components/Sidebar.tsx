@@ -6,7 +6,6 @@ import {
     CheckCircleOutlined,
     CalendarOutlined,
     DashboardOutlined,
-    FieldTimeOutlined,
     AppstoreOutlined,
     SettingOutlined,
 } from '@ant-design/icons';
@@ -31,10 +30,9 @@ export const Sidebar: React.FC = () => {
 
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: <DashboardOutlined /> },
-        { path: '/projects', label: 'Projects', icon: <FolderOutlined /> },
+        { path: '/timeline', label: 'Projects', icon: <FolderOutlined /> },
         { path: '/my-tasks', label: 'My Tasks', icon: <CheckCircleOutlined /> },
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
-        { path: '/timeline', label: 'Timeline', icon: <FieldTimeOutlined /> },
         ...(isAdmin ? [
             { path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> },
         ] : []),

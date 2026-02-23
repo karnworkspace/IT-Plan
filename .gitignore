@@ -48,3 +48,6 @@ riskassetment.md
 # Deploy scripts & keys (server-only)
 deploy/
 key-dontpushgit/
+
+# Cloudflare Tunnel docs (local only)
+CLOUDFLARE-TUNNEL.md

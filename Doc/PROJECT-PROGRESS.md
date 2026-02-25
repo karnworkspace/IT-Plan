@@ -1,6 +1,6 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-25
 **Status:** ✅ Production Ready — Local Dev (Docker)
 **Phase 1-11 Archive:** `Doc/PROGRESS-ARCHIVE.md`
 
@@ -17,17 +17,16 @@
 | Manual Test (37/39 passed) | ✅ 95% |
 | Codebase Refactoring | ✅ 100% |
 | Annual Plan Timeline | ✅ 100% |
+| Desktop Responsive | ✅ 100% |
 
-### Local Dev Environment
-- Frontend: http://localhost:5173 (Docker)
-- Backend: http://localhost:3000 (local) / :3001 (Docker)
-- Database: PostgreSQL 16 in Docker (port 5432)
-- DB Name: `taskflow` (NOT `taskflow_dev`)
-
-### Production (UAT)
-- Frontend: https://frontend-beta-seven-60.vercel.app
-- Backend: https://backend-five-iota-42.vercel.app
-- Database: Vercel Postgres (Neon)
+### Dev Environment
+- **Docker (แนะนำ):** `docker-compose up -d`
+  - Frontend: http://localhost:5173
+  - Backend: http://localhost:3001
+  - Database: PostgreSQL 16 (port 5432)
+  - DB Name: `taskflow`
+- **Local:** Frontend :5173 / Backend :3000
+- **External Testing:** Cloudflare Quick Tunnel (ดู `CLOUDFLARE-TUNNEL.md`)
 
 ---
 
@@ -135,17 +134,33 @@
 
 ---
 
+## Phase 16: Desktop Responsive + Cloudflare Tunnel (2026-02-25)
+
+**Desktop Responsive (ปรับ CSS ให้ใช้งานได้ดีเมื่อ browser ไม่ maximize):**
+1. `TimelinePage.css` — ลด column widths + @media 1200px
+2. `DashboardPage.css` — @media 1200px padding
+3. `MyTasksPage.css` — overflow-x: auto + min-width per column
+4. `ProjectDetailPage.css` — overflow-x: auto + min-width per column
+5. `CalendarPage.css` — flex-wrap + @media 1200px/768px
+6. `Sidebar.css` — @media 1100px shrink sidebar 260→200px
+
+**Cloudflare Quick Tunnel:**
+- รองรับ external testing ผ่าน `cloudflared tunnel`
+- คู่มือ: `CLOUDFLARE-TUNNEL.md` (gitignored)
+
+---
+
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)
-2. Admin name script: `scripts/fix-admin-name.ts` pending on production
-3. 29/68 manual test cases untested
+2. 29/68 manual test cases untested
 
 ---
 
 ## Recommended Next Actions
 
 ### Optional / Future
+- Production deployment (GitHub → Server)
 - Real-time notifications (WebSocket)
 - Email notifications
 - WCAG AA accessibility audit

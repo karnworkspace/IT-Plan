@@ -1,312 +1,186 @@
-# Quick Reference - Task Management System
+# Quick Reference - Task Management System (YTY Project)
 
-**สำหรับ AI Agent ที่มาทำงานต่อ**
-
----
-
-## 🚀 Quick Start (ใน 5 นาที)
-
-### 1. อ่านเอกสารหลัก
-```
-Doc/PROJECT-PROGRESS.md  ← เริ่มที่นี่!
-```
-
-### 2. เข้าใจสถานะปัจจุบัน
-- ✅ Core System: **เสร็จสมบูรณ์ 100%** (Deployed UAT)
-- ✅ User Feedback: **100%** (18/18 items complete)
-- ✅ Tests: **64/64 PASSED**
-
-### 3. รัน Project
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-# http://localhost:5173
-```
-
-**Backend:**
-```bash
-cd backend
-npm install
-npm run dev
-# http://localhost:3000
-```
-
-### 4. ทดสอบ API
-```bash
-# Health check
-curl http://localhost:3000/api/v1/health
-
-# Register
-curl -X POST http://localhost:3000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass123","name":"Test"}'
-```
+**Last Updated:** 2026-02-25
+**Status:** ✅ Production Ready | Docker Dev Environment
 
 ---
 
-## 📁 โครงสร้างโปรเจค
+## Quick Start
+
+### Docker (แนะนำ)
+```bash
+docker-compose up -d
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:3001
+# Adminer:  http://localhost:8081
+```
+
+### Local Dev
+```bash
+cd backend && npm run dev   # http://localhost:3000
+cd frontend && npm run dev  # http://localhost:5173
+```
+
+### Test Accounts
+- `tharab@sena.co.th` / `123456` (ADMIN)
+- `ohm@sena.co.th` / `123456` (MEMBER)
+- `karn@sena.co.th` / `123456` (MEMBER)
+
+---
+
+## Tech Stack
+
+| Layer | Stack |
+|-------|-------|
+| Frontend | React 18 + Vite + TypeScript + Ant Design 6.x + Zustand |
+| Backend | Express 5.x + TypeScript + Prisma 5.10.2 |
+| Database | PostgreSQL 16 (Docker, port 5432, DB: `taskflow`) |
+| Auth | JWT (access 15min, refresh 7day) + bcrypt |
+
+---
+
+## Project Structure
 
 ```
 YTY Project/
-├── Doc/                    # 📄 เอกสารทั้งหมด
-│   ├── PROJECT-PROGRESS.md          ⭐ อ่านก่อน!
-│   ├── QUICK-REFERENCE.md           📋 เอกสารนี้
-│   ├── Task-Management-System-Design.md
-│   ├── API-Specification.md
-│   ├── Development-Workflow.md
-│   ├── Quick-Start-Guide.md
-│   └── Static-PIN-Login-Guide.md
+├── Doc/                          # Documentation
+│   ├── PROJECT-PROGRESS.md       ← อ่านก่อน!
+│   ├── QUICK-REFERENCE.md        ← ไฟล์นี้
+│   └── PROGRESS-ARCHIVE.md       ← Phase 1-11 history
 │
-├── Design/                 # 🎨 UI Mockups
-│   ├── UI-Mockups/
-│   │   ├── 01-dashboard-v2.png
-│   │   ├── 02-login-page-pin.png
-│   │   ├── 03-task-detail.png
-│   │   ├── 04-project-list.png
-│   │   ├── 05-analytics-dashboard.png
-│   │   └── 06-setup-pin.png
-│   └── README.md
+├── frontend/src/
+│   ├── pages/                    # Page components
+│   │   ├── DashboardPage.tsx     # Dashboard + activity feed
+│   │   ├── TimelinePage.tsx      # Annual Plan (Projects menu)
+│   │   ├── ProjectDetailPage.tsx # Project detail + task board
+│   │   ├── MyTasksPage.tsx       # Personal task board
+│   │   ├── CalendarPage.tsx      # Calendar view
+│   │   ├── ConfigurationPage.tsx # Admin: user management
+│   │   └── LoginPage.tsx         # Email/password login
+│   ├── components/               # Reusable (Sidebar, TaskDetailModal, etc.)
+│   ├── services/                 # API clients (axios)
+│   ├── store/                    # Zustand state management
+│   ├── types/                    # Centralized TypeScript types
+│   ├── constants/                # Status config, colors, icons
+│   └── utils/                    # Export Excel/PDF, error handling
 │
-├── frontend/               # ⚛️ React App (เสร็จแล้ว)
-│   ├── src/
-│   │   ├── components/    # PinInput, ProtectedRoute
-│   │   ├── pages/         # Login, Dashboard, SetupPin
-│   │   ├── services/      # API client, Auth service
-│   │   ├── store/         # Zustand auth store
-│   │   └── App.tsx        # Router
-│   └── package.json
+├── backend/src/
+│   ├── services/                 # Business logic (Source of Truth)
+│   ├── controllers/              # HTTP handlers
+│   ├── routes/                   # API endpoints
+│   ├── middlewares/              # Auth, Error, Validation
+│   ├── constants/                # Status/Priority/Role enums
+│   ├── utils/                    # JWT, bcrypt, AppError, response
+│   └── config/                   # Environment, PrismaClient singleton
 │
-└── backend/                # 🚀 Express API (เสร็จแล้ว)
-    ├── src/
-    │   ├── config/        # Environment, Database
-    │   ├── controllers/   # Auth handlers
-    │   ├── services/      # Business logic
-    │   ├── routes/        # API endpoints
-    │   ├── middlewares/   # Auth, Error, RateLimit
-    │   ├── utils/         # JWT, bcrypt helpers
-    │   └── index.ts       # Entry point
-    ├── prisma/
-    │   ├── schema.prisma  # Database schema
-    │   └── migrations/    # DB migrations
-    └── package.json
+├── docker-compose.yml            # Docker orchestration
+├── .env                          # Docker env vars (root)
+└── CLOUDFLARE-TUNNEL.md          # External testing guide (gitignored)
 ```
 
 ---
 
-## 🎯 ทำอะไรต่อ?
-
-### Option 1: Test Integration (แนะนำ)
-```bash
-# 1. รัน Backend
-cd backend && npm run dev
-
-# 2. รัน Frontend (terminal ใหม่)
-cd frontend && npm run dev
-
-# 3. ทดสอบ login flow
-# - ไปที่ http://localhost:5173/login
-# - Register user ผ่าน API ก่อน
-# - ทดสอบ login
-```
-
-### Option 2: เพิ่ม Backend APIs
-```bash
-# สร้าง CRUD APIs สำหรับ:
-# - Projects (backend/src/controllers/project.controller.ts)
-# - Tasks (backend/src/controllers/task.controller.ts)
-
-# อ่าน API Spec:
-# Doc/API-Specification.md
-```
-
-### Option 3: เพิ่มหน้า Frontend
-```bash
-# สร้างหน้าใหม่ใน frontend/src/pages/
-# - ProjectsListPage.tsx
-# - TaskDetailPage.tsx
-# - AnalyticsPage.tsx
-```
-
----
-
-## 📖 เอกสารสำคัญ
-
-| ไฟล์ | จุดประสงค์ |
-|------|-----------
-| `PROJECT-PROGRESS.md` | ⭐ สถานะโปรเจค + แนวทางทำต่อ |
-| `Task-Management-System-Design.md` | System architecture + Database |
-| `API-Specification.md` | API endpoints ทั้งหมด |
-| `Static-PIN-Login-Guide.md` | วิธีทำ PIN authentication |
-| `Development-Workflow.md` | Git workflow + Standards |
-
----
-
-## 💻 Tech Stack
-
-**Frontend (เสร็จแล้ว):**
-- Vite + React + TypeScript
-- Ant Design 6.x
-- Zustand + React Router + Axios
-
-**Backend (เสร็จแล้ว):**
-- Node.js + Express 5.x + TypeScript
-- Prisma 5.10.2 + SQLite (dev)
-- JWT + bcrypt
-
----
-
-## ✅ Features ที่มี
-
-### Frontend
-- ✅ Login (Email + PIN)
-- ✅ Setup PIN
-- ✅ Dashboard
-- ✅ Project Selector
-- ✅ Task Board
-- ✅ Protected Routes
-- ✅ Auth State Management
-
-### Backend
-- ✅ User Registration
-- ✅ Email/Password Login
-- ✅ PIN Login
-- ✅ PIN Setup/Change/Reset
-- ✅ JWT Token Refresh
-- ✅ Logout
-- ✅ Health Check
-
----
-
-## ✅ User Feedback Features (2026-02-08 ~ 2026-02-10)
-
-- ✅ UI Contrast Fix + Forgot Password/PIN
-- ✅ Task: Start/Finish Date, Assignee Update, Status (HOLD, CANCELLED)
-- ✅ Project: 7 Statuses, Multi-Select Filter, Dashboard Clickable
-- ✅ Card/List Toggle, Sorting, Label: Deadline → Finish
-- ✅ Sub-tasks, Timeline/Gantt, Groups
-- ✅ Image Attachment in Comments (multer upload)
-- ✅ Export Excel (xlsx@0.18.5, Projects + Tasks)
-- ✅ Save as PDF (jspdf + html2canvas, Projects + Tasks)
-- ✅ Annual Plan Timeline — Redesign จาก Gantt → table + monthly bars (Q1-Q4, 5 categories)
-
-## ✅ Phase 14: UX Improvements + Multi-Assignee (2026-02-15)
-
-**Backend:**
-- ✅ ADMIN bypass — CRUD project/task ทุกตัวได้โดยไม่ต้องเป็นสมาชิก
-- ✅ Multiple Assignees — `TaskAssignee` model (many-to-many), `assigneeIds[]` ใน create/update
-- ✅ Backward compat — รองรับทั้ง `assigneeId` (เดิม) และ `assigneeIds` (ใหม่)
-
-**Frontend:**
-- ✅ Multiple Assignees UI — TaskDetailModal + ProjectDetailPage board view
-- ✅ Project Status Gradient — header/cards สีตาม status (5 statuses × 5 สี)
-- ✅ Timeline clickable — ชื่อ Project → navigate, ชื่อ Task → TaskDetailModal
-- ✅ Projects kanban — ปุ่ม ⋮ (Edit/Delete) บน board card
-- ✅ My Tasks kanban — คลิก card → TaskDetailModal + ปุ่ม ⋮ (View/Delete)
-- ✅ Configuration page (ADMIN only) — User list + Edit role + Reset password
-- ✅ Login — email/password only (ลบ PIN), Forgot Password link
-
----
-
-## 🔑 Key Files
-
-**Backend:**
-- `backend/src/index.ts` - Express entry point
-- `backend/src/services/auth.service.ts` - Auth logic
-- `backend/src/services/project.service.ts` - Project CRUD logic (เพิ่ม)
-- `backend/src/controllers/project.controller.ts` - Project handlers (เพิ่ม)
-- `backend/prisma/schema.prisma` - DB schema
-
-**Frontend:**
-- `frontend/src/App.tsx` - Router
-- `frontend/src/store/authStore.ts` - Auth state
-- `frontend/src/pages/DashboardPage.tsx` - Main page
-
-**Docs:**
-- `Doc/PROJECT-PROGRESS.md` - อ่านก่อน!
-
----
-
-## 🛠️ Database Commands
+## Database Commands
 
 ```bash
 cd backend
-
-# Generate Prisma Client
-npx prisma generate
-
-# Run Migrations
-npx prisma migrate dev
-
-# Open Database GUI
-npx prisma studio
-
-# Reset Database
-npx prisma migrate reset
+npx prisma db push        # Sync schema (ใช้แทน migrate)
+npx prisma generate       # Generate client
+npx prisma studio         # DB GUI (port 5555)
 ```
 
----
-
-## 🔧 Bug Fixes ล่าสุด (2026-01-22)
-
-| ปัญหา | การแก้ไข |
-|-------|----------|
-| SQLite ไม่รองรับ Enum/Json | เปลี่ยนเป็น String |
-| TypeScript unused params | เพิ่ม `_` prefix |
-| JWT SignOptions type | Cast type ให้ถูกต้อง |
+> ⚠️ ใช้ `prisma db push` เท่านั้น — migration history มี SQLite artifacts
 
 ---
 
-## 🧪 Project CRUD APIs (2026-01-22) ✅
+## API Endpoints
 
-**Endpoints:**
-- `GET /api/v1/projects` - ดึงรายการ projects
-- `GET /api/v1/projects/:id` - ดึง project ตาม ID
-- `GET /api/v1/projects/:id/stats` - ดึงสถิติ project
-- `POST /api/v1/projects` - สร้าง project ใหม่
-- `PUT /api/v1/projects/:id` - อัปเดต project
-- `DELETE /api/v1/projects/:id` - ลบ project
-- `GET /api/v1/projects/timeline` - Annual Plan Timeline data
+### Auth
+- `POST /api/v1/auth/register` — สมัครสมาชิก
+- `POST /api/v1/auth/login` — Login (email/password)
+- `POST /api/v1/auth/refresh` — Refresh token
+- `POST /api/v1/auth/logout` — Logout
 
-**ไฟล์ที่สร้าง:**
-- `backend/src/services/project.service.ts`
-- `backend/src/controllers/project.controller.ts`
-- `backend/src/routes/project.routes.ts`
+### Projects
+- `GET /api/v1/projects` — รายการ projects
+- `GET /api/v1/projects/timeline` — Annual Plan Timeline data
+- `GET /api/v1/projects/:id` — Project detail
+- `GET /api/v1/projects/:id/stats` — Project statistics
+- `POST /api/v1/projects` — สร้าง project
+- `PUT /api/v1/projects/:id` — แก้ไข project
+- `DELETE /api/v1/projects/:id` — ลบ project
 
-**ทดสอบ:**
+### Tasks
+- `GET /api/v1/tasks?projectId=` — Tasks by project
+- `POST /api/v1/tasks` — สร้าง task (รองรับ `assigneeIds[]`, `tagIds[]`)
+- `PUT /api/v1/tasks/:id` — แก้ไข task
+- `DELETE /api/v1/tasks/:id` — ลบ task
+- `PATCH /api/v1/tasks/:id/convert-to-subtask` — แปลงเป็น subtask
+- `PATCH /api/v1/tasks/:id/convert-to-task` — แปลงเป็น task
+
+### Tags
+- `GET /api/v1/tags` — รายการ tags
+- `POST /api/v1/tags` — สร้าง tag
+- `PUT /api/v1/tags/:id` — แก้ไข tag
+- `DELETE /api/v1/tags/:id` — ลบ tag
+
+### Comments
+- `GET /api/v1/comments?taskId=` — Comments ของ task
+- `POST /api/v1/comments` — เพิ่ม comment (รองรับ reply: `parentCommentId`)
+- `DELETE /api/v1/comments/:id` — ลบ comment
+
+### Users (ADMIN)
+- `GET /api/v1/users` — รายการ users
+- `PUT /api/v1/users/:id/role` — เปลี่ยน role
+- `POST /api/v1/users/:id/reset-password` — Reset password
+
+---
+
+## Features Summary
+
+### Core Features
+- ✅ Email/Password Login + JWT Auth
+- ✅ Dashboard + Activity Feed + Quick Access
+- ✅ Projects Kanban (5 statuses, status gradient colors)
+- ✅ Task Board (TODO/IN_PROGRESS/IN_REVIEW/DONE/BLOCKED)
+- ✅ Task Detail Modal (full CRUD)
+- ✅ My Tasks (personal task board)
+- ✅ Calendar View
+- ✅ Annual Plan Timeline (12-month bars, 5 categories, Q1-Q4)
+
+### Advanced Features
+- ✅ Multiple Assignees (many-to-many)
+- ✅ Sub-tasks (multi-level, convert task↔subtask)
+- ✅ Tag System (CRUD, filter, badges on cards)
+- ✅ Chat-style Comments (reply threading, @mention)
+- ✅ Image Attachments in Comments
+- ✅ Export Excel + PDF
+- ✅ ADMIN Configuration (user management, role, reset password)
+- ✅ ADMIN bypass (CRUD all projects/tasks)
+
+### UX/UI
+- ✅ Desktop Responsive (media queries 768px/1100px/1200px)
+- ✅ Sidebar shrink at narrow width
+- ✅ Horizontal scroll for boards/tables
+- ✅ Cloudflare Quick Tunnel support (external testing)
+
+---
+
+## External Testing (Cloudflare Tunnel)
+
+ดูคู่มือเต็มที่ `CLOUDFLARE-TUNNEL.md` (root project)
+
 ```bash
-# Login และดึง token
-TOKEN=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"endtoend@test.com","password":"password123"}' \
-  | jq -r '.data.accessToken')
-
-# สร้าง project
-curl -X POST http://localhost:3000/api/v1/projects \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"name":"My Project","color":"#1890ff"}'
-
-# ดึงรายการ projects
-curl -X GET "http://localhost:3000/api/v1/projects" \
-  -H "Authorization: Bearer $TOKEN"
+# เปิด tunnel (2 terminals)
+cloudflared tunnel --url http://localhost:3001  # Backend
+cloudflared tunnel --url http://localhost:5173  # Frontend
+# ส่ง URL ให้ Claude แก้ config → rebuild Docker
 ```
-
-## 🆘 Help
-
-**ติดปัญหา?**
-1. อ่าน `Doc/PROJECT-PROGRESS.md`
-2. ดู `Doc/Task-Management-System-Design.md`
-3. เช็ค code ใน `backend/src/` หรือ `frontend/src/`
-
-**ต้องการทำต่อ?**
-1. Task CRUD APIs (ถัดไป - อ่าน PROJECT-PROGRESS.md)
-2. Frontend Integration (เชื่อม Dashboard กับ real APIs)
-3. ทำตาม checklist ใน `PROJECT-PROGRESS.md`
 
 ---
 
-**Last Updated:** 2026-02-15
-**Status:** ✅ All Complete | Core System 100% | User Feedback 100% (18/18) | Timeline Redesign 100% | Tests 64/64 PASSED
+## Docker Gotchas
+- `frontend_node_modules` / `backend_node_modules` เป็น named volume
+- เพิ่ม package ใหม่ต้อง `docker volume rm <volume>` แล้ว rebuild
+- Root `.env` ใช้สำหรับ Docker (ไม่ใช่ `backend/.env`)
+- `VITE_API_URL` เป็น build-time variable → ต้อง rebuild frontend เมื่อเปลี่ยน

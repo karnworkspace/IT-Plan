@@ -172,11 +172,12 @@
     display: flex;
     gap: 12px;
     min-height: 500px;
+    overflow-x: auto;
 }
 
 .board-column {
     flex: 1;
-    min-width: 0;
+    min-width: 220px;
     background: #F8FAFC;
     border-radius: 12px;
     display: flex;
@@ -370,12 +371,16 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-    .task-board {
-        flex-wrap: wrap;
+    .project-detail-header {
+        padding: 20px 24px 24px;
+    }
+
+    .project-detail-content {
+        padding: 20px 24px;
     }
 
     .board-column {
-        min-width: calc(33% - 8px);
+        min-width: 200px;
     }
 }
 

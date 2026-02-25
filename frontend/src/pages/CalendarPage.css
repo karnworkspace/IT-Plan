@@ -27,6 +27,7 @@
     display: flex;
     gap: 16px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .cal-stat-item {
@@ -233,6 +234,16 @@
    Responsive
    ========================================== */
 
+@media (max-width: 1200px) {
+    .calendar-content {
+        padding: 20px;
+    }
+
+    .cal-stat-item {
+        padding: 16px 20px;
+    }
+}
+
 @media (max-width: 768px) {
     .calendar-page-header {
         flex-direction: column;
@@ -241,5 +252,9 @@
 
     .cal-stats-row {
         flex-direction: column;
+    }
+
+    .calendar-content {
+        padding: 16px;
     }
 }

@@ -100,11 +100,12 @@
     display: flex;
     gap: 12px;
     min-height: 500px;
+    overflow-x: auto;
 }
 
 .mytasks-column {
     flex: 1;
-    min-width: 0;
+    min-width: 220px;
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
     border-radius: 12px;
@@ -290,12 +291,16 @@
    ========================================== */
 
 @media (max-width: 1200px) {
-    .mytasks-board {
-        flex-wrap: wrap;
+    .my-tasks-header {
+        padding: 24px !important;
+    }
+
+    .my-tasks-content {
+        padding: 20px;
     }
 
     .mytasks-column {
-        min-width: calc(33% - 8px);
+        min-width: 200px;
     }
 }
 

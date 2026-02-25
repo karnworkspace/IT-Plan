@@ -54,18 +54,18 @@
 }
 
 .annual-plan-table {
-    min-width: 1200px;
+    min-width: 1000px;
 }
 
 /* ====================================
    Column widths
    ==================================== */
 .ap-col-no { width: 48px; min-width: 48px; text-align: center; }
-.ap-col-code { width: 120px; min-width: 120px; }
-.ap-col-name { width: 320px; min-width: 320px; flex-shrink: 0; }
-.ap-col-team { width: 130px; min-width: 130px; }
-.ap-col-progress { width: 120px; min-width: 120px; }
-.ap-col-timeline { flex: 1; min-width: 420px; }
+.ap-col-code { width: 100px; min-width: 100px; }
+.ap-col-name { width: 240px; min-width: 240px; flex-shrink: 0; }
+.ap-col-team { width: 110px; min-width: 110px; }
+.ap-col-progress { width: 100px; min-width: 100px; }
+.ap-col-timeline { flex: 1; min-width: 360px; }
 
 /* ====================================
    Header Row
@@ -417,9 +417,23 @@
 /* ====================================
    Responsive
    ==================================== */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .timeline-page-header {
         padding: 16px 20px;
+    }
+
+    .timeline-content {
+        padding: 16px 20px;
+    }
+
+    .timeline-header-filters {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .timeline-page-header {
+        padding: 12px 16px;
     }
 
     .timeline-header-top {

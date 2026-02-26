@@ -54,3 +54,6 @@ CLOUDFLARE-TUNNEL.md
 
 # Database admin credentials (local only)
 DATABASE-ADMIN.md
+
+# Server deployment guide (local only)
+readbeforeserver.md

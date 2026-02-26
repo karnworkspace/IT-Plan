@@ -1,0 +1,158 @@
+[
+  {
+    "name": "CMS - Construction Material System",
+    "description": "CMS tasks imported from JO Excel",
+    "color": "#F59E0B",
+    "status": "ACTIVE",
+    "projectCode": "PP26000-30-00",
+    "category": "SOFTWARE_DEVELOPMENT",
+    "sortOrder": 30,
+    "ownerEmail": "Ekapons@sena.co.th",
+    "members": [
+      { "email": "Ekapons@sena.co.th", "role": "OWNER" },
+      { "email": "Sittichaid@sena.co.th", "role": "MEMBER" }
+    ],
+    "tasks": [
+      {
+        "title": "ระบบรับ-ขาย วัสดุก่อสร้างโกดังพัฒนาการ 25 (คลังเอชาย) Phase I รายงาน",
+        "description": "ระบบรับ-ขาย วัสดุก่อสร้างโกดังพัฒนาการ 25 (คลังเอชาย) Phase I รายงาน\nChange 26/01/2569 กับพี่วี\n\n---\nแนวทางแก้ไข: New Project Input / Form / Report / Mail\n1. ระบบโครงการสั่งขาย\n2. ระบบโกดังรับสินค้า แยกคลังเพื่อซื้อ (ออกใบรับสินค้าตามคลัง Mail)\n3. ระบบ Bom วัสดุก่อสร้าง\n4. ระบบโครงการสั่งซื้อ\n5. ระบบโกดังขายสินค้า (ออกใบแจ้งหนี้ Mail)\n\nผู้แจ้ง: วีรพร (บัญชี)\nมูลค่างาน: 100,000 บาท\nTheme: No.3",
+        "status": "IN_PROGRESS",
+        "priority": "HIGH",
+        "progress": 30,
+        "startDate": "2026-01-05",
+        "dueDate": "2026-04-30",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      }
+    ]
+  },
+  {
+    "name": "AMS - Asset Management System",
+    "description": "AMS tasks imported from JO Excel",
+    "color": "#3B82F6",
+    "status": "ACTIVE",
+    "projectCode": "PP26000-31-00",
+    "category": "SOFTWARE_DEVELOPMENT",
+    "sortOrder": 31,
+    "ownerEmail": "Ekapons@sena.co.th",
+    "members": [
+      { "email": "Ekapons@sena.co.th", "role": "OWNER" },
+      { "email": "Sittichaid@sena.co.th", "role": "MEMBER" }
+    ],
+    "tasks": [
+      {
+        "title": "เนื่องจากได้ขึ้นทะเบียนการใช้ระบบ E-tax ของ 3 บริษัท เรียบร้อยแล้วทางทีม I-NET แจ้ง Timeline สำหรับ Test ระบบ เป็นกลา...",
+        "description": "เนื่องจากได้ขึ้นทะเบียนการใช้ระบบ E-tax ของ 3 บริษัท เรียบร้อยแล้วทางทีม I-NET แจ้ง Timeline สำหรับ Test ระบบ เป็นกลางเดือนมกราคม\n1. บริษัท เจ.เอส.พี.แอสพลัส จำกัด\n2. บริษัท บ้านพุทธรักษา 2015 จำกัด\n3. บริษัท บ้านพุทธชาด 2015 จำกัด\n\n---\nแนวทางแก้ไข: New Project เนื่องจากติดเรื่อง SMS กับ Inet\n\nผู้แจ้ง: ชญาณ์นันท์ (บัญชี SenX)\nมูลค่างาน: 30,000 บาท\nTheme: No.3",
+        "status": "IN_PROGRESS",
+        "priority": "MEDIUM",
+        "progress": 30,
+        "startDate": "2026-01-05",
+        "dueDate": "2026-03-31",
+        "assigneeEmail": "Sittichaid@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Sittichaid@sena.co.th"]
+      },
+      {
+        "title": "ระบบภาษีที่ดิน Phase I (แปลงขาย+แปลงสาธารณูปโภค)",
+        "description": "ระบบภาษีที่ดิน Phase I (แปลงขาย+แปลงสาธารณูปโภค)\n1. Data มาจาก REM\n2. Web กรมธนารักษ์\n3. Report รายงานเป็น excel & Operation\n\n---\nแนวทางแก้ไข: New Project รอขั้นตอน 1 ของพี่ตรี กับขั้นตอน 2 ของกานต์\n\nผู้แจ้ง: วีรพร (CFO)\nมูลค่างาน: 50,000 บาท\nTheme: No.3",
+        "status": "TODO",
+        "priority": "HIGH",
+        "progress": 0,
+        "startDate": "2026-01-08",
+        "dueDate": "2026-02-28",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      },
+      {
+        "title": "ขอนำส่งขั้นตอนการจัดทำหนังสือค้ำประกัน (LG) สำหรับ",
+        "description": "ขอนำส่งขั้นตอนการจัดทำหนังสือค้ำประกัน (LG) สำหรับ\n• งานสาธารณูปโภค\n• งานส่วนของผู้รับเหมา\nสำหรับในส่วนของอีเมลแจ้งเตือนวันครบกำหนดสัญญาต่าง ๆ ขณะนี้พี่โจและทีมกำลังดำเนินการปรับแก้ไข โดยคาดว่าจะแล้วเสร็จภายในประมาณ 2 สัปดาห์ค่ะ\nหากมีข้อสงสัยหรือต้องการข้อมูลเพิ่มเติม สามารถสอบถามได้ทุกเมื่อค่ะ\n\n---\nแนวทางแก้ไข: New Project\n\nผู้แจ้ง: ศรีวรัตน์ (PD)\nมูลค่างาน: 5,000 บาท\nTheme: No.2",
+        "status": "DONE",
+        "priority": "HIGH",
+        "progress": 100,
+        "startDate": "2026-01-20",
+        "dueDate": "2026-02-15",
+        "assigneeEmail": "Sittichaid@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Sittichaid@sena.co.th"]
+      },
+      {
+        "title": "เนื่องจากคอมพิวเตอร์ให้เช่าสัญญาเลขที่ TOL23-0533 และ TOL23-0534 หมดสัญญากับทาง บจก.ไทยโอริกส์ ลีสซิ่งเมื่อวันที่ 11 ...",
+        "description": "เนื่องจากคอมพิวเตอร์ให้เช่าสัญญาเลขที่ TOL23-0533 และ TOL23-0534 หมดสัญญากับทาง บจก.ไทยโอริกส์ ลีสซิ่งเมื่อวันที่ 11 พฤศจิกายน 2568 และ 11 ธันวาคม 2568 ตามลำดับ และบริษัทได้ทำการส่งคืนคอมพิวเตอร์ให้กับทางลีสซิ่งทั้งหมดแล้ว จึงอยากให้ทางพี่โจปรับปรุง Stock โดยนำสัญญา TOL23-0533 และ TOL23-0534 ออกจากรายงาน RC-2050 และ RC-2100 ครับ\n\n---\nแนวทางแก้ไข: New Project ทำระบบคืนสัญญา เพื่อไม่ให้ไปออกรายงานและเก็บข้อมูลสัญญาคืน\n\nผู้แจ้ง: ธนัฐพงษ์ (บัญชีรับ)\nมูลค่างาน: FOC บาท\nTheme: No.2",
+        "status": "DONE",
+        "priority": "MEDIUM",
+        "progress": 100,
+        "startDate": "2026-01-22",
+        "dueDate": "2026-03-15",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th"]
+      },
+      {
+        "title": "ระบบตรวจสอบผู้รับเหมา ในระบบค่าแรง เพิ่ม Module",
+        "description": "ระบบตรวจสอบผู้รับเหมา ในระบบค่าแรง เพิ่ม Module\n\n---\nแนวทางแก้ไข: New เพิ่มการใส่ หักผรม ไม่หักผรม เช็คการใส่ค่า รายงานสำหรับบัญชี หน้า Upload/Download ให้ Audit ตรวจสอบ\n\nผู้แจ้ง: วณิภา (กรรมการ)\nมูลค่างาน: 50,000 บาท\nTheme: No.2",
+        "status": "DONE",
+        "priority": "HIGH",
+        "progress": 100,
+        "startDate": "2026-01-28",
+        "dueDate": "2026-02-28",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      },
+      {
+        "title": "ฝ่ายอาคารสถานที่ มีความประสงค์ในการขอแก้ไขระบบจองห้องประชุม \"โดยเพิ่มช่องจำนวน.........ผู้เข้าร่วมประชุม\"",
+        "description": "ฝ่ายอาคารสถานที่ มีความประสงค์ในการขอแก้ไขระบบจองห้องประชุม \"โดยเพิ่มช่องจำนวน.........ผู้เข้าร่วมประชุม\" หมายเหตุ : ขอให้เป็นหัวข้อ \"แดง\" ต้องกรอกข้อมูลทุกครั้ง\n\n---\nแนวทางแก้ไข: ปรับโครงสร้าง แก้ Master AMS แก้หน้า Web ตามคิว\n\nผู้แจ้ง: กรวิก (เจ้าหน้าที่ธุรการ)\nมูลค่างาน: 5,000 บาท\nTheme: No.2",
+        "status": "IN_PROGRESS",
+        "priority": "MEDIUM",
+        "progress": 30,
+        "startDate": "2026-02-11",
+        "dueDate": "2026-02-28",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      },
+      {
+        "title": "ฝ่าย ACM แผนก ตรวจวัสดุโครงการ ขอสิทธิ์ในการเข้าถึงโครงการทุกโครงการ ของระบบ AMS หมวดค่าแรง",
+        "description": "ฝ่าย ACM แผนก ตรวจวัสดุโครงการ ขอสิทธิ์ในการเข้าถึงโครงการทุกโครงการ ของระบบ AMS หมวดค่าแรง เพื่อใช้ในการตรวจสอบ ของ USER: nisas\n\n---\nแนวทางแก้ไข: CR ปรับให้สิทธิ์เห็นทุกโครงการแบบ HR แต่ส่วนนี้คนเดียว\n\nผู้แจ้ง: นิษา (ประสานงานโครงการ)\nมูลค่างาน: 3,000 บาท\nTheme: No.2",
+        "status": "TODO",
+        "priority": "HIGH",
+        "progress": 0,
+        "startDate": "2026-02-13",
+        "dueDate": "2026-03-15",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      }
+    ]
+  },
+  {
+    "name": "SF - Salesforce Integration",
+    "description": "SF tasks imported from JO Excel",
+    "color": "#10B981",
+    "status": "ACTIVE",
+    "projectCode": "PP26000-32-00",
+    "category": "SOFTWARE_DEVELOPMENT",
+    "sortOrder": 32,
+    "ownerEmail": "Ekapons@sena.co.th",
+    "members": [
+      { "email": "Ekapons@sena.co.th", "role": "OWNER" },
+      { "email": "Sittichaid@sena.co.th", "role": "MEMBER" }
+    ],
+    "tasks": [
+      {
+        "title": "ทำหน้า Web Get ค่ามิเตอร์ไฟฟ้า และนำเข้าระบบ SF จากเจ้าของระบบ พบ Error เขายังแก้ไขไม่ได้",
+        "description": "ทำหน้า Web Get ค่ามิเตอร์ไฟฟ้า และนำเข้าระบบ SF จากเจ้าของระบบ พบ Error เขายังแก้ไขไม่ได้\n\n---\nแนวทางแก้ไข: เขียนใหม่ให้รองรับ Web\n\nผู้แจ้ง: ญานิดา (บัญชี)\nมูลค่างาน: 30,000 บาท\nTheme: No.3",
+        "status": "TODO",
+        "priority": "HIGH",
+        "progress": 0,
+        "startDate": "2026-02-02",
+        "dueDate": "2026-05-31",
+        "assigneeEmail": "Ekapons@sena.co.th",
+        "createdByEmail": "Ekapons@sena.co.th",
+        "assigneeEmails": ["Ekapons@sena.co.th", "Sittichaid@sena.co.th"]
+      }
+    ]
+  }
+]

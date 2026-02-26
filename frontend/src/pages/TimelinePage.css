@@ -60,12 +60,12 @@
 /* ====================================
    Column widths
    ==================================== */
-.ap-col-no { width: 48px; min-width: 48px; text-align: center; }
-.ap-col-code { width: 100px; min-width: 100px; }
-.ap-col-name { width: 320px; min-width: 280px; flex-shrink: 0; }
-.ap-col-team { width: 110px; min-width: 110px; }
-.ap-col-progress { width: 100px; min-width: 100px; }
-.ap-col-timeline { flex: 1; min-width: 360px; }
+.ap-col-no { width: 36px; min-width: 36px; text-align: center; white-space: nowrap; }
+.ap-col-code { width: 105px; min-width: 105px; white-space: nowrap; font-size: 12px; }
+.ap-col-name { width: 300px; min-width: 180px; overflow: hidden; }
+.ap-col-team { width: 120px; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ap-col-progress { width: 90px; min-width: 80px; white-space: nowrap; }
+.ap-col-timeline { flex: 1; min-width: 300px; }
 
 /* ====================================
    Header Row
@@ -189,7 +189,7 @@
 }
 
 .ap-cell {
-    padding: 8px 12px;
+    padding: 8px 8px;
     display: flex;
     align-items: center;
     border-right: 1px solid #F1F5F9;
@@ -238,10 +238,8 @@
 .ap-project-name {
     font-weight: 600;
     color: #1E293B;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     font-size: 13px;
+    word-break: break-word;
 }
 
 /* Status dot */

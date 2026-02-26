@@ -48,7 +48,6 @@ import {
     FilePdfOutlined,
     TeamOutlined,
     UserAddOutlined,
-    CloseCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';

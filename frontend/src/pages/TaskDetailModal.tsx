@@ -24,8 +24,6 @@ import {
 import {
     UserOutlined,
     CalendarOutlined,
-    EditOutlined,
-    DeleteOutlined,
     SendOutlined,
     PlusOutlined,
     MessageOutlined,

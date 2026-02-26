@@ -55,6 +55,7 @@ export class ProjectService {
           where: { parentTaskId: null },
           select: {
             id: true, title: true, status: true, priority: true, progress: true,
+            startDate: true, dueDate: true,
             assignee: { select: { id: true, name: true } },
             taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
           },
@@ -72,7 +73,9 @@ export class ProjectService {
       return {
         id: p.id, name: p.name, projectCode: p.projectCode, category: p.category,
         status: p.status, color: p.color, businessOwner: p.businessOwner,
-        sortOrder: p.sortOrder, timeline: p.timeline, progress, totalTasks, doneTasks,
+        sortOrder: p.sortOrder, timeline: p.timeline,
+        startDate: p.startDate, endDate: p.endDate,
+        progress, totalTasks, doneTasks,
         owner: p.owner,
         members: p.members.map(m => ({ id: m.user.id, name: m.user.name, role: m.role })),
         tasks: p.tasks,

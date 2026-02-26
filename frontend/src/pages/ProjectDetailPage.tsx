@@ -855,12 +855,15 @@ export const ProjectDetailPage: React.FC = () => {
                                                     <Tag color={PRIORITY_CONFIG[task.priority]?.color}>
                                                         {PRIORITY_CONFIG[task.priority]?.label}
                                                     </Tag>
-                                                    {task.taskTags?.map(tt => (
-                                                        <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 11 }}>
+                                                    <Title level={5} style={{ margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</Title>
+                                                    {task.taskTags?.slice(0, 2).map(tt => (
+                                                        <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 11, flexShrink: 0 }}>
                                                             {tt.tag.name}
                                                         </Tag>
                                                     ))}
-                                                    <Title level={5} style={{ margin: 0 }}>{task.title}</Title>
+                                                    {(task.taskTags?.length || 0) > 2 && (
+                                                        <Tag style={{ fontSize: 11, flexShrink: 0 }}>+{(task.taskTags?.length || 0) - 2}</Tag>
+                                                    )}
                                                 </div>
                                                 <div className="task-meta">
                                                     <Select

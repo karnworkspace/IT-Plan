@@ -20,6 +20,9 @@ import {
     Upload,
     Image,
     Mentions,
+    Popover,
+    Spin,
+    List,
 } from 'antd';
 import {
     UserOutlined,
@@ -64,6 +67,60 @@ interface TaskDetailModalProps {
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
 import { STATUS_ICONS } from '../constants/statusIcons';
 
+// --- TagTasksPopover: คลิก tag badge → แสดงรายชื่อ tasks ที่ติด tag เดียวกัน ---
+const TagTasksPopover: React.FC<{
+    tag: { id: string; name: string; color: string };
+    projectId: string;
+    currentTaskId: string;
+}> = ({ tag, projectId, currentTaskId }) => {
+    const [tasks, setTasks] = useState<{ id: string; title: string; status: string }[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    const fetchTasks = async () => {
+        setLoading(true);
+        try {
+            const res = await taskService.getTasks(projectId, { pageSize: 100 });
+            const filtered = (res.tasks || [])
+                .filter((t: Task) => t.id !== currentTaskId && t.taskTags?.some(tt => tt.tag.id === tag.id))
+                .map((t: Task) => ({ id: t.id, title: t.title, status: t.status }));
+            setTasks(filtered);
+        } catch {
+            setTasks([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Popover
+            open={open}
+            onOpenChange={(v) => { setOpen(v); if (v) fetchTasks(); }}
+            trigger="click"
+            title={<><TagOutlined style={{ marginRight: 4 }} />Tasks with tag "{tag.name}"</>}
+            content={
+                loading ? <Spin size="small" /> :
+                tasks.length === 0 ? <Text type="secondary">No other tasks</Text> :
+                <List
+                    size="small"
+                    dataSource={tasks}
+                    style={{ maxHeight: 240, overflow: 'auto', width: 300 }}
+                    renderItem={(t) => (
+                        <List.Item style={{ padding: '6px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Tag color={STATUS_CONFIG[t.status]?.color} style={{ marginRight: 0, fontSize: 11, flexShrink: 0 }}>
+                                {STATUS_CONFIG[t.status]?.label || t.status}
+                            </Tag>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
+                        </List.Item>
+                    )}
+                />
+            }
+        >
+            <Tag color={tag.color} style={{ cursor: 'pointer' }}>{tag.name}</Tag>
+        </Popover>
+    );
+};
+
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     visible,
     taskId,
@@ -77,6 +134,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const [updates, setUpdates] = useState<DailyUpdate[]>([]);
     const [projectMembers, setProjectMembers] = useState<{ id: string; name: string; email: string }[]>([]);
     const [allTags, setAllTags] = useState<TagType[]>([]);
+    const [tagSearch, setTagSearch] = useState('');
     const [convertModalVisible, setConvertModalVisible] = useState(false);
     const [parentTaskOptions, setParentTaskOptions] = useState<{ id: string; title: string }[]>([]);
 
@@ -340,12 +398,49 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         </Select>
                                     </Form.Item>
                                     <Form.Item name="tagIds" style={{ marginBottom: 0, minWidth: 200 }}>
-                                        <Select mode="multiple" placeholder="Tags" allowClear maxTagCount={3}>
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Tags"
+                                            allowClear
+                                            maxTagCount={3}
+                                            showSearch
+                                            searchValue={tagSearch}
+                                            onSearch={setTagSearch}
+                                            filterOption={(input, option) => {
+                                                if (option?.value === '__create_new__') return true;
+                                                const tag = allTags.find(t => t.id === option?.value);
+                                                return tag?.name.toLowerCase().includes(input.toLowerCase()) ?? false;
+                                            }}
+                                            onSelect={async (value: string) => {
+                                                if (value === '__create_new__') {
+                                                    const name = tagSearch.trim();
+                                                    setTagSearch('');
+                                                    if (!name) return;
+                                                    try {
+                                                        const newTag = await tagService.createTag({ name });
+                                                        setAllTags(prev => [...prev, newTag]);
+                                                        const current: string[] = editForm.getFieldValue('tagIds') || [];
+                                                        editForm.setFieldsValue({ tagIds: current.filter(v => v !== '__create_new__').concat(newTag.id) });
+                                                    } catch {
+                                                        message.error('Failed to create tag');
+                                                        const current: string[] = editForm.getFieldValue('tagIds') || [];
+                                                        editForm.setFieldsValue({ tagIds: current.filter(v => v !== '__create_new__') });
+                                                    }
+                                                } else {
+                                                    setTagSearch('');
+                                                }
+                                            }}
+                                        >
                                             {allTags.map(tag => (
                                                 <Option key={tag.id} value={tag.id}>
                                                     <Tag color={tag.color} style={{ marginRight: 4 }}>{tag.name}</Tag>
                                                 </Option>
                                             ))}
+                                            {tagSearch.trim() && !allTags.some(t => t.name.toLowerCase() === tagSearch.trim().toLowerCase()) && (
+                                                <Option key="__create_new__" value="__create_new__">
+                                                    <PlusOutlined style={{ marginRight: 4 }} />Create: "{tagSearch.trim()}"
+                                                </Option>
+                                            )}
                                         </Select>
                                     </Form.Item>
                                 </Space>
@@ -438,7 +533,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                                         {task.taskTags && task.taskTags.length > 0 ? (
                                             task.taskTags.map((tt: { id: string; tag: { id: string; name: string; color: string } }) => (
-                                                <Tag key={tt.id} color={tt.tag.color}>{tt.tag.name}</Tag>
+                                                <TagTasksPopover key={tt.id} tag={tt.tag} projectId={task.projectId} currentTaskId={task.id} />
                                             ))
                                         ) : (
                                             <Text type="secondary">No tags</Text>

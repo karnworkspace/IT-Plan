@@ -44,6 +44,7 @@ export const taskService = {
       priority?: string;
       assigneeId?: string;
       search?: string;
+      tagId?: string;
     }
   ): Promise<TasksResponse> {
     const queryParams = new URLSearchParams();
@@ -53,6 +54,7 @@ export const taskService = {
     if (params?.priority) queryParams.append('priority', params.priority);
     if (params?.assigneeId) queryParams.append('assigneeId', params.assigneeId);
     if (params?.search) queryParams.append('search', params.search);
+    if (params?.tagId) queryParams.append('tagId', params.tagId);
 
     const response = await api.get(`/projects/${projectId}/tasks?${queryParams.toString()}`);
     return response.data.data;

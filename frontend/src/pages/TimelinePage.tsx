@@ -32,6 +32,8 @@ interface TimelineTask {
     status: string;
     priority: string;
     progress: number;
+    startDate?: string | null;
+    dueDate?: string | null;
     assignee?: { id: string; name: string };
     taskTags?: { id: string; tag: { id: string; name: string; color: string } }[];
 }
@@ -46,6 +48,8 @@ interface TimelineProject {
     businessOwner: string | null;
     sortOrder: number;
     timeline: Record<string, Record<string, string>> | null;
+    startDate: string | null;
+    endDate: string | null;
     progress: number;
     totalTasks: number;
     doneTasks: number;
@@ -72,18 +76,49 @@ const QUARTERS = [
     { label: 'Q4', months: [9, 10, 11] },
 ];
 
-// Get bar color for a month cell — uses timeline JSON only (not project.status)
+// Helper: get month index (0-based) from date string, only if year is 2026
+const getMonthOf = (dateStr: string | null | undefined): number | null => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (d.getFullYear() !== 2026) return null;
+    return d.getMonth();
+};
+
+// Get bar color for PROJECT row — only show bars within startDate..endDate
 const getMonthBarColor = (project: TimelineProject, monthIndex: number): string | null => {
+    // Clamp to project date range
+    const startMonth = getMonthOf(project.startDate) ?? 0;
+    const endMonth = getMonthOf(project.endDate);
+    if (endMonth !== null && monthIndex > endMonth) return null;
+    if (monthIndex < startMonth) return null;
+
+    // If 100% done → all green
+    if (project.progress === 100) return '#10B981';
+
+    // Fall back to timeline JSON
     const year = '2026';
     const monthKey = String(monthIndex + 1);
     const timeline = project.timeline as Record<string, Record<string, string>> | null;
+    if (timeline?.[year]?.[monthKey]) {
+        const planType = timeline[year][monthKey];
+        if (planType === 'actual') return '#10B981';
+        if (planType === 'delayed') return '#F59E0B';
+    }
 
-    if (!timeline || !timeline[year] || !timeline[year][monthKey]) return null;
+    return '#EF4444'; // Red — planned
+};
 
-    const planType = timeline[year][monthKey];
-    if (planType === 'actual') return '#10B981';    // Green — completed
-    if (planType === 'delayed') return '#F59E0B';   // Orange — delayed
-    return '#EF4444';                                // Red — planned (default)
+// Get bar color for TASK row — only show bars within task's date range
+const getTaskBarColor = (project: TimelineProject, task: TimelineTask, monthIndex: number): string | null => {
+    const taskStart = getMonthOf(task.startDate) ?? getMonthOf(project.startDate) ?? 0;
+    const taskEnd = getMonthOf(task.dueDate) ?? getMonthOf(project.endDate);
+    if (taskEnd !== null && monthIndex > taskEnd) return null;
+    if (monthIndex < taskStart) return null;
+
+    // Done/Cancelled → green
+    if (task.status === 'DONE' || task.status === 'CANCELLED') return '#10B981';
+
+    return '#EF4444'; // Red — in progress / planned
 };
 
 // Current month indicator
@@ -360,14 +395,12 @@ export const TimelinePage: React.FC = () => {
                                                             <div className="ap-col-no ap-cell" />
                                                             <div className="ap-col-code ap-cell" />
                                                             <div className="ap-col-name ap-cell ap-task-name-cell">
-                                                                <Tooltip title={task.title} placement="topLeft">
-                                                                    <span
-                                                                        className="ap-task-name ap-clickable"
-                                                                        onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}
-                                                                    >
-                                                                        {task.title}
-                                                                    </span>
-                                                                </Tooltip>
+                                                                <span
+                                                                    className="ap-task-name ap-clickable"
+                                                                    onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}
+                                                                >
+                                                                    {task.title}
+                                                                </span>
                                                                 <span className={`ap-task-status ap-task-status-${task.status.toLowerCase()}`}>
                                                                     {task.status.replace('_', ' ')}
                                                                 </span>
@@ -394,7 +427,7 @@ export const TimelinePage: React.FC = () => {
                                                             <div className="ap-col-timeline ap-cell">
                                                                 <div className="ap-month-bars ap-task-bars">
                                                                     {Array.from({ length: 12 }, (_, i) => {
-                                                                        const color = getMonthBarColor(project, i);
+                                                                        const color = getTaskBarColor(project, task, i);
                                                                         return (
                                                                             <div key={i} className={`ap-month-cell ${i === currentMonth ? 'ap-current-month-cell' : ''}`}>
                                                                                 {color && (

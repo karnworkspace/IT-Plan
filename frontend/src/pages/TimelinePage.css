@@ -62,7 +62,7 @@
    ==================================== */
 .ap-col-no { width: 48px; min-width: 48px; text-align: center; }
 .ap-col-code { width: 100px; min-width: 100px; }
-.ap-col-name { width: 240px; min-width: 240px; flex-shrink: 0; }
+.ap-col-name { width: 320px; min-width: 280px; flex-shrink: 0; }
 .ap-col-team { width: 110px; min-width: 110px; }
 .ap-col-progress { width: 100px; min-width: 100px; }
 .ap-col-timeline { flex: 1; min-width: 360px; }
@@ -361,16 +361,15 @@
 
 .ap-task-name-cell {
     padding-left: 48px !important;
-    gap: 8px;
-    overflow: hidden;
+    gap: 4px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .ap-task-name {
     font-size: 12px;
     color: #475569;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .ap-task-status {

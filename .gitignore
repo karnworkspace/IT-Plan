@@ -51,3 +51,6 @@ key-dontpushgit/
 
 # Cloudflare Tunnel docs (local only)
 CLOUDFLARE-TUNNEL.md
+
+# Database admin credentials (local only)
+DATABASE-ADMIN.md

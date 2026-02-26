@@ -20,7 +20,6 @@ import {
     Upload,
     Image,
     Mentions,
-    Spin,
 } from 'antd';
 import {
     UserOutlined,

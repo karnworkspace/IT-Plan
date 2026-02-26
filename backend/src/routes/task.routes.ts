@@ -12,6 +12,7 @@ import {
   getSubTasks,
   convertToSubtask,
   convertToTask,
+  getTasksByTag,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
@@ -31,6 +32,9 @@ router.get('/my-tasks', getMyTasks);
 
 // Reorder tasks (must be before :id routes)
 router.patch('/tasks/reorder', reorderTasks);
+
+// Tasks by tag (cross-project) — must be before :id routes
+router.get('/tasks/by-tag/:tagId', validateUUID('tagId'), getTasksByTag);
 
 // Individual task routes
 router.get('/tasks/:id', validateUUID('id'), getTask);

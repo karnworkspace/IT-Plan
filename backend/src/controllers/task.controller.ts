@@ -363,6 +363,27 @@ export const convertToSubtask = async (req: Request, res: Response, next: NextFu
 };
 
 /**
+ * Get all tasks by tag (cross-project)
+ */
+export const getTasksByTag = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { tagId } = req.params as { tagId: string };
+
+    const filters = {
+      status: req.query.status as string | undefined,
+      priority: req.query.priority as string | undefined,
+      page: req.query.page ? parseInt(req.query.page as string) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+    };
+
+    const result = await taskService.getTasksByTag(tagId, filters);
+    return sendSuccess(res, { tasks: result.data, pagination: result.pagination }, '200');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Convert a subtask into an independent task
  */
 export const convertToTask = async (req: Request, res: Response, next: NextFunction) => {

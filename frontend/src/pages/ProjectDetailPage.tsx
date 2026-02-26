@@ -733,7 +733,12 @@ export const ProjectDetailPage: React.FC = () => {
                                                                     {task.taskTags && task.taskTags.length > 0 && (
                                                                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
                                                                             {task.taskTags.map(tt => (
-                                                                                <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>
+                                                                                <Tag
+                                                                                    key={tt.id}
+                                                                                    color={tt.tag.color}
+                                                                                    style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0, cursor: 'pointer' }}
+                                                                                    onClick={(e) => { e.stopPropagation(); navigate(`/tags/${tt.tag.id}`); }}
+                                                                                >
                                                                                     {tt.tag.name}
                                                                                 </Tag>
                                                                             ))}
@@ -857,7 +862,12 @@ export const ProjectDetailPage: React.FC = () => {
                                                     </Tag>
                                                     <Title level={5} style={{ margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</Title>
                                                     {task.taskTags?.slice(0, 2).map(tt => (
-                                                        <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 11, flexShrink: 0 }}>
+                                                        <Tag
+                                                            key={tt.id}
+                                                            color={tt.tag.color}
+                                                            style={{ fontSize: 11, flexShrink: 0, cursor: 'pointer' }}
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/tags/${tt.tag.id}`); }}
+                                                        >
                                                             {tt.tag.name}
                                                         </Tag>
                                                     ))}

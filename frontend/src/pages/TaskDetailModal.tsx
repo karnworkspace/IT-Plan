@@ -20,9 +20,7 @@ import {
     Upload,
     Image,
     Mentions,
-    Popover,
     Spin,
-    List,
 } from 'antd';
 import {
     UserOutlined,
@@ -45,6 +43,7 @@ import { commentService, type Comment, type Attachment } from '../services/comme
 import { dailyUpdateService, type DailyUpdate } from '../services/dailyUpdateService';
 import { tagService } from '../services/tagService';
 import type { Tag as TagType } from '../types';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { SubTaskList } from '../components/SubTaskList';
 import './TaskDetailModal.css';
@@ -67,59 +66,19 @@ interface TaskDetailModalProps {
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
 import { STATUS_ICONS } from '../constants/statusIcons';
 
-// --- TagTasksPopover: คลิก tag badge → แสดงรายชื่อ tasks ที่ติด tag เดียวกัน ---
-const TagTasksPopover: React.FC<{
+// --- ClickableTag: คลิก tag badge → navigate ไปหน้า TagTasksPage ---
+const ClickableTag: React.FC<{
     tag: { id: string; name: string; color: string };
-    projectId: string;
-    currentTaskId: string;
-}> = ({ tag, projectId, currentTaskId }) => {
-    const [tasks, setTasks] = useState<{ id: string; title: string; status: string }[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-
-    const fetchTasks = async () => {
-        setLoading(true);
-        try {
-            const res = await taskService.getTasks(projectId, { pageSize: 100 });
-            const filtered = (res.tasks || [])
-                .filter((t: Task) => t.id !== currentTaskId && t.taskTags?.some(tt => tt.tag.id === tag.id))
-                .map((t: Task) => ({ id: t.id, title: t.title, status: t.status }));
-            setTasks(filtered);
-        } catch {
-            setTasks([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <Popover
-            open={open}
-            onOpenChange={(v) => { setOpen(v); if (v) fetchTasks(); }}
-            trigger="click"
-            title={<><TagOutlined style={{ marginRight: 4 }} />Tasks with tag "{tag.name}"</>}
-            content={
-                loading ? <Spin size="small" /> :
-                tasks.length === 0 ? <Text type="secondary">No other tasks</Text> :
-                <List
-                    size="small"
-                    dataSource={tasks}
-                    style={{ maxHeight: 240, overflow: 'auto', width: 300 }}
-                    renderItem={(t) => (
-                        <List.Item style={{ padding: '6px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Tag color={STATUS_CONFIG[t.status]?.color} style={{ marginRight: 0, fontSize: 11, flexShrink: 0 }}>
-                                {STATUS_CONFIG[t.status]?.label || t.status}
-                            </Tag>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
-                        </List.Item>
-                    )}
-                />
-            }
-        >
-            <Tag color={tag.color} style={{ cursor: 'pointer' }}>{tag.name}</Tag>
-        </Popover>
-    );
-};
+    onNavigate: (tagId: string) => void;
+}> = ({ tag, onNavigate }) => (
+    <Tag
+        color={tag.color}
+        style={{ cursor: 'pointer' }}
+        onClick={() => onNavigate(tag.id)}
+    >
+        {tag.name}
+    </Tag>
+);
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     visible,
@@ -128,6 +87,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     onUpdate,
 }) => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [task, setTask] = useState<Task | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
@@ -230,6 +190,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             setIsEditing(false);
             message.success('Task updated');
             onUpdate();
+            onClose();
         } catch (error) {
             message.error('Failed to update task');
         }
@@ -533,7 +494,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                                         {task.taskTags && task.taskTags.length > 0 ? (
                                             task.taskTags.map((tt: { id: string; tag: { id: string; name: string; color: string } }) => (
-                                                <TagTasksPopover key={tt.id} tag={tt.tag} projectId={task.projectId} currentTaskId={task.id} />
+                                                <ClickableTag key={tt.id} tag={tt.tag} onNavigate={(tagId) => { onClose(); navigate(`/tags/${tagId}`); }} />
                                             ))
                                         ) : (
                                             <Text type="secondary">No tags</Text>

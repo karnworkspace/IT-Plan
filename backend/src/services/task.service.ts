@@ -689,6 +689,40 @@ export class TaskService {
   }
 
   /**
+   * Get all tasks with a specific tag (cross-project)
+   */
+  async getTasksByTag(tagId: string, filters?: { status?: string; priority?: string; page?: number; limit?: number }): Promise<PaginationResult<any>> {
+    const { status, priority, page = 1, limit = 100 } = filters || {};
+
+    const where: any = { taskTags: { some: { tagId } } };
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+
+    const total = await prisma.task.count({ where });
+
+    const tasks = await prisma.task.findMany({
+      where,
+      include: {
+        project: { select: { id: true, name: true, color: true } },
+        assignee: { select: { id: true, name: true, email: true } },
+        createdBy: { select: { id: true, name: true } },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
+        _count: { select: { comments: true, dailyUpdates: true, subTasks: true } },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        { sortOrder: 'asc' },
+        { priority: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
+
+    return { data: tasks, pagination: { page, limit, total } };
+  }
+
+  /**
    * Convert a subtask into an independent top-level task
    */
   async convertToTask(taskId: string, userId: string): Promise<any> {

@@ -80,6 +80,25 @@ export const taskService = {
   },
 
   /**
+   * Get tasks by tag (cross-project)
+   */
+  async getTasksByTag(tagId: string, params?: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+    priority?: string;
+  }): Promise<TasksResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('limit', params.pageSize.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.priority) queryParams.append('priority', params.priority);
+
+    const response = await api.get(`/tasks/by-tag/${tagId}?${queryParams.toString()}`);
+    return response.data.data;
+  },
+
+  /**
    * Get task by ID
    */
   async getTask(id: string): Promise<Task> {

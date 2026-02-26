@@ -13,6 +13,7 @@ import { CalendarPage } from './pages/CalendarPage';
 import { TimelinePage } from './pages/TimelinePage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import { UserListPage } from './pages/UserListPage';
+import { TagTasksPage } from './pages/TagTasksPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
@@ -81,6 +82,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TimelinePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tags/:tagId"
+            element={
+              <ProtectedRoute>
+                <TagTasksPage />
               </ProtectedRoute>
             }
           />

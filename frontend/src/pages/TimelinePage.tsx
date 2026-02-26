@@ -405,7 +405,12 @@ export const TimelinePage: React.FC = () => {
                                                                     {task.status.replace('_', ' ')}
                                                                 </span>
                                                                 {task.taskTags?.map(tt => (
-                                                                    <Tag key={tt.id} color={tt.tag.color} style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0 }}>
+                                                                    <Tag
+                                                                        key={tt.id}
+                                                                        color={tt.tag.color}
+                                                                        style={{ fontSize: 10, lineHeight: '16px', padding: '0 4px', margin: 0, cursor: 'pointer' }}
+                                                                        onClick={(e) => { e.stopPropagation(); navigate(`/tags/${tt.tag.id}`); }}
+                                                                    >
                                                                         {tt.tag.name}
                                                                     </Tag>
                                                                 ))}

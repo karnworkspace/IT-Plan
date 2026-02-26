@@ -1,7 +1,7 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-02-25
-**Status:** ✅ Production Ready — Local Dev (Docker)
+**Last Updated:** 2026-02-26
+**Status:** ✅ Production — Deployed on Internal Server
 **Phase 1-11 Archive:** `Doc/PROGRESS-ARCHIVE.md`
 
 ---
@@ -14,10 +14,12 @@
 | Backend (Express + Prisma + PostgreSQL) | ✅ 100% |
 | Tests (64/64 API + 65/65 Integration) | ✅ 100% |
 | User Feedback (18/18 items) | ✅ 100% |
-| Manual Test (37/39 passed) | ✅ 95% |
+| Manual Test (68/68 passed) | ✅ 100% |
+| User Acceptance Test (Cloudflare Tunnel) | ✅ Done |
 | Codebase Refactoring | ✅ 100% |
 | Annual Plan Timeline | ✅ 100% |
 | Desktop Responsive | ✅ 100% |
+| Production Deployment (Internal Server) | ✅ Done |
 
 ### Dev Environment
 - **Docker (แนะนำ):** `docker-compose up -d`
@@ -27,6 +29,7 @@
   - DB Name: `taskflow`
 - **Local:** Frontend :5173 / Backend :3000
 - **External Testing:** Cloudflare Quick Tunnel (ดู `CLOUDFLARE-TUNNEL.md`)
+- **Production:** `http://172.22.22.11:4200/taskflow/` (Ubuntu 24.04 Internal Server)
 
 ---
 
@@ -150,17 +153,31 @@
 
 ---
 
+## Phase 17: Production Deployment — Internal Server ✅ (2026-02-26)
+
+**Server:** Ubuntu 24.04 LTS | Docker 28.5.1 | Nginx 1.24.0 | IP: 172.22.22.11
+
+**Deployment:**
+1. Multi-stage Docker build (frontend: Vite→Nginx, backend: TypeScript→Node)
+2. `docker-compose.prod.yml` — 3 containers (postgres, backend, frontend)
+3. Nginx config — `/taskflow/` base path + API proxy to backend container
+4. Vite `base: '/taskflow/'` + React Router `basename`
+5. URL: `http://172.22.22.11:4200/taskflow/`
+
+**Deploy workflow:** `git pull origin main` → `docker compose -f docker-compose.prod.yml up -d --build`
+
+---
+
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)
-2. 29/68 manual test cases untested
 
 ---
 
 ## Recommended Next Actions
 
 ### Optional / Future
-- Production deployment (GitHub → Server)
+- ~~Production deployment (GitHub → Server)~~ ✅ Done
 - Real-time notifications (WebSocket)
 - Email notifications
 - WCAG AA accessibility audit

@@ -57,3 +57,9 @@ DATABASE-ADMIN.md
 
 # Server deployment guide (local only)
 readbeforeserver.md
+
+# Internal files (not for git)
+Data-edit/
+Manual/
+manualuser.md
+.claude/skills/

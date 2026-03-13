@@ -550,15 +550,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         )}
 
                         {/* Sub-tasks Section */}
-                        {!isEditing && (
-                            <div className="section" style={{ marginTop: 16 }}>
-                                <SubTaskList
-                                    parentTask={task}
-                                    subTasks={task.subTasks || []}
-                                    onRefresh={() => taskId && loadTaskData(taskId)}
-                                />
-                            </div>
-                        )}
+                        <div className="section" style={{ marginTop: 16 }}>
+                            <SubTaskList
+                                parentTask={task}
+                                subTasks={task.subTasks || []}
+                                onRefresh={() => taskId && loadTaskData(taskId)}
+                            />
+                        </div>
 
                         <Divider />
 

@@ -145,6 +145,14 @@
 .timeline-card {
     border-radius: 12px;
     transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.timeline-card .ant-statistic-title,
+.timeline-card .ant-statistic-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .timeline-card:hover {

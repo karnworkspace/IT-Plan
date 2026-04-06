@@ -84,6 +84,17 @@ const getMonthOf = (dateStr: string | null | undefined): number | null => {
     return d.getMonth();
 };
 
+// Status color map for timeline bars
+const STATUS_BAR_COLORS: Record<string, string> = {
+    PLAN: '#3B82F6',       // ฟ้า
+    PENDING: '#3B82F6',    // ฟ้า
+    ACTIVE: '#10B981',     // เขียว
+    DELAY: '#EF4444',      // แดง
+    COMPLETED: '#2563EB',  // น้ำเงิน
+    HOLD: '#F59E0B',       // เหลือง
+    CANCELLED: '#6B7280',  // เทา
+};
+
 // Get bar color for PROJECT row — only show bars within startDate..endDate
 const getMonthBarColor = (project: TimelineProject, monthIndex: number): string | null => {
     // Clamp to project date range
@@ -92,8 +103,8 @@ const getMonthBarColor = (project: TimelineProject, monthIndex: number): string 
     if (endMonth !== null && monthIndex > endMonth) return null;
     if (monthIndex < startMonth) return null;
 
-    // If 100% done → all green
-    if (project.progress === 100) return '#10B981';
+    // If 100% done → completed color (น้ำเงิน)
+    if (project.progress === 100) return STATUS_BAR_COLORS.COMPLETED;
 
     // Fall back to timeline JSON
     const year = '2026';
@@ -101,11 +112,12 @@ const getMonthBarColor = (project: TimelineProject, monthIndex: number): string 
     const timeline = project.timeline as Record<string, Record<string, string>> | null;
     if (timeline?.[year]?.[monthKey]) {
         const planType = timeline[year][monthKey];
-        if (planType === 'actual') return '#10B981';
-        if (planType === 'delayed') return '#F59E0B';
+        if (planType === 'actual') return STATUS_BAR_COLORS.ACTIVE;
+        if (planType === 'delayed') return STATUS_BAR_COLORS.DELAY;
     }
 
-    return '#EF4444'; // Red — planned
+    // Use project status color, fallback to plan (ฟ้า)
+    return STATUS_BAR_COLORS[project.status] || STATUS_BAR_COLORS.PLAN;
 };
 
 // Get bar color for TASK row — only show bars within task's date range
@@ -115,10 +127,14 @@ const getTaskBarColor = (project: TimelineProject, task: TimelineTask, monthInde
     if (taskEnd !== null && monthIndex > taskEnd) return null;
     if (monthIndex < taskStart) return null;
 
-    // Done/Cancelled → green
-    if (task.status === 'DONE' || task.status === 'CANCELLED') return '#10B981';
+    // Map task status to colors
+    if (task.status === 'DONE') return STATUS_BAR_COLORS.COMPLETED;
+    if (task.status === 'CANCELLED') return STATUS_BAR_COLORS.CANCELLED;
+    if (task.status === 'IN_PROGRESS') return STATUS_BAR_COLORS.ACTIVE;
+    if (task.status === 'BLOCKED') return STATUS_BAR_COLORS.DELAY;
+    if (task.status === 'HOLD') return STATUS_BAR_COLORS.HOLD;
 
-    return '#EF4444'; // Red — in progress / planned
+    return STATUS_BAR_COLORS.PLAN; // TODO / planned → ฟ้า
 };
 
 // Current month indicator
@@ -224,9 +240,12 @@ export const TimelinePage: React.FC = () => {
                         </div>
                         <div className="timeline-header-filters">
                             <div className="shared-legend">
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Planned</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Completed</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Delayed</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#3B82F6' }} /><span>Plan</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Active</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Delay</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#2563EB' }} /><span>Complete</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Hold</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#6B7280' }} /><span>Cancel</span></div>
                                 <div className="shared-legend-item"><div className="shared-legend-current" /><span>Current</span></div>
                             </div>
                             <Select

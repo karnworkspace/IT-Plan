@@ -166,8 +166,8 @@
 
 .ap-category-count {
     font-size: 11px;
-    color: #64748B;
-    font-weight: 500;
+    color: #1E293B;
+    font-weight: 700;
 }
 
 /* ====================================
@@ -251,10 +251,12 @@
     margin-left: auto;
 }
 
+.ap-status-plan { background: #3B82F6; }
+.ap-status-pending { background: #3B82F6; }
 .ap-status-active { background: #10B981; }
-.ap-status-delay { background: #F59E0B; }
-.ap-status-completed { background: #3B82F6; }
-.ap-status-hold { background: #9CA3AF; }
+.ap-status-delay { background: #EF4444; }
+.ap-status-completed { background: #2563EB; }
+.ap-status-hold { background: #F59E0B; }
 .ap-status-cancelled { background: #6B7280; }
 
 /* Team text */
@@ -273,8 +275,8 @@
 
 .ap-progress-text {
     font-size: 11px;
-    font-weight: 600;
-    color: #64748B;
+    font-weight: 700;
+    color: #1E293B;
 }
 
 .ap-col-progress .ant-progress {

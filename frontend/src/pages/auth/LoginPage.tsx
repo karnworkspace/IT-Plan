@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
             <div className="login-branding">
                 <div className="branding-title">
                     <div className="app-name">SENA</div>
-                    <div className="app-subtitle">IT Project Progress</div>
+                    <div className="app-subtitle">IT Project System</div>
                 </div>
             </div>
 
@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
                                 <Form.Item name="remember" valuePropName="checked" noStyle>
                                     <Checkbox>Remember me</Checkbox>
                                 </Form.Item>
-                                <Link href="/forgot-password">Forgot Password?</Link>
+{/* Forgot Password disabled — ให้ Admin แก้ password แทน */}
                             </div>
                         </Form.Item>
 

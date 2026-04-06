@@ -179,6 +179,18 @@
     border-color: #CBD5E1;
 }
 
+/* Overdue Card */
+.mytasks-card.mytasks-card-overdue {
+    border-color: #EF4444;
+    border-left: 3px solid #EF4444;
+    background: #FFF5F5;
+}
+
+.mytasks-card.mytasks-card-overdue:hover {
+    border-color: #DC2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
 .mytasks-card-dragging {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
     cursor: grabbing;

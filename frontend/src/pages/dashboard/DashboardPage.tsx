@@ -229,9 +229,9 @@ export const DashboardPage: React.FC = () => {
                     <div className="dashboard-header-section">
                         <div>
                             <Title level={2} style={{ margin: 0, color: '#1E293B', fontSize: 48 }}>
-                                Welcome back, {user?.name?.split(' ')[0]}! 👋
+                                Dashboard
                             </Title>
-                            <Text style={{ color: '#64748B', fontSize: 30 }}>Here's what's happening with your projects today.</Text>
+                            <Text style={{ color: '#64748B', fontSize: 30 }}>IT Overall</Text>
                         </div>
                         <Button
                             type="primary"
@@ -240,7 +240,7 @@ export const DashboardPage: React.FC = () => {
                             style={{ background: '#3B82F6', borderColor: '#3B82F6' }}
                             icon={<ArrowRightOutlined />}
                         >
-                            View All Projects
+                            View My Projects
                         </Button>
                     </div>
 
@@ -253,7 +253,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.totalProjects}
                                     icon={<FolderOutlined />}
                                     iconClass="icon-slate"
-                                    gradientFrom="#F1F5F9"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -263,7 +262,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
                                     iconClass="icon-blue"
-                                    gradientFrom="#DBEAFE"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -273,7 +271,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
                                     iconClass="icon-amber"
-                                    gradientFrom="#FEF3C7"
                                     onClick={() => navigate('/my-tasks')}
                                 />
                             </div>
@@ -283,7 +280,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.teamMembers}
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
-                                    gradientFrom="#D1FAE5"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -294,216 +290,209 @@ export const DashboardPage: React.FC = () => {
                                     suffix="%"
                                     icon={<RocketOutlined />}
                                     iconClass="icon-purple"
-                                    gradientFrom="#EDE9FE"
-                                    description="DONE tasks / total tasks × 100"
+                                    description="DONE tasks / total tasks x 100"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
                         </div>
 
-                        <div className="dashboard-grid">
-                            {/* Left Column */}
-                            <div className="main-col">
-                                {/* Recent Projects */}
-                                <div className="section-header">
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Projects</Title>
-                                    <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
-                                </div>
-                                <Row gutter={[16, 16]}>
-                                    {recentProjects.slice(0, 4).map(project => (
-                                        <Col xs={24} md={12} key={project.id}>
-                                            <div
-                                                className="project-card-v2"
-                                                onClick={() => navigate(`/projects/${project.id}`)}
-                                            >
-                                                <div className="card-header">
-                                                    <div className="project-icon-v2" style={{ backgroundColor: getStatusIconBg(project.status) }}>
-                                                        <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 18 }} />
-                                                    </div>
-                                                    <span className={`status-badge ${getStatusBadgeClass(project.status)}`}>
-                                                        {project.status}
-                                                    </span>
+                        <div className="dashboard-sections">
+                            {/* Recent Projects */}
+                            <div className="section-header">
+                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Projects</Title>
+                                <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
+                            </div>
+                            <Row gutter={[16, 16]}>
+                                {recentProjects.slice(0, 4).map(project => (
+                                    <Col xs={24} md={12} key={project.id}>
+                                        <div
+                                            className="project-card-v2"
+                                            onClick={() => navigate(`/projects/${project.id}`)}
+                                        >
+                                            <div className="card-header">
+                                                <div className="project-icon-v2" style={{ backgroundColor: getStatusIconBg(project.status) }}>
+                                                    <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 18 }} />
                                                 </div>
-                                                <h3 className="project-card-title">{project.name}</h3>
-                                                <p className="project-card-id">{project.description || 'No description'}</p>
-                                                <div className="project-card-progress">
-                                                    <div className="progress-header">
-                                                        <span className="progress-label">Progress</span>
-                                                        <span className="progress-value">65%</span>
-                                                    </div>
-                                                    <div className="progress-bar-track">
-                                                        <div
-                                                            className="progress-bar-fill"
-                                                            style={{ width: '65%', background: getStatusProgressColor(project.status) }}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                <span className={`status-badge ${getStatusBadgeClass(project.status)}`}>
+                                                    {project.status}
+                                                </span>
                                             </div>
-                                        </Col>
-                                    ))}
-                                </Row>
-
-                                {/* My Tasks */}
-                                <div className="section-header" style={{ marginTop: 32 }}>
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>My Active Tasks</Title>
-                                    <button className="view-all-link" onClick={() => navigate('/my-tasks')}>View all</button>
-                                </div>
-                                <Card className="tasks-list-card" variant="borderless">
-                                    {myTasks.length > 0 ? (
-                                        <List
-                                            dataSource={myTasks}
-                                            renderItem={task => (
-                                                <List.Item
-                                                    actions={[
-                                                        <Button
-                                                            type="text"
-                                                            icon={<ArrowRightOutlined />}
-                                                            onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
-                                                        />
-                                                    ]}
-                                                >
-                                                    <List.Item.Meta
-                                                        avatar={
-                                                            <div className={`task-priority-icon ${task.priority === 'URGENT' ? 'priority-urgent' : 'priority-normal'}`}>
-                                                                <CheckCircleOutlined />
-                                                            </div>
-                                                        }
-                                                        title={<Text strong style={{ color: '#1E293B' }}>{task.title}</Text>}
-                                                        description={
-                                                            <Space split={<span style={{ color: '#CBD5E1' }}>·</span>}>
-                                                                <Text style={{ color: '#64748B', fontSize: 13 }}>{task.project?.name}</Text>
-                                                                <Text style={{ color: '#64748B', fontSize: 13 }}>
-                                                                    Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
-                                                                </Text>
-                                                            </Space>
-                                                        }
+                                            <h3 className="project-card-title">{project.name}</h3>
+                                            <p className="project-card-id">{project.description || 'No description'}</p>
+                                            <div className="project-card-progress">
+                                                <div className="progress-header">
+                                                    <span className="progress-label">Progress</span>
+                                                    <span className="progress-value">65%</span>
+                                                </div>
+                                                <div className="progress-bar-track">
+                                                    <div
+                                                        className="progress-bar-fill"
+                                                        style={{ width: '65%', background: getStatusProgressColor(project.status) }}
                                                     />
-                                                </List.Item>
-                                            )}
-                                        />
-                                    ) : (
-                                        <div className="empty-state">No active tasks</div>
-                                    )}
-                                </Card>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Col>
+                                ))}
+                            </Row>
 
-                                {/* Annual Plan */}
-                                <div className="section-header" style={{ marginTop: 32 }}>
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>IT Project Tracking 2026</Title>
-                                    <button className="view-all-link" onClick={() => navigate('/timeline')}>View Annual Plan →</button>
-                                </div>
-                                <Card
-                                    className="annual-plan-card"
-                                    variant="borderless"
-                                    style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%)' }}
-                                    onClick={() => navigate('/timeline')}
+                            {/* Quick Access Panel */}
+                            <div className="section-header" style={{ marginTop: 32 }}>
+                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>
+                                    <ThunderboltOutlined style={{ marginRight: 8, color: '#F59E0B' }} />
+                                    Quick Access
+                                </Title>
+                            </div>
+                            <div className="quick-access-panel">
+                                {/* Active Projects Shortcuts */}
+                                {recentProjects
+                                    .filter(p => p.status === 'ACTIVE')
+                                    .slice(0, 5)
+                                    .map(project => (
+                                        <div
+                                            key={project.id}
+                                            className="quick-access-item"
+                                            onClick={() => navigate(`/projects/${project.id}`)}
+                                        >
+                                            <div className="qa-icon" style={{ background: getStatusIconBg(project.status) }}>
+                                                <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 14 }} />
+                                            </div>
+                                            <div className="qa-info">
+                                                <span className="qa-name">{project.name}</span>
+                                                <span className="qa-meta">{project._count?.tasks || 0} tasks</span>
+                                            </div>
+                                            <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
+                                        </div>
+                                    ))
+                                }
+                                {/* My Tasks Summary */}
+                                <div
+                                    className="quick-access-item qa-highlight"
+                                    onClick={() => navigate('/my-tasks')}
                                 >
-                                    <Space>
-                                        <ClockCircleOutlined style={{ fontSize: 24, color: '#667eea' }} />
-                                        <div>
-                                            <Text strong>Annual Plan View — Timeline</Text>
-                                            <br />
-                                            <Text type="secondary" style={{ fontSize: 12 }}>ดูภาพรวมโปรเจกต์ทั้งหมดในรูปแบบ Gantt Chart</Text>
-                                        </div>
-                                        <ArrowRightOutlined style={{ fontSize: 16, color: '#667eea' }} />
-                                    </Space>
-                                </Card>
-                            </div>
-
-                            {/* Right Column: Quick Access + Activity Feed */}
-                            <div className="side-col">
-                                {/* Quick Access Panel */}
-                                <div className="section-header">
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>
-                                        <ThunderboltOutlined style={{ marginRight: 8, color: '#F59E0B' }} />
-                                        Quick Access
-                                    </Title>
-                                </div>
-                                <div className="quick-access-panel">
-                                    {/* Active Projects Shortcuts */}
-                                    {recentProjects
-                                        .filter(p => p.status === 'ACTIVE')
-                                        .slice(0, 5)
-                                        .map(project => (
-                                            <div
-                                                key={project.id}
-                                                className="quick-access-item"
-                                                onClick={() => navigate(`/projects/${project.id}`)}
-                                            >
-                                                <div className="qa-icon" style={{ background: getStatusIconBg(project.status) }}>
-                                                    <FolderOutlined style={{ color: getStatusIconColor(project.status), fontSize: 14 }} />
-                                                </div>
-                                                <div className="qa-info">
-                                                    <span className="qa-name">{project.name}</span>
-                                                    <span className="qa-meta">{project._count?.tasks || 0} tasks</span>
-                                                </div>
-                                                <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
-                                            </div>
-                                        ))
-                                    }
-                                    {/* My Tasks Summary */}
-                                    <div
-                                        className="quick-access-item qa-highlight"
-                                        onClick={() => navigate('/my-tasks')}
-                                    >
-                                        <div className="qa-icon" style={{ background: '#DBEAFE' }}>
-                                            <CheckCircleOutlined style={{ color: '#3B82F6', fontSize: 14 }} />
-                                        </div>
-                                        <div className="qa-info">
-                                            <span className="qa-name">My Tasks</span>
-                                            <span className="qa-meta">
-                                                {stats.pendingTasks} pending · {stats.completedTasks} done
-                                            </span>
-                                        </div>
-                                        <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
+                                    <div className="qa-icon" style={{ background: '#DBEAFE' }}>
+                                        <CheckCircleOutlined style={{ color: '#3B82F6', fontSize: 14 }} />
                                     </div>
-                                </div>
-
-                                {/* Activity Feed */}
-                                <div className="section-header" style={{ marginTop: 24 }}>
-                                    <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Team Activity</Title>
-                                </div>
-                                <div className="activity-feed">
-                                    {recentActivities.length > 0 ? recentActivities.map((log, index) => {
-                                        const targetUrl = log.taskId && log.projectId
-                                            ? `/projects/${log.projectId}?taskId=${log.taskId}`
-                                            : log.projectId
-                                                ? `/projects/${log.projectId}`
-                                                : undefined;
-                                        return (
-                                            <div
-                                                key={log.id}
-                                                className={`activity-item ${targetUrl ? 'clickable' : ''}`}
-                                                onClick={() => targetUrl && navigate(targetUrl)}
-                                            >
-                                                {index < recentActivities.length - 1 && (
-                                                    <div className="activity-line" />
-                                                )}
-                                                <div
-                                                    className="activity-avatar"
-                                                    style={{ background: ACTION_COLORS[log.action] || '#6B7280' }}
-                                                    title={log.user?.name || 'Unknown'}
-                                                >
-                                                    {log.user ? getInitials(log.user.name) : <UserOutlined />}
-                                                </div>
-                                                <div className="activity-content">
-                                                    <p className="activity-text">
-                                                        <span className="activity-user">{log.user?.name || 'Someone'}</span>{' '}
-                                                        <span className="activity-action">
-                                                            {ACTION_LABELS[log.action] || log.action?.toLowerCase()}
-                                                        </span>{' '}
-                                                        <span className="activity-entity">
-                                                            {log.task?.title || log.project?.name || log.entityType}
-                                                        </span>
-                                                    </p>
-                                                    <span className="activity-time">{dayjs(log.createdAt).fromNow()}</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    }) : (
-                                        <div className="empty-state">No recent activities</div>
-                                    )}
+                                    <div className="qa-info">
+                                        <span className="qa-name">My Tasks</span>
+                                        <span className="qa-meta">
+                                            {stats.pendingTasks} pending · {stats.completedTasks} done
+                                        </span>
+                                    </div>
+                                    <ArrowRightOutlined style={{ color: '#CBD5E1', fontSize: 12 }} />
                                 </div>
                             </div>
+
+                            {/* My Active Tasks */}
+                            <div className="section-header" style={{ marginTop: 32 }}>
+                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>My Active Tasks</Title>
+                                <button className="view-all-link" onClick={() => navigate('/my-tasks')}>View all</button>
+                            </div>
+                            <Card className="tasks-list-card" variant="borderless">
+                                {myTasks.length > 0 ? (
+                                    <List
+                                        dataSource={myTasks}
+                                        renderItem={task => (
+                                            <List.Item
+                                                actions={[
+                                                    <Button
+                                                        type="text"
+                                                        icon={<ArrowRightOutlined />}
+                                                        onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
+                                                    />
+                                                ]}
+                                            >
+                                                <List.Item.Meta
+                                                    avatar={
+                                                        <div className={`task-priority-icon ${task.priority === 'URGENT' ? 'priority-urgent' : 'priority-normal'}`}>
+                                                            <CheckCircleOutlined />
+                                                        </div>
+                                                    }
+                                                    title={<Text strong style={{ color: '#1E293B' }}>{task.title}</Text>}
+                                                    description={
+                                                        <Space split={<span style={{ color: '#CBD5E1' }}>·</span>}>
+                                                            <Text style={{ color: '#64748B', fontSize: 13 }}>{task.project?.name}</Text>
+                                                            <Text style={{ color: '#64748B', fontSize: 13 }}>
+                                                                Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
+                                                            </Text>
+                                                        </Space>
+                                                    }
+                                                />
+                                            </List.Item>
+                                        )}
+                                    />
+                                ) : (
+                                    <div className="empty-state">No active tasks</div>
+                                )}
+                            </Card>
+
+                            {/* Team Activity */}
+                            <div className="section-header" style={{ marginTop: 32 }}>
+                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Team Activity</Title>
+                            </div>
+                            <div className="activity-feed">
+                                {recentActivities.length > 0 ? recentActivities.map((log, index) => {
+                                    const targetUrl = log.taskId && log.projectId
+                                        ? `/projects/${log.projectId}?taskId=${log.taskId}`
+                                        : log.projectId
+                                            ? `/projects/${log.projectId}`
+                                            : undefined;
+                                    return (
+                                        <div
+                                            key={log.id}
+                                            className={`activity-item ${targetUrl ? 'clickable' : ''}`}
+                                            onClick={() => targetUrl && navigate(targetUrl)}
+                                        >
+                                            {index < recentActivities.length - 1 && (
+                                                <div className="activity-line" />
+                                            )}
+                                            <div
+                                                className="activity-avatar"
+                                                style={{ background: ACTION_COLORS[log.action] || '#6B7280' }}
+                                                title={log.user?.name || 'Unknown'}
+                                            >
+                                                {log.user ? getInitials(log.user.name) : <UserOutlined />}
+                                            </div>
+                                            <div className="activity-content">
+                                                <p className="activity-text">
+                                                    <span className="activity-user">{log.user?.name || 'Someone'}</span>{' '}
+                                                    <span className="activity-action">
+                                                        {ACTION_LABELS[log.action] || log.action?.toLowerCase()}
+                                                    </span>{' '}
+                                                    <span className="activity-entity">
+                                                        {log.task?.title || log.project?.name || log.entityType}
+                                                    </span>
+                                                </p>
+                                                <span className="activity-time">{dayjs(log.createdAt).fromNow()}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }) : (
+                                    <div className="empty-state">No recent activities</div>
+                                )}
+                            </div>
+
+                            {/* Total IT Project (Annual Plan) */}
+                            <div className="section-header" style={{ marginTop: 32 }}>
+                                <Title level={4} style={{ color: '#1E293B', margin: 0, fontWeight: 700 }}>Total IT Project</Title>
+                                <button className="view-all-link" onClick={() => navigate('/timeline')}>View Annual Plan →</button>
+                            </div>
+                            <Card
+                                className="annual-plan-card"
+                                variant="borderless"
+                                style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%)' }}
+                                onClick={() => navigate('/timeline')}
+                            >
+                                <Space>
+                                    <ClockCircleOutlined style={{ fontSize: 24, color: '#667eea' }} />
+                                    <div>
+                                        <Text strong>Annual Plan View — Timeline</Text>
+                                        <br />
+                                        <Text type="secondary" style={{ fontSize: 12 }}>ดูภาพรวมโปรเจกต์ทั้งหมดในรูปแบบ Gantt Chart</Text>
+                                    </div>
+                                    <ArrowRightOutlined style={{ fontSize: 16, color: '#667eea' }} />
+                                </Space>
+                            </Card>
                         </div>
                     </Spin>
                 </Content>

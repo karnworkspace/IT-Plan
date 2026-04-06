@@ -38,6 +38,7 @@ import {
     MoreOutlined,
     EyeOutlined,
     DeleteOutlined,
+    WarningOutlined,
 } from '@ant-design/icons';
 import { useCountUp } from '../../hooks/useCountUp';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
@@ -97,7 +98,7 @@ function MyTasksDroppableColumn({ id, className, children }: { id: string; class
     );
 }
 
-function SortableMyTaskCard({ id, children, onClick }: { id: string; children: React.ReactNode; onClick: () => void }) {
+function SortableMyTaskCard({ id, children, onClick, className: extraClass }: { id: string; children: React.ReactNode; onClick: () => void; className?: string }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
@@ -110,7 +111,7 @@ function SortableMyTaskCard({ id, children, onClick }: { id: string; children: R
             {...attributes}
             {...listeners}
             style={style}
-            className={`mytasks-card ${isDragging ? 'mytasks-card-dragging' : ''}`}
+            className={`mytasks-card ${isDragging ? 'mytasks-card-dragging' : ''} ${extraClass || ''}`}
             onClick={() => !isDragging && onClick()}
         >
             {children}
@@ -197,12 +198,20 @@ export const MyTasksPage: React.FC = () => {
         return true;
     });
 
+    // Overdue check helper
+    const isOverdue = (task: Task) =>
+        task.dueDate &&
+        task.status !== 'DONE' &&
+        task.status !== 'CANCELLED' &&
+        dayjs(task.dueDate).isBefore(dayjs(), 'day');
+
     // Stats counts
     const todoCount = filteredTasks.filter(t => t.status === 'TODO').length;
     const inProgressCount = filteredTasks.filter(t => t.status === 'IN_PROGRESS').length;
     const doneCount = filteredTasks.filter(t => t.status === 'DONE').length;
     const holdCount = filteredTasks.filter(t => t.status === 'HOLD').length;
     const cancelledCount = filteredTasks.filter(t => t.status === 'CANCELLED').length;
+    const overdueCount = filteredTasks.filter(t => isOverdue(t)).length;
 
     // Group tasks by status (order from backend: sortOrder → dueDate → priority)
     const getTasksByStatus = (status: string) =>
@@ -343,23 +352,26 @@ export const MyTasksPage: React.FC = () => {
                     <Spin spinning={loading}>
                         {/* Stats Cards */}
                         <Row gutter={16} className="stats-row">
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
                             </Col>
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-purple" gradientFrom="#EDE9FE" />
                             </Col>
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
                             </Col>
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
                             </Col>
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
                             </Col>
-                            <Col xs={12} sm={4}>
+                            <Col xs={12} sm={3}>
                                 <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                            </Col>
+                            <Col xs={12} sm={3}>
+                                <StatCardItem title="Overdue" value={overdueCount} icon={<WarningOutlined />} iconClass="icon-red" gradientFrom="#FEE2E2" />
                             </Col>
                         </Row>
 
@@ -411,9 +423,9 @@ export const MyTasksPage: React.FC = () => {
                                                 {columnTasks.map((task) => {
                                                     const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
                                                     return (
-                                                        <SortableMyTaskCard key={task.id} id={task.id} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
+                                                        <SortableMyTaskCard key={task.id} id={task.id} className={isOverdue(task) ? 'mytasks-card-overdue' : ''} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
                                                             {/* Project Color Bar */}
-                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
+                                                            <div className="mytasks-card-color" style={{ background: isOverdue(task) ? '#EF4444' : (task.project?.color || '#1890ff') }} />
 
                                                             <div className="mytasks-card-body">
                                                                 {/* Project Name + Menu */}

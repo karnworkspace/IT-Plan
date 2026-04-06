@@ -162,8 +162,8 @@ export const CalendarPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Stats summary */}
-                    <div className="cal-stats-row">
+                    {/* Stats summary — removed per feedback U19 */}
+                    {/* <div className="cal-stats-row">
                         <div className="cal-stat-item cal-stat-clickable" onClick={() => setStatModalType('due')}>
                             <CalendarOutlined style={{ fontSize: 24, color: '#667eea' }} />
                             <div>
@@ -178,7 +178,7 @@ export const CalendarPage: React.FC = () => {
                                 <div className="cal-stat-label">Overdue</div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     <Spin spinning={loading}>
                         <Card className="calendar-card">

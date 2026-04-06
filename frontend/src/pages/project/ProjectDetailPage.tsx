@@ -593,7 +593,7 @@ export const ProjectDetailPage: React.FC = () => {
                             <Row gutter={[16, 16]}>
                                 {/* Start Date */}
                                 {project.startDate && (
-                                    <Col xs={24} sm={8}>
+                                    <Col xs={8} sm={8}>
                                         <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                             <Statistic
                                                 title={<span style={{ color: sg.textColor, fontWeight: 600 }}><CalendarOutlined /> Project Start</span>}
@@ -605,7 +605,7 @@ export const ProjectDetailPage: React.FC = () => {
                                 )}
 
                                 {/* Due Date */}
-                                <Col xs={24} sm={8}>
+                                <Col xs={8} sm={8}>
                                     <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
                                             title={<span style={{ color: sg.textColor, fontWeight: 600 }}><ClockCircleOutlined /> Target Finish</span>}
@@ -622,10 +622,10 @@ export const ProjectDetailPage: React.FC = () => {
                                 </Col>
 
                                 {/* Days Remaining */}
-                                <Col xs={24} sm={8}>
+                                <Col xs={8} sm={8}>
                                     <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
                                         <Statistic
-                                            title={<span style={{ color: sg.textColor, fontWeight: 600 }}><SyncOutlined spin /> Time Remaining</span>}
+                                            title={<span style={{ color: sg.textColor, fontWeight: 600 }}><SyncOutlined /> Time Remaining</span>}
                                             value={
                                                 (() => {
                                                     const targetDate = project.endDate

@@ -241,7 +241,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
     const { id } = req.params as { id: string };
     const userId = extractUserId(req);
 
-    const { status, progress: rawProgress } = req.body;
+    const { status, progress: rawProgress, note } = req.body;
 
     // Validation
     if (!status) {
@@ -252,6 +252,10 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Invalid status value', 400);
     }
 
+    if (!note || (typeof note === 'string' && note.trim().length === 0)) {
+      return sendError(res, 'Note is required when changing task status', 400);
+    }
+
     // Auto-calculate progress from status if not provided
     const progress = rawProgress !== undefined ? rawProgress : (STATUS_PROGRESS[status] ?? 0);
 
@@ -259,7 +263,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Progress must be between 0 and 100', 400);
     }
 
-    const task = await taskService.updateTaskStatus(id, status, progress, userId);
+    const task = await taskService.updateTaskStatus(id, status, progress, userId, note);
 
     return sendSuccess(res, { task }, '200');
   } catch (error) {
@@ -397,6 +401,19 @@ export const convertToTask = async (req: Request, res: Response, next: NextFunct
     if (error.message) {
       return sendError(res, error.message, 400);
     }
+    next(error);
+  }
+};
+
+/**
+ * Get status change logs for a task
+ */
+export const getStatusChangeLogs = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params as { id: string };
+    const logs = await taskService.getStatusChangeLogs(id);
+    return sendSuccess(res, { logs });
+  } catch (error) {
     next(error);
   }
 };

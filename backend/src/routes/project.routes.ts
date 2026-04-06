@@ -3,6 +3,7 @@ import { authenticate } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
 import {
   getTimeline,
+  getMyProjects,
   getProjects,
   getProject,
   createProject,
@@ -33,6 +34,13 @@ router.use(authenticate);
  */
 router.get('/timeline', getTimeline);
 router.patch('/reorder', reorderProjects);
+
+/**
+ * @route   GET /api/v1/projects/my
+ * @desc    Get projects where current user is owner or member
+ * @access  Private
+ */
+router.get('/my', getMyProjects);
 
 router.get('/', getProjects);
 

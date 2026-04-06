@@ -420,7 +420,12 @@ export class TaskService {
   /**
    * Update task status and progress
    */
-  async updateTaskStatus(id: string, status: string, progress: number, userId: string): Promise<any> {
+  async updateTaskStatus(id: string, status: string, progress: number, userId: string, note: string): Promise<any> {
+    // Validate mandatory note
+    if (!note || note.trim().length === 0) {
+      throw new Error('Note is required when changing task status');
+    }
+
     // Check if user has permission
     const existingTask = await prisma.task.findUnique({
       where: { id },
@@ -451,6 +456,17 @@ export class TaskService {
       },
     });
 
+    // Create StatusChangeLog entry
+    await prisma.statusChangeLog.create({
+      data: {
+        taskId: id,
+        userId,
+        fromStatus: existingTask.status,
+        toStatus: status,
+        note,
+      },
+    });
+
     // Trigger notification when task completed
     if (status === 'DONE' && existingTask.createdById !== userId) {
       await notificationService.createNotification({
@@ -471,7 +487,7 @@ export class TaskService {
       entityId: id,
       projectId: existingTask.projectId,
       taskId: id,
-      metadata: { status, progress }
+      metadata: { status, progress, fromStatus: existingTask.status, note }
     });
 
     return updatedTask;
@@ -488,40 +504,29 @@ export class TaskService {
 
     let where: any = {};
 
-    // 1. CHIAN / OHM / ADMIN Logic -> See ALL Tasks
-    const isAdminView =
-      user.email === 'monchiant@sena.co.th' ||
-      user.email === 'adinuna@sena.co.th' ||
-      user.role === 'ADMIN';
+    const isAdminView = user.role === 'ADMIN';
+    const isManagerView = user.role === 'MANAGER';
 
     if (isAdminView) {
-      // No assignee filter = All tasks
+      // See ALL tasks
       where = {};
-    } else {
-      // 2. Determine visibility for Normal Users
-      // Find TEAM user ID (Shared tasks)
-      // Ideally we cache this, but for now we look it up.
-      // We assume the user with email 'team@sena.co.th' is the bucket for team tasks.
-      const teamUser = await prisma.user.findUnique({
-        where: { email: 'team@sena.co.th' },
-        select: { id: true }
+    } else if (isManagerView) {
+      // See tasks in projects where user is owner or member + own assigned tasks
+      const memberProjects = await prisma.projectMember.findMany({
+        where: { userId: user.id },
+        select: { projectId: true },
       });
+      const projectIds = memberProjects.map(mp => mp.projectId);
 
-      // Users who can see TEAM tasks
-      const teamViewers = ['tharab@sena.co.th', 'nattapongm@sena.co.th'];
-
-      if (teamViewers.includes(user.email) && teamUser) {
-        // Can see My Assigned Tasks OR Team Tasks
-        where = {
-          OR: [
-            { assigneeId: user.id },
-            { assigneeId: teamUser.id },
-          ],
-        };
-      } else {
-        // Strict: ONLY Assigned Tasks (No CreatedBy logic anymore!)
-        where = { assigneeId: user.id };
-      }
+      where = {
+        OR: [
+          { projectId: { in: projectIds } },
+          { assigneeId: user.id },
+        ],
+      };
+    } else {
+      // MEMBER: only assigned tasks
+      where = { assigneeId: user.id };
     }
 
     if (status) where.status = status;
@@ -628,7 +633,10 @@ export class TaskService {
       blocked_tasks: blocked,
       hold_tasks: hold,
       cancelled_tasks: cancelled,
-      completion_rate: total > 0 ? Math.round((done / total) * 100) : 0,
+      completion_rate: (() => {
+        const countable = total - hold - cancelled;
+        return countable > 0 ? Math.round((done / countable) * 100) : 0;
+      })(),
     };
   }
   /**
@@ -749,6 +757,19 @@ export class TaskService {
     });
 
     return updated;
+  }
+
+  /**
+   * Get status change logs for a task
+   */
+  async getStatusChangeLogs(taskId: string): Promise<any[]> {
+    return prisma.statusChangeLog.findMany({
+      where: { taskId },
+      include: {
+        user: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }
 

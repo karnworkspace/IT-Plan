@@ -17,6 +17,7 @@ import {
     Badge,
     Button,
     Dropdown,
+    Input,
     Modal,
     message,
     Spin,
@@ -123,6 +124,17 @@ export const TagTasksPage: React.FC = () => {
     // DnD State
     const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
     const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+    // Status change modal state
+    const [statusChangeModal, setStatusChangeModal] = useState<{
+        visible: boolean;
+        taskId: string;
+        fromStatus: string;
+        toStatus: string;
+        progress: number;
+    }>({ visible: false, taskId: '', fromStatus: '', toStatus: '', progress: 0 });
+    const [statusChangeNote, setStatusChangeNote] = useState('');
+    const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
     const getTaskMenuItems = (task: Task): MenuProps['items'] => [
         {
@@ -250,25 +262,52 @@ export const TagTasksPage: React.FC = () => {
             return;
         }
 
-        // Cross-column — optimistic update
+        // Cross-column — show modal for note
+        setStatusChangeNote('');
+        setStatusChangeModal({
+            visible: true,
+            taskId,
+            fromStatus: task.status,
+            toStatus: newStatus,
+            progress: newStatus === 'DONE' ? 100 : task.progress,
+        });
+    };
+
+    const handleStatusChangeConfirm = async () => {
+        if (!statusChangeNote.trim()) {
+            message.warning('กรุณากรอกเหตุผลที่เปลี่ยนสถานะ');
+            return;
+        }
+        const { taskId, toStatus, progress } = statusChangeModal;
+        setStatusChangeLoading(true);
+
         const oldTasks = [...tasks];
         setTasks(prev => prev.map(t =>
             t.id === taskId
-                ? { ...t, status: newStatus as Task['status'], progress: newStatus === 'DONE' ? 100 : t.progress }
+                ? { ...t, status: toStatus as Task['status'], progress }
                 : t
         ));
 
         try {
             await taskService.updateTaskStatus(taskId, {
-                status: newStatus,
-                progress: newStatus === 'DONE' ? 100 : task.progress,
+                status: toStatus,
+                progress,
+                note: statusChangeNote.trim(),
             });
-            message.success(`Task moved to ${newStatus.replace(/_/g, ' ')}`);
+            message.success(`Task moved to ${toStatus.replace(/_/g, ' ')}`);
+            setStatusChangeModal(prev => ({ ...prev, visible: false }));
         } catch (error) {
             setTasks(oldTasks);
             message.error('Failed to update task status');
             console.error(error);
+        } finally {
+            setStatusChangeLoading(false);
         }
+    };
+
+    const handleStatusChangeCancel = () => {
+        setStatusChangeModal(prev => ({ ...prev, visible: false }));
+        setStatusChangeNote('');
     };
 
     return (
@@ -448,6 +487,38 @@ export const TagTasksPage: React.FC = () => {
                     </Spin>
                 </Content>
             </Layout>
+
+            {/* Status Change Note Modal */}
+            <Modal
+                title="เหตุผลที่เปลี่ยนสถานะ"
+                open={statusChangeModal.visible}
+                onOk={handleStatusChangeConfirm}
+                onCancel={handleStatusChangeCancel}
+                okText="Confirm"
+                cancelText="Cancel"
+                confirmLoading={statusChangeLoading}
+                okButtonProps={{ disabled: !statusChangeNote.trim() }}
+                maskClosable={false}
+            >
+                <div style={{ marginBottom: 16 }}>
+                    <Space>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.fromStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.fromStatus]?.label || statusChangeModal.fromStatus}
+                        </Tag>
+                        <span style={{ fontSize: 16 }}>→</span>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.toStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.toStatus]?.label || statusChangeModal.toStatus}
+                        </Tag>
+                    </Space>
+                </div>
+                <Input.TextArea
+                    rows={3}
+                    placeholder="กรุณาระบุเหตุผลที่เปลี่ยนสถานะ..."
+                    value={statusChangeNote}
+                    onChange={(e) => setStatusChangeNote(e.target.value)}
+                    autoFocus
+                />
+            </Modal>
 
             <TaskDetailModal
                 visible={detailModalVisible}

@@ -12,6 +12,7 @@ import {
     Select,
     Tooltip,
     Empty,
+    Modal,
 } from 'antd';
 import {
     PlusOutlined,
@@ -39,6 +40,16 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
     const [newTitle, setNewTitle] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // Status change modal state
+    const [statusChangeModal, setStatusChangeModal] = useState<{
+        visible: boolean;
+        subTaskId: string;
+        fromStatus: string;
+        toStatus: string;
+    }>({ visible: false, subTaskId: '', fromStatus: '', toStatus: '' });
+    const [statusChangeNote, setStatusChangeNote] = useState('');
+    const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+
     const completedCount = subTasks.filter(t => t.status === 'DONE').length;
     const progressPercent = subTasks.length > 0 ? Math.round((completedCount / subTasks.length) * 100) : 0;
 
@@ -64,15 +75,41 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
         }
     };
 
-    const handleStatusChange = async (subTaskId: string, newStatus: string) => {
+    const handleStatusChange = (subTaskId: string, newStatus: string) => {
+        const subTask = subTasks.find(t => t.id === subTaskId);
+        if (!subTask || subTask.status === newStatus) return;
+        setStatusChangeNote('');
+        setStatusChangeModal({
+            visible: true,
+            subTaskId,
+            fromStatus: subTask.status,
+            toStatus: newStatus,
+        });
+    };
+
+    const handleStatusChangeConfirm = async () => {
+        if (!statusChangeNote.trim()) {
+            message.warning('กรุณากรอกเหตุผลที่เปลี่ยนสถานะ');
+            return;
+        }
+        const { subTaskId, toStatus } = statusChangeModal;
+        const progress = toStatus === 'DONE' ? 100 : toStatus === 'IN_PROGRESS' ? 50 : 0;
+        setStatusChangeLoading(true);
         try {
-            const progress = newStatus === 'DONE' ? 100 : newStatus === 'IN_PROGRESS' ? 50 : 0;
-            await taskService.updateTaskStatus(subTaskId, { status: newStatus, progress });
+            await taskService.updateTaskStatus(subTaskId, { status: toStatus, progress, note: statusChangeNote.trim() });
             message.success('Status updated');
+            setStatusChangeModal(prev => ({ ...prev, visible: false }));
             onRefresh();
         } catch (error) {
             message.error('Failed to update status');
+        } finally {
+            setStatusChangeLoading(false);
         }
+    };
+
+    const handleStatusChangeCancel = () => {
+        setStatusChangeModal(prev => ({ ...prev, visible: false }));
+        setStatusChangeNote('');
     };
 
     const handleDeleteSubTask = async (subTaskId: string) => {
@@ -227,6 +264,38 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                     Add Sub-task
                 </Button>
             )}
+
+            {/* Status Change Note Modal */}
+            <Modal
+                title="เหตุผลที่เปลี่ยนสถานะ"
+                open={statusChangeModal.visible}
+                onOk={handleStatusChangeConfirm}
+                onCancel={handleStatusChangeCancel}
+                okText="Confirm"
+                cancelText="Cancel"
+                confirmLoading={statusChangeLoading}
+                okButtonProps={{ disabled: !statusChangeNote.trim() }}
+                maskClosable={false}
+            >
+                <div style={{ marginBottom: 16 }}>
+                    <Space>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.fromStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.fromStatus]?.label || statusChangeModal.fromStatus}
+                        </Tag>
+                        <span style={{ fontSize: 16 }}>→</span>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.toStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.toStatus]?.label || statusChangeModal.toStatus}
+                        </Tag>
+                    </Space>
+                </div>
+                <Input.TextArea
+                    rows={3}
+                    placeholder="กรุณาระบุเหตุผลที่เปลี่ยนสถานะ..."
+                    value={statusChangeNote}
+                    onChange={(e) => setStatusChangeNote(e.target.value)}
+                    autoFocus
+                />
+            </Modal>
         </div>
     );
 };

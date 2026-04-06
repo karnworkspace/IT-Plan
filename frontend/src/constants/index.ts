@@ -131,6 +131,13 @@ export const PROJECT_STATUS_GRADIENT: Record<string, ProjectStatusGradient> = {
   },
 };
 
+// --- Project Type Config ---
+
+export const PROJECT_TYPE_CONFIG: Record<string, { label: string; color: string; description: string }> = {
+  PROJECT:  { label: 'Project',  color: '#3B82F6', description: 'Report ผู้บริหาร / คำนวณ KPI' },
+  INTERNAL: { label: 'Internal', color: '#6B7280', description: 'งานภายใน / ไม่นับ KPI' },
+};
+
 // --- Project Color Picker ---
 
 export const PROJECT_COLORS = [

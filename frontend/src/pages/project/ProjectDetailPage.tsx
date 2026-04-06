@@ -122,6 +122,17 @@ export const ProjectDetailPage: React.FC = () => {
     const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
     const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
+    // Status change modal state
+    const [statusChangeModal, setStatusChangeModal] = useState<{
+        visible: boolean;
+        taskId: string;
+        fromStatus: string;
+        toStatus: string;
+        progress: number;
+    }>({ visible: false, taskId: '', fromStatus: '', toStatus: '', progress: 0 });
+    const [statusChangeNote, setStatusChangeNote] = useState('');
+    const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+
     // Member Management State
     const [memberModalVisible, setMemberModalVisible] = useState(false);
     const [allUsers, setAllUsers] = useState<{ id: string; name: string; email: string }[]>([]);
@@ -342,14 +353,17 @@ export const ProjectDetailPage: React.FC = () => {
         }
     };
 
-    const handleStatusChange = async (taskId: string, newStatus: string) => {
-        try {
-            await taskService.updateTaskStatus(taskId, { status: newStatus });
-            message.success('Status updated');
-            await loadProjectData();
-        } catch (error) {
-            message.error('Failed to update status');
-        }
+    const handleStatusChange = (taskId: string, newStatus: string) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task || task.status === newStatus) return;
+        setStatusChangeNote('');
+        setStatusChangeModal({
+            visible: true,
+            taskId,
+            fromStatus: task.status,
+            toStatus: newStatus,
+            progress: newStatus === 'DONE' ? 100 : task.progress,
+        });
     };
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -387,16 +401,52 @@ export const ProjectDetailPage: React.FC = () => {
             return;
         }
 
-        // Cross-column — optimistic update
-        const newProgress = newStatus === 'DONE' ? 100 : task.progress;
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any, progress: newProgress } : t));
-        try {
-            await taskService.updateTaskStatus(taskId, { status: newStatus, progress: newProgress });
-            message.success(`Moved "${task.title}" to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
-        } catch {
-            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: task.status } : t));
-            message.error('Failed to update task status');
+        // Cross-column — show modal for note
+        setStatusChangeNote('');
+        setStatusChangeModal({
+            visible: true,
+            taskId,
+            fromStatus: task.status,
+            toStatus: newStatus,
+            progress: newStatus === 'DONE' ? 100 : task.progress,
+        });
+    };
+
+    const handleStatusChangeConfirm = async () => {
+        if (!statusChangeNote.trim()) {
+            message.warning('กรุณากรอกเหตุผลที่เปลี่ยนสถานะ');
+            return;
         }
+        const { taskId, toStatus, progress } = statusChangeModal;
+        setStatusChangeLoading(true);
+
+        const oldTasks = [...tasks];
+        setTasks(prev => prev.map(t =>
+            t.id === taskId
+                ? { ...t, status: toStatus as any, progress }
+                : t
+        ));
+
+        try {
+            await taskService.updateTaskStatus(taskId, {
+                status: toStatus,
+                progress,
+                note: statusChangeNote.trim(),
+            });
+            message.success(`Moved to ${STATUS_CONFIG[toStatus]?.label || toStatus}`);
+            setStatusChangeModal(prev => ({ ...prev, visible: false }));
+            await loadProjectData();
+        } catch (error) {
+            setTasks(oldTasks);
+            message.error('Failed to update task status');
+        } finally {
+            setStatusChangeLoading(false);
+        }
+    };
+
+    const handleStatusChangeCancel = () => {
+        setStatusChangeModal(prev => ({ ...prev, visible: false }));
+        setStatusChangeNote('');
     };
 
     const handleTaskClick = (taskId: string) => {
@@ -1006,6 +1056,38 @@ export const ProjectDetailPage: React.FC = () => {
                         </Col>
                     </Row>
                 </Form>
+            </Modal>
+
+            {/* Status Change Note Modal */}
+            <Modal
+                title="เหตุผลที่เปลี่ยนสถานะ"
+                open={statusChangeModal.visible}
+                onOk={handleStatusChangeConfirm}
+                onCancel={handleStatusChangeCancel}
+                okText="Confirm"
+                cancelText="Cancel"
+                confirmLoading={statusChangeLoading}
+                okButtonProps={{ disabled: !statusChangeNote.trim() }}
+                maskClosable={false}
+            >
+                <div style={{ marginBottom: 16 }}>
+                    <Space>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.fromStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.fromStatus]?.label || statusChangeModal.fromStatus}
+                        </Tag>
+                        <span style={{ fontSize: 16 }}>→</span>
+                        <Tag color={STATUS_CONFIG[statusChangeModal.toStatus]?.color}>
+                            {STATUS_CONFIG[statusChangeModal.toStatus]?.label || statusChangeModal.toStatus}
+                        </Tag>
+                    </Space>
+                </div>
+                <Input.TextArea
+                    rows={3}
+                    placeholder="กรุณาระบุเหตุผลที่เปลี่ยนสถานะ..."
+                    value={statusChangeNote}
+                    onChange={(e) => setStatusChangeNote(e.target.value)}
+                    autoFocus
+                />
             </Modal>
 
             {/* Task Detail Modal */}

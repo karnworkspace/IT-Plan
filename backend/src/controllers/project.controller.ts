@@ -3,6 +3,7 @@ import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
 import projectService from '../services/project.service';
 import { PROJECT_STATUSES, MEMBER_ROLES } from '../constants';
+import { AuthRequest } from '../types';
 
 /**
  * Get timeline data (Annual Plan view)
@@ -21,10 +22,43 @@ export const getTimeline = async (
 };
 
 /**
+ * Get my projects (projects where user is owner or member)
+ */
+export const getMyProjects = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, 'Unauthorized', 401);
+    }
+
+    const { status, projectType, page, pageSize } = req.query;
+
+    const filters: Record<string, string | number> = {};
+    if (status) filters.status = status as string;
+    if (projectType) filters.projectType = projectType as string;
+    if (page) filters.page = parseInt(page as string, 10);
+    if (pageSize) filters.pageSize = parseInt(pageSize as string, 10);
+
+    const result = await projectService.getMyProjects(userId, filters);
+
+    return sendSuccess(res, {
+      projects: result.data,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get all projects
  */
 export const getProjects = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -37,7 +71,8 @@ export const getProjects = async (
     if (page) filters.page = parseInt(page as string, 10);
     if (limit) filters.limit = parseInt(limit as string, 10);
 
-    const result = await projectService.getAllProjects(filters);
+    const user = req.user ? { id: req.user.id, email: req.user.email, role: req.user.role } : undefined;
+    const result = await projectService.getAllProjects(filters, user);
 
     return sendSuccess(res, {
       projects: result.data,
@@ -81,7 +116,7 @@ export const createProject = async (
 ) => {
   try {
     const userId = extractUserId(req);
-    const { name, description, color, icon, status, startDate, endDate } = req.body;
+    const { name, description, color, icon, status, startDate, endDate, projectType } = req.body;
 
     // Validation
     if (!name || (typeof name === 'string' && name.trim().length === 0)) {
@@ -108,6 +143,7 @@ export const createProject = async (
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       ownerId: userId,
+      projectType,
     });
 
     return sendSuccess(res, { project }, undefined, 201);

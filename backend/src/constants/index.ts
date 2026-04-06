@@ -35,8 +35,15 @@ export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 export const MEMBER_ROLES = ['OWNER', 'ADMIN', 'MEMBER'] as const;
 export type MemberRole = (typeof MEMBER_ROLES)[number];
 
-export const USER_ROLES = ['ADMIN', 'MEMBER'] as const;
+export const USER_ROLES = ['ADMIN', 'MANAGER', 'MEMBER'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+
+// ========== Project Types ==========
+export const PROJECT_TYPES = ['PROJECT', 'INTERNAL'] as const;
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+
+export const isValidProjectType = (s: string): s is ProjectType =>
+  (PROJECT_TYPES as readonly string[]).includes(s);
 
 // ========== Group Types ==========
 export const GROUP_TYPES = ['USER_GROUP', 'PROJECT_GROUP'] as const;

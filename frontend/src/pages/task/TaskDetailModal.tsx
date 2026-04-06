@@ -34,7 +34,7 @@ import {
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { taskService, type Task } from '../../services/taskService';
+import { taskService, type Task, type StatusChangeLog } from '../../services/taskService';
 import { projectService } from '../../services/projectService';
 import { commentService, type Comment, type Attachment } from '../../services/commentService';
 import { dailyUpdateService, type DailyUpdate } from '../../services/dailyUpdateService';
@@ -109,6 +109,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const [updateForm] = Form.useForm();
     const [submittingUpdate, setSubmittingUpdate] = useState(false);
 
+    // Status change modal + logs
+    const [statusChangeLogs, setStatusChangeLogs] = useState<StatusChangeLog[]>([]);
+    const [statusChangeModal, setStatusChangeModal] = useState<{
+        visible: boolean;
+        fromStatus: string;
+        toStatus: string;
+    }>({ visible: false, fromStatus: '', toStatus: '' });
+    const [statusChangeNote, setStatusChangeNote] = useState('');
+    const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+
     useEffect(() => {
         if (visible) {
             tagService.getAllTags().then(setAllTags).catch(() => {});
@@ -131,15 +141,17 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const loadTaskData = async (id: string) => {
         try {
             setLoading(true);
-            const [taskData, commentsData, updatesData] = await Promise.all([
+            const [taskData, commentsData, updatesData, logsData] = await Promise.all([
                 taskService.getTask(id),
                 commentService.getTaskComments(id),
                 dailyUpdateService.getTaskUpdates(id),
+                taskService.getStatusChangeLogs(id).catch(() => []),
             ]);
 
             setTask(taskData);
             setComments(commentsData);
             setUpdates(updatesData);
+            setStatusChangeLogs(logsData);
 
             // Load project members for assignee dropdown
             if (taskData.projectId) {
@@ -286,6 +298,40 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         }
     };
 
+    const handleStatusChangeConfirm = async () => {
+        if (!task || !statusChangeNote.trim()) {
+            message.warning('กรุณากรอกเหตุผลที่เปลี่ยนสถานะ');
+            return;
+        }
+        const { toStatus } = statusChangeModal;
+        const progress = toStatus === 'DONE' ? 100 : task.progress;
+        setStatusChangeLoading(true);
+        try {
+            await taskService.updateTaskStatus(task.id, {
+                status: toStatus,
+                progress,
+                note: statusChangeNote.trim(),
+            });
+            // Update local task state and form
+            setTask({ ...task, status: toStatus as Task['status'], progress });
+            editForm.setFieldsValue({ status: toStatus });
+            setStatusChangeModal(prev => ({ ...prev, visible: false }));
+            message.success('Status updated');
+            onUpdate();
+            // Refresh logs
+            taskService.getStatusChangeLogs(task.id).then(setStatusChangeLogs).catch(() => {});
+        } catch {
+            message.error('Failed to update status');
+        } finally {
+            setStatusChangeLoading(false);
+        }
+    };
+
+    const handleStatusChangeCancel = () => {
+        setStatusChangeModal(prev => ({ ...prev, visible: false }));
+        setStatusChangeNote('');
+    };
+
     if (!task && loading) {
         return (
             <Modal visible={visible} footer={null} closable={false} width={800}>
@@ -340,7 +386,20 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         </Select>
                                     </Form.Item>
                                     <Form.Item name="status" style={{ marginBottom: 0, width: 140 }}>
-                                        <Select>
+                                        <Select
+                                            onChange={(newStatus: string) => {
+                                                if (task && newStatus !== task.status) {
+                                                    // Revert the form value, show modal instead
+                                                    editForm.setFieldsValue({ status: task.status });
+                                                    setStatusChangeNote('');
+                                                    setStatusChangeModal({
+                                                        visible: true,
+                                                        fromStatus: task.status,
+                                                        toStatus: newStatus,
+                                                    });
+                                                }
+                                            }}
+                                        >
                                             {Object.keys(STATUS_CONFIG).map(key => (
                                                 <Option key={key} value={key}>{STATUS_CONFIG[key].label}</Option>
                                             ))}
@@ -543,6 +602,46 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     </Button>
                                 )}
                             </div>
+                        )}
+
+                        {/* Status Change History */}
+                        {statusChangeLogs.length > 0 && (
+                            <>
+                                <Divider />
+                                <div className="section">
+                                    <Title level={5}><HistoryOutlined style={{ marginRight: 8 }} />Status Change History ({statusChangeLogs.length})</Title>
+                                    <Timeline mode="left">
+                                        {statusChangeLogs.map(log => (
+                                            <Timeline.Item
+                                                key={log.id}
+                                                color={STATUS_CONFIG[log.toStatus]?.dotColor || '#6B7280'}
+                                                label={dayjs(log.createdAt).format('MMM D, HH:mm')}
+                                            >
+                                                <Card size="small" className="update-card">
+                                                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                                                        <Space>
+                                                            <Avatar size={20} style={{ backgroundColor: '#1890ff', fontSize: 11 }}>
+                                                                {log.user?.name?.[0] || 'U'}
+                                                            </Avatar>
+                                                            <Text strong style={{ fontSize: 12 }}>{log.user?.name || 'Unknown'}</Text>
+                                                        </Space>
+                                                        <Space>
+                                                            <Tag color={STATUS_CONFIG[log.fromStatus]?.color}>
+                                                                {STATUS_CONFIG[log.fromStatus]?.label || log.fromStatus}
+                                                            </Tag>
+                                                            <span>→</span>
+                                                            <Tag color={STATUS_CONFIG[log.toStatus]?.color}>
+                                                                {STATUS_CONFIG[log.toStatus]?.label || log.toStatus}
+                                                            </Tag>
+                                                        </Space>
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>{log.note}</Text>
+                                                    </Space>
+                                                </Card>
+                                            </Timeline.Item>
+                                        ))}
+                                    </Timeline>
+                                </div>
+                            </>
                         )}
 
                         <Divider />
@@ -801,6 +900,39 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     </div>
                 </div>
             </div>
+        </Modal>
+
+        {/* Status Change Note Modal */}
+        <Modal
+            title="เหตุผลที่เปลี่ยนสถานะ"
+            open={statusChangeModal.visible}
+            onOk={handleStatusChangeConfirm}
+            onCancel={handleStatusChangeCancel}
+            okText="Confirm"
+            cancelText="Cancel"
+            confirmLoading={statusChangeLoading}
+            okButtonProps={{ disabled: !statusChangeNote.trim() }}
+            maskClosable={false}
+            zIndex={1100}
+        >
+            <div style={{ marginBottom: 16 }}>
+                <Space>
+                    <Tag color={STATUS_CONFIG[statusChangeModal.fromStatus]?.color}>
+                        {STATUS_CONFIG[statusChangeModal.fromStatus]?.label || statusChangeModal.fromStatus}
+                    </Tag>
+                    <span style={{ fontSize: 16 }}>→</span>
+                    <Tag color={STATUS_CONFIG[statusChangeModal.toStatus]?.color}>
+                        {STATUS_CONFIG[statusChangeModal.toStatus]?.label || statusChangeModal.toStatus}
+                    </Tag>
+                </Space>
+            </div>
+            <Input.TextArea
+                rows={3}
+                placeholder="กรุณาระบุเหตุผลที่เปลี่ยนสถานะ..."
+                value={statusChangeNote}
+                onChange={(e) => setStatusChangeNote(e.target.value)}
+                autoFocus
+            />
         </Modal>
 
         {/* Convert to Subtask Modal */}

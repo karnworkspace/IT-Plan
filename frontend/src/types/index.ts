@@ -103,6 +103,7 @@ export interface Project {
   status: ProjectStatus;
   startDate?: string;
   endDate?: string;
+  projectType?: 'PROJECT' | 'INTERNAL';
   ownerId: string;
   createdAt: string;
   updatedAt: string;
@@ -202,6 +203,17 @@ export interface Group {
     members: number;
     projects: number;
   };
+}
+
+export interface StatusChangeLog {
+  id: string;
+  taskId: string;
+  userId: string;
+  fromStatus: string;
+  toStatus: string;
+  note: string;
+  createdAt: string;
+  user?: { id: string; name: string };
 }
 
 // --- Response Types ---

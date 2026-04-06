@@ -4,6 +4,18 @@ import type { Task, TasksResponse, TaskStats } from '../types';
 // Re-export entity types for backward compatibility
 export type { Task, TasksResponse, TaskStats } from '../types';
 
+// Status change log type
+export interface StatusChangeLog {
+  id: string;
+  taskId: string;
+  fromStatus: string;
+  toStatus: string;
+  note: string;
+  userId: string;
+  user: { id: string; name: string; email: string };
+  createdAt: string;
+}
+
 // Input types (request-specific, kept here)
 export interface CreateTaskInput {
   title: string;
@@ -131,11 +143,19 @@ export const taskService = {
   },
 
   /**
-   * Update task status
+   * Update task status (note is mandatory)
    */
-  async updateTaskStatus(id: string, data: { status?: string; progress?: number }): Promise<Task> {
+  async updateTaskStatus(id: string, data: { status?: string; progress?: number; note: string }): Promise<Task> {
     const response = await api.patch(`/tasks/${id}/status`, data);
     return response.data.data.task;
+  },
+
+  /**
+   * Get status change logs for a task
+   */
+  async getStatusChangeLogs(taskId: string): Promise<StatusChangeLog[]> {
+    const response = await api.get(`/tasks/${taskId}/status-logs`);
+    return response.data.data;
   },
 
   /**

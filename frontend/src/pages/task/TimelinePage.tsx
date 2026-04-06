@@ -23,7 +23,7 @@ import type { Tag as TagType } from '../../types';
 import './TimelinePage.css';
 
 const { Content } = Layout;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 // Types
 interface TimelineTask {
@@ -251,9 +251,11 @@ export const TimelinePage: React.FC = () => {
                                 <FieldTimeOutlined style={{ marginRight: 10 }} />
                                 IT Project Tracking 2026
                             </Title>
-                            <Text type="secondary" style={{ fontSize: 30 }}>
-                                Annual Plan View — {totalProjects} projects, {totalTasks} tasks, avg {avgProgress}% progress
-                            </Text>
+                            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                                <Tag color="default">{totalProjects} Projects</Tag>
+                                <Tag color="default">{totalTasks} Tasks</Tag>
+                                <Tag color="default">Avg {avgProgress}%</Tag>
+                            </div>
                         </div>
                         <div className="timeline-header-filters">
                             <div className="shared-legend">
@@ -357,7 +359,7 @@ export const TimelinePage: React.FC = () => {
                                                         style={{ cursor: hasTasks ? 'pointer' : 'default' }}
                                                     >
                                                         <div className="ap-col-no ap-cell">
-                                                            <span className="ap-no-badge">{projectNumber}</span>
+                                                            <span className={`ap-no-badge badge-${project.status.toLowerCase()}`}>{projectNumber}</span>
                                                         </div>
                                                         <div className="ap-col-code ap-cell">
                                                             <span className="ap-code">{project.projectCode || '-'}</span>
@@ -376,7 +378,9 @@ export const TimelinePage: React.FC = () => {
                                                                     {project.name}
                                                                 </span>
                                                             </Tooltip>
-                                                            <span className={`ap-status-dot ap-status-${project.status.toLowerCase()}`} />
+                                                            <Tooltip title={project.status}>
+                                                                <span className={`ap-status-dot ap-status-${project.status.toLowerCase()}`} />
+                                                            </Tooltip>
                                                         </div>
                                                         <div className="ap-col-team ap-cell">
                                                             <span className="ap-team-text">
@@ -392,9 +396,9 @@ export const TimelinePage: React.FC = () => {
                                                                 <Progress
                                                                     percent={project.progress}
                                                                     size="small"
-                                                                    strokeColor={project.progress >= 100 ? '#32BCAD' : project.progress > 0 ? '#32BCAD' : '#E2E8F0'}
+                                                                    strokeColor={project.progress >= 100 ? '#2E7D9B' : project.progress > 0 ? '#32BCAD' : '#E2E8F0'}
                                                                     railColor="#F1F5F9"
-                                                                    format={p => <span className="ap-progress-text">{p}%</span>}
+                                                                    format={p => <span className={`ap-progress-text ${p === 0 ? 'ap-progress-zero' : ''}`}>{p}%</span>}
                                                                 />
                                                                 <span style={{ fontSize: 10, color: '#94A3B8', marginTop: 2, display: 'block' }}>
                                                                     {project.doneTasks}/{project.totalTasks} done
@@ -413,7 +417,7 @@ export const TimelinePage: React.FC = () => {
                                                                             <div className={`ap-month-cell ${i === currentMonth ? 'ap-current-month-cell' : ''}`}>
                                                                                 {color && (
                                                                                     <div
-                                                                                        className="ap-month-bar"
+                                                                                        className={`ap-month-bar ${i > currentMonth ? 'future-bar' : ''}`}
                                                                                         style={{ backgroundColor: color }}
                                                                                     />
                                                                                 )}

@@ -81,6 +81,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    border-radius: 10px 10px 0 0;
 }
 
 .ap-header-row > div {
@@ -138,9 +139,10 @@
 }
 
 .ap-month-header.ap-current-month {
-    background: rgba(50, 188, 173, 0.3);
+    background: rgba(50, 188, 173, 0.4);
     color: #fff;
     font-weight: 700;
+    position: relative;
 }
 
 /* ====================================
@@ -149,8 +151,8 @@
 .ap-category-row {
     display: flex;
     align-items: center;
-    background: #F1F5F9;
-    border-left: 4px solid #0F172A;
+    background: #F0FAF9;
+    border-left: 4px solid #32BCAD;
     padding: 8px 12px;
     gap: 12px;
     border-bottom: 1px solid #E2E8F0;
@@ -179,8 +181,12 @@
     transition: background 0.15s;
 }
 
+.ap-project-row:nth-child(even) {
+    background: rgba(50, 188, 173, 0.02);
+}
+
 .ap-project-row:hover {
-    background: #F8FAFC;
+    background: rgba(50, 188, 173, 0.06);
 }
 
 .ap-project-row.ap-expanded {
@@ -213,7 +219,16 @@
     color: #475569;
     font-size: 11px;
     font-weight: 700;
+    transition: background 0.2s, color 0.2s;
 }
+
+.ap-no-badge.badge-active { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-plan { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-pending { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-delay { background: rgba(217,79,79,0.15); color: #9B2C2C; }
+.ap-no-badge.badge-hold { background: rgba(232,168,56,0.15); color: #8B6914; }
+.ap-no-badge.badge-completed { background: rgba(46,125,155,0.15); color: #1a5a6e; }
+.ap-no-badge.badge-cancelled { background: #E2E8F0; color: #77787B; }
 
 /* Project code */
 .ap-code {
@@ -244,11 +259,12 @@
 
 /* Status dot */
 .ap-status-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
     margin-left: auto;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
 }
 
 .ap-status-plan { background: #32BCAD; }
@@ -274,9 +290,14 @@
 }
 
 .ap-progress-text {
-    font-size: 11px;
-    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
     color: #000000;
+}
+
+.ap-progress-zero {
+    color: #77787B;
 }
 
 .ap-col-progress .ant-progress {
@@ -333,12 +354,17 @@
 .ap-month-bar {
     width: 100%;
     height: 16px;
-    border-radius: 3px;
-    transition: opacity 0.15s;
+    border-radius: 4px;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.ap-month-bar.future-bar {
+    opacity: 0.5;
 }
 
 .ap-project-row:hover .ap-month-bar {
-    opacity: 0.85;
+    opacity: 1;
+    transform: scaleY(1.1);
 }
 
 .ap-task-month-bar {

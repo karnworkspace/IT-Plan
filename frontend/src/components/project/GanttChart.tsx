@@ -333,7 +333,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         return (
             <div style={{ padding: 40, textAlign: 'center' }}>
                 <Empty
-                    description="No tasks with dates to display. Add start/due dates to tasks to see them in the Gantt Chart."
+                    description="ยังไม่มี Task ที่กำหนดวันที่ — กรุณาเพิ่ม Start Date / Due Date ใน Task เพื่อแสดง Gantt Chart"
                 />
             </div>
         );

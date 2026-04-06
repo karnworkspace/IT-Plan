@@ -78,7 +78,7 @@ export const Sidebar: React.FC = () => {
                     onClick={() => setCollapsed(!collapsed)}
                     aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
-                    {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                    {collapsed ? <MenuUnfoldOutlined /> : <><MenuFoldOutlined /> ย่อเมนู</>}
                 </button>
             </div>
 

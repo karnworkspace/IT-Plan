@@ -111,14 +111,30 @@ const getMonthBarColor = (project: TimelineProject, monthIndex: number): string 
     const year = '2026';
     const monthKey = String(monthIndex + 1);
     const timeline = project.timeline as Record<string, Record<string, string>> | null;
-    if (timeline?.[year]?.[monthKey]) {
-        const planType = timeline[year][monthKey];
-        if (planType === 'actual') return STATUS_BAR_COLORS.ACTIVE;
-        if (planType === 'delayed') return STATUS_BAR_COLORS.DELAY;
-    }
+    const planType = timeline?.[year]?.[monthKey];
 
-    // Use project status color, fallback to plan (ฟ้า)
-    return STATUS_BAR_COLORS[project.status] || STATUS_BAR_COLORS.PLAN;
+    if (!planType) return null; // ไม่มี data → ไม่แสดงแถบ
+
+    // ถ้ามีค่าชัดเจน (actual/delayed) → ใช้ตามนั้น
+    if (planType === 'actual') return STATUS_BAR_COLORS.ACTIVE;
+    if (planType === 'delayed') return STATUS_BAR_COLORS.DELAY;
+
+    // "planned" → แยกตามช่วงเวลา
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-based (0=Jan)
+    const currentYear = now.getFullYear();
+    const isCurrentYear = String(currentYear) === year;
+
+    if (isCurrentYear && monthIndex < currentMonth) {
+        // เดือนที่ผ่านมาแล้ว → ใช้สี project status
+        return STATUS_BAR_COLORS[project.status] || STATUS_BAR_COLORS.ACTIVE;
+    } else if (isCurrentYear && monthIndex === currentMonth) {
+        // เดือนปัจจุบัน → ใช้สี project status
+        return STATUS_BAR_COLORS[project.status] || STATUS_BAR_COLORS.ACTIVE;
+    } else {
+        // เดือนอนาคต → ฟ้า (แผน)
+        return STATUS_BAR_COLORS.PLAN;
+    }
 };
 
 // Get bar color for TASK row — only show bars within task's date range

@@ -544,8 +544,14 @@ export const ProjectDetailPage: React.FC = () => {
                     <div className="header-content">
                         <div className="project-title-section">
                             <Title level={2} className="project-title">
-                                <span className="color-dot" style={{ backgroundColor: project.color }} />
+                                <span className="color-dot" style={{ backgroundColor: (PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE).accentColor }} />
                                 {project.name}
+                                <Tag
+                                    color={(PROJECT_STATUS_GRADIENT[project.status] || PROJECT_STATUS_GRADIENT.ACTIVE).accentColor}
+                                    style={{ marginLeft: 12, fontSize: 13, fontWeight: 600, verticalAlign: 'middle' }}
+                                >
+                                    {project.status}
+                                </Tag>
                             </Title>
                             {project.description && (
                                 <Paragraph type="secondary" className="project-desc">

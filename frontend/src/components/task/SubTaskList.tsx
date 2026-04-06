@@ -223,7 +223,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                     isDone
                                         ? <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 18 }} />
                                         : subTask.status === 'IN_PROGRESS'
-                                            ? <SyncOutlined spin style={{ color: '#1890ff', fontSize: 18 }} />
+                                            ? <SyncOutlined style={{ color: '#1890ff', fontSize: 18 }} />
                                             : <ClockCircleOutlined style={{ color: '#d9d9d9', fontSize: 18 }} />
                                 }
                                 title={

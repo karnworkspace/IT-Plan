@@ -3,7 +3,7 @@ import { Typography, Tooltip, Tag, Empty } from 'antd';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
-import type { Task } from '../services/taskService';
+import type { Task } from '../../services/taskService';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -33,7 +33,7 @@ const generateWeeks = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
     return weeks;
 };
 
-import { GANTT_STATUS_COLORS as STATUS_COLORS, GANTT_PRIORITY_COLORS as PRIORITY_COLORS } from '../constants';
+import { GANTT_STATUS_COLORS as STATUS_COLORS, GANTT_PRIORITY_COLORS as PRIORITY_COLORS } from '../../constants';
 
 export const GanttChart: React.FC<GanttChartProps> = ({ tasks, projectStartDate, projectEndDate }) => {
     // Filter tasks with dates and sort by start date

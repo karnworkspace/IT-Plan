@@ -31,10 +31,10 @@ import {
     AppstoreAddOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
-import { Sidebar } from '../components/Sidebar';
-import { groupService, type Group } from '../services/groupService';
-import { projectService, type Project } from '../services/projectService';
-import { getErrorMessage } from '../utils/getErrorMessage';
+import { Sidebar } from '../../components/layout/Sidebar';
+import { groupService, type Group } from '../../services/groupService';
+import { projectService, type Project } from '../../services/projectService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import './GroupsPage.css';
 
 const { Content } = Layout;

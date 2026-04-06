@@ -3,7 +3,7 @@ import React from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // No Link import here to avoid confusion
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../store/authStore';
 import './LoginPage.css'; // Re-use login styles
 
 const { Title, Text, Link: AntLink } = Typography;

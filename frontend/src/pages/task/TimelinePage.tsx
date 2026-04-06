@@ -15,11 +15,11 @@ import {
     CaretDownOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../components/Sidebar';
+import { Sidebar } from '../../components/layout/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
-import api from '../services/api';
-import { tagService } from '../services/tagService';
-import type { Tag as TagType } from '../types';
+import api from '../../services/api';
+import { tagService } from '../../services/tagService';
+import type { Tag as TagType } from '../../types';
 import './TimelinePage.css';
 
 const { Content } = Layout;

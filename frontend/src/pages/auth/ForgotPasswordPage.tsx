@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message, Steps, Result } from 'antd';
 import { MailOutlined, LockOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import { getErrorMessage } from '../utils/getErrorMessage';
+import { authService } from '../../services/authService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import './LoginPage.css';
 
 const { Title, Text, Link } = Typography;

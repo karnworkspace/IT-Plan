@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { taskService, type Task } from '../services/taskService';
-import { Sidebar } from '../components/Sidebar';
+import { taskService, type Task } from '../../services/taskService';
+import { Sidebar } from '../../components/layout/Sidebar';
 import {
     Layout,
     Card,
@@ -21,7 +21,7 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
-import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../../constants';
 import { TaskDetailModal } from './TaskDetailModal';
 import './CalendarPage.css';
 

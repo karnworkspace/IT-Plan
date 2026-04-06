@@ -9,8 +9,8 @@ import {
     AppstoreOutlined,
     SettingOutlined,
 } from '@ant-design/icons';
-import { useAuthStore } from '../store/authStore';
-import { NotificationPopover } from './NotificationPopover';
+import { useAuthStore } from '../../store/authStore';
+import { NotificationPopover } from '../notification/NotificationPopover';
 import './Sidebar.css';
 
 const { Sider } = Layout;

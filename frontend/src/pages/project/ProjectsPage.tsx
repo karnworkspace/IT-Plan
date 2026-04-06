@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
-import { kanbanCollision } from '../utils/kanbanCollision';
+import { kanbanCollision } from '../../utils/kanbanCollision';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { projectService, type Project } from '../services/projectService';
-import { Sidebar } from '../components/Sidebar';
+import { projectService, type Project } from '../../services/projectService';
+import { Sidebar } from '../../components/layout/Sidebar';
 import {
     Layout,
     Card,
@@ -52,16 +52,16 @@ import {
     DownloadOutlined,
     FilePdfOutlined,
 } from '@ant-design/icons';
-import { exportProjects } from '../utils/exportExcel';
-import { exportProjectsPDF } from '../utils/exportPDF';
+import { exportProjects } from '../../utils/exportExcel';
+import { exportProjectsPDF } from '../../utils/exportPDF';
 import './ProjectsPage.css';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
-import { PROJECT_COLORS } from '../constants';
-import { useCountUp } from '../hooks/useCountUp';
+import { PROJECT_COLORS } from '../../constants';
+import { useCountUp } from '../../hooks/useCountUp';
 
 interface ProjectWithStats extends Project {
     stats?: {

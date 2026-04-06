@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Typography, Table, Tag, message, Spin, Button, Modal, Input, Select, Form } from 'antd';
 import { UserOutlined, ArrowLeftOutlined, EditOutlined, LockOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../components/Sidebar';
-import api from '../services/api';
+import { Sidebar } from '../../components/layout/Sidebar';
+import api from '../../services/api';
 import type { ColumnsType } from 'antd/es/table';
 
 const { Content } = Layout;

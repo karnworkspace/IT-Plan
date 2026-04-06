@@ -22,8 +22,8 @@ import {
     SyncOutlined,
     SwapOutlined,
 } from '@ant-design/icons';
-import { taskService, type Task } from '../services/taskService';
-import { STATUS_CONFIG } from '../constants';
+import { taskService, type Task } from '../../services/taskService';
+import { STATUS_CONFIG } from '../../constants';
 
 const { Text } = Typography;
 const { Option } = Select;

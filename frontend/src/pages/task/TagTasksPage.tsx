@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { taskService, type Task } from '../services/taskService';
-import api from '../services/api';
-import { Sidebar } from '../components/Sidebar';
+import { taskService, type Task } from '../../services/taskService';
+import api from '../../services/api';
+import { Sidebar } from '../../components/layout/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
 import dayjs from 'dayjs';
 import {
@@ -35,12 +35,12 @@ import {
     EyeOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
-import { useCountUp } from '../hooks/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
-import { kanbanCollision } from '../utils/kanbanCollision';
+import { kanbanCollision } from '../../utils/kanbanCollision';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
+import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../../constants';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;

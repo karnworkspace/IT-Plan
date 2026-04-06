@@ -2,9 +2,10 @@
 
 ## ก่อนเริ่มงาน (บังคับ)
 
-1. อ่าน `Doc/PROJECT-PROGRESS.md` ← สถานะปัจจุบัน + Phase ล่าสุด
-2. อ่าน `Doc/QUICK-REFERENCE.md` ← Quick ref, commands, features
-3. Phase 1-11 archive อยู่ที่ `Doc/PROGRESS-ARCHIVE.md` (อ่านเมื่อต้องการเท่านั้น)
+1. อ่าน `Doc/CODE-SCHEMA.md` ← **แผนที่ codebase ทั้งหมด** (DB schema, API endpoints, file map, data flow, permissions)
+2. อ่าน `Doc/PROJECT-PROGRESS.md` ← สถานะปัจจุบัน + Phase ล่าสุด
+3. อ่าน `Doc/QUICK-REFERENCE.md` ← Quick ref, commands, features
+4. Phase 1-11 archive อยู่ที่ `Doc/PROGRESS-ARCHIVE.md` (อ่านเมื่อต้องการเท่านั้น)
 
 ## การบันทึกความคืบหน้า
 

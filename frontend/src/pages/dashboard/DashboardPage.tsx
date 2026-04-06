@@ -24,12 +24,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Sidebar } from '../components/Sidebar';
-import { projectService } from '../services/projectService';
-import { taskService } from '../services/taskService';
-import { activityLogService } from '../services/activityLogService';
-import { useAuthStore } from '../store/authStore';
-import { useCountUp } from '../hooks/useCountUp';
+import { Sidebar } from '../../components/layout/Sidebar';
+import { projectService } from '../../services/projectService';
+import { taskService } from '../../services/taskService';
+import { activityLogService } from '../../services/activityLogService';
+import { useAuthStore } from '../../store/authStore';
+import { useCountUp } from '../../hooks/useCountUp';
 import './DashboardPage.css';
 
 dayjs.extend(relativeTime);

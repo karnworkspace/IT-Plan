@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { projectService, type Project } from '../services/projectService';
-import { taskService, type Task } from '../services/taskService';
-import type { ProjectMember } from '../types';
-import api from '../services/api';
-import { Sidebar } from '../components/Sidebar';
+import { projectService, type Project } from '../../services/projectService';
+import { taskService, type Task } from '../../services/taskService';
+import type { ProjectMember } from '../../types';
+import api from '../../services/api';
+import { Sidebar } from '../../components/layout/Sidebar';
 import {
     Layout,
     Card,
@@ -51,12 +51,12 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
-import { kanbanCollision } from '../utils/kanbanCollision';
+import { kanbanCollision } from '../../utils/kanbanCollision';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { exportTasks } from '../utils/exportExcel';
-import { exportTasksPDF } from '../utils/exportPDF';
-import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT, PROJECT_COLORS, PROJECT_STATUS_LABELS } from '../constants';
+import { exportTasks } from '../../utils/exportExcel';
+import { exportTasksPDF } from '../../utils/exportPDF';
+import { STATUS_CONFIG, PRIORITY_CONFIG, PROJECT_STATUS_GRADIENT, PROJECT_COLORS, PROJECT_STATUS_LABELS } from '../../constants';
 import './ProjectDetailPage.css';
 
 const { Content } = Layout;
@@ -67,8 +67,8 @@ const { TabPane } = Tabs;
 // PRIORITY_BADGE uses same values as centralized PRIORITY_CONFIG (color + bg + label)
 const PRIORITY_BADGE = PRIORITY_CONFIG;
 
-import { TaskDetailModal } from './TaskDetailModal';
-import { GanttChart } from '../components/GanttChart';
+import { TaskDetailModal } from '../task/TaskDetailModal';
+import { GanttChart } from '../../components/project/GanttChart';
 
 function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
     const { setNodeRef, isOver } = useDroppable({ id });

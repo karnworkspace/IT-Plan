@@ -25,7 +25,7 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useNavigate } from 'react-router-dom';
-import { notificationService, type Notification } from '../services/notificationService';
+import { notificationService, type Notification } from '../../services/notificationService';
 import './NotificationPopover.css';
 
 dayjs.extend(relativeTime);

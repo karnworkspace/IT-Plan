@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message, Steps, Result } from 'antd';
 import { MailOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { PinInput } from '../components/PinInput';
-import { authService } from '../services/authService';
-import { getErrorMessage } from '../utils/getErrorMessage';
+import { PinInput } from '../../components/auth/PinInput';
+import { authService } from '../../services/authService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import './LoginPage.css';
 
 const { Title, Text, Link } = Typography;

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Form, Input, Button, Checkbox, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../store/authStore';
 import './LoginPage.css';
 
 const { Title, Text, Link } = Typography;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { taskService, type Task, type CreateTaskInput } from '../services/taskService';
-import { projectService, type Project } from '../services/projectService';
-import { Sidebar } from '../components/Sidebar';
+import { taskService, type Task, type CreateTaskInput } from '../../services/taskService';
+import { projectService, type Project } from '../../services/projectService';
+import { Sidebar } from '../../components/layout/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
 import dayjs from 'dayjs';
 import {
@@ -39,14 +39,14 @@ import {
     EyeOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
-import { useCountUp } from '../hooks/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
-import { kanbanCollision } from '../utils/kanbanCollision';
+import { kanbanCollision } from '../../utils/kanbanCollision';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { exportTasks } from '../utils/exportExcel';
-import { exportTasksPDF } from '../utils/exportPDF';
-import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../constants';
+import { exportTasks } from '../../utils/exportExcel';
+import { exportTasksPDF } from '../../utils/exportPDF';
+import { STATUS_CONFIG, STATUS_COLUMN_ORDER, PRIORITY_CONFIG } from '../../constants';
 import './MyTasksPage.css';
 
 const { Header, Content } = Layout;

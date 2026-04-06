@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Card, Form, Button, Typography, Progress, message, Space } from 'antd';
 import { LockOutlined, CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { PinInput } from '../components/PinInput';
-import { useAuthStore } from '../store/authStore';
+import { PinInput } from '../../components/auth/PinInput';
+import { useAuthStore } from '../../store/authStore';
 import './SetupPinPage.css';
 
 const { Title, Text } = Typography;

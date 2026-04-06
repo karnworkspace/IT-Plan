@@ -36,15 +36,15 @@ import {
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { taskService, type Task } from '../services/taskService';
-import { projectService } from '../services/projectService';
-import { commentService, type Comment, type Attachment } from '../services/commentService';
-import { dailyUpdateService, type DailyUpdate } from '../services/dailyUpdateService';
-import { tagService } from '../services/tagService';
-import type { Tag as TagType } from '../types';
+import { taskService, type Task } from '../../services/taskService';
+import { projectService } from '../../services/projectService';
+import { commentService, type Comment, type Attachment } from '../../services/commentService';
+import { dailyUpdateService, type DailyUpdate } from '../../services/dailyUpdateService';
+import { tagService } from '../../services/tagService';
+import type { Tag as TagType } from '../../types';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { SubTaskList } from '../components/SubTaskList';
+import { useAuthStore } from '../../store/authStore';
+import { SubTaskList } from '../../components/task/SubTaskList';
 import './TaskDetailModal.css';
 
 // Extend dayjs
@@ -62,8 +62,8 @@ interface TaskDetailModalProps {
     onUpdate: () => void;
 }
 
-import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
-import { STATUS_ICONS } from '../constants/statusIcons';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../../constants';
+import { STATUS_ICONS } from '../../constants/statusIcons';
 
 // --- ClickableTag: คลิก tag badge → navigate ไปหน้า TagTasksPage ---
 const ClickableTag: React.FC<{

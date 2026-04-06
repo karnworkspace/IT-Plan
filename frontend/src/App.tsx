@@ -1,20 +1,20 @@
 import { ConfigProvider } from 'antd';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { ForgotPinPage } from './pages/ForgotPinPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { SetupPinPage } from './pages/SetupPinPage';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { MyTasksPage } from './pages/MyTasksPage';
-import { ProjectDetailPage } from './pages/ProjectDetailPage';
-import { CalendarPage } from './pages/CalendarPage';
-import { TimelinePage } from './pages/TimelinePage';
-import { ConfigurationPage } from './pages/ConfigurationPage';
-import { UserListPage } from './pages/UserListPage';
-import { TagTasksPage } from './pages/TagTasksPage';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ForgotPinPage } from './pages/auth/ForgotPinPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { SetupPinPage } from './pages/auth/SetupPinPage';
+import { ProjectsPage } from './pages/project/ProjectsPage';
+import { MyTasksPage } from './pages/task/MyTasksPage';
+import { ProjectDetailPage } from './pages/project/ProjectDetailPage';
+import { CalendarPage } from './pages/task/CalendarPage';
+import { TimelinePage } from './pages/task/TimelinePage';
+import { ConfigurationPage } from './pages/admin/ConfigurationPage';
+import { UserListPage } from './pages/admin/UserListPage';
+import { TagTasksPage } from './pages/task/TagTasksPage';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import './App.css';
 
 function App() {

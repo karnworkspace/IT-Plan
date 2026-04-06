@@ -54,19 +54,18 @@ const STATUS_COLUMNS = STATUS_COLUMN_ORDER.map(key => ({
     dotColor: STATUS_CONFIG[key].dotColor,
 }));
 
-const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
+const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
-    gradientFrom?: string;
+    borderClass?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
     return (
         <Card
-            className="stat-card"
+            className={`stat-card ${borderClass || ''}`}
             variant="borderless"
-            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
             <div className="stat-card-inner">
                 <div>
@@ -327,9 +326,9 @@ export const TagTasksPage: React.FC = () => {
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                     <TagOutlined style={{ fontSize: 28, color: tagInfo?.color || '#32BCAD' }} />
-                                    <Title level={2} style={{ margin: 0, fontSize: 48 }}>
+                                    <Title level={3} style={{ margin: 0, fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>
                                         {tagInfo ? (
-                                            <Tag color={tagInfo.color} style={{ fontSize: 28, padding: '4px 16px', lineHeight: '36px' }}>
+                                            <Tag color={tagInfo.color} style={{ fontSize: 14, padding: '2px 10px', lineHeight: '22px' }}>
                                                 {tagInfo.name}
                                             </Tag>
                                         ) : 'Tag Tasks'}
@@ -348,22 +347,22 @@ export const TagTasksPage: React.FC = () => {
                         {/* Stats Cards */}
                         <Row gutter={16} className="stats-row">
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" borderClass="stat-border-green" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-purple" gradientFrom="#EDE9FE" />
+                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-blue" borderClass="stat-border-lightgreen" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
+                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" borderClass="stat-border-green" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
+                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" borderClass="stat-border-blue" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
+                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" borderClass="stat-border-amber" />
                             </Col>
                             <Col xs={12} sm={4}>
-                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" borderClass="stat-border-gray" />
                             </Col>
                         </Row>
 

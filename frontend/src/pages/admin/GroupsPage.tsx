@@ -241,11 +241,11 @@ export const GroupsPage: React.FC = () => {
                 <div className="groups-page-header">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                            <Title level={2} style={{ color: '#1a1a2e', margin: 0, fontSize: 48 }}>
-                                <TeamOutlined style={{ marginRight: 12 }} />
+                            <Title level={3} style={{ color: '#0F172A', margin: 0, fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>
+                                <TeamOutlined style={{ marginRight: 8 }} />
                                 Groups
                             </Title>
-                            <Text type="secondary" style={{ marginTop: 8, display: 'block', fontSize: 30 }}>
+                            <Text type="secondary" style={{ marginTop: 4, display: 'block', fontSize: 14, color: '#77787B' }}>
                                 Manage user groups and project groups
                             </Text>
                         </div>

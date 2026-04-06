@@ -33,6 +33,53 @@
 
 /* timeline-legend-inline: moved to shared.css as .shared-legend */
 
+/* Title */
+.timeline-title {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Prompt', sans-serif;
+}
+
+/* Stats badges */
+.timeline-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.timeline-stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #F1F5F9;
+    border-radius: 8px;
+    padding: 4px 12px;
+    border: 0.5px solid #E2E8F0;
+}
+
+.timeline-stat-badge.stat-accent {
+    border-left: 3px solid #32BCAD;
+    background: rgba(50, 188, 173, 0.05);
+}
+
+.timeline-stat-number {
+    font-family: 'Prompt', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0F172A;
+}
+
+.timeline-stat-label {
+    font-size: 12px;
+    color: #77787B;
+    font-weight: 400;
+}
+
 .timeline-page-header .ant-select-selector {
     border-radius: 8px !important;
 }
@@ -153,9 +200,10 @@
     align-items: center;
     background: #F0FAF9;
     border-left: 4px solid #32BCAD;
-    padding: 8px 12px;
+    padding: 10px 16px;
     gap: 12px;
     border-bottom: 1px solid #E2E8F0;
+    border-top: 1px solid #E2E8F0;
 }
 
 .ap-category-label {
@@ -168,8 +216,11 @@
 
 .ap-category-count {
     font-size: 11px;
-    color: #000000;
-    font-weight: 700;
+    color: #77787B;
+    font-weight: 600;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 8px;
+    border-radius: 10px;
 }
 
 /* ====================================
@@ -195,7 +246,7 @@
 }
 
 .ap-cell {
-    padding: 8px 8px;
+    padding: 10px 10px;
     display: flex;
     align-items: center;
     border-right: 1px solid #F1F5F9;
@@ -297,7 +348,14 @@
 }
 
 .ap-progress-zero {
-    color: #77787B;
+    color: #94A3B8;
+    font-weight: 500;
+}
+
+/* Make 0% progress rail more visible */
+.ap-progress-wrapper .ant-progress-bg[style*="width: 0%"] + .ant-progress-inner,
+.ap-progress-wrapper .ant-progress-inner {
+    background: #E2E8F0 !important;
 }
 
 .ap-col-progress .ant-progress {
@@ -353,7 +411,7 @@
 
 .ap-month-bar {
     width: 100%;
-    height: 16px;
+    height: 20px;
     border-radius: 4px;
     transition: opacity 0.15s, transform 0.15s;
 }

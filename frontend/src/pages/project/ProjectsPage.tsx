@@ -75,19 +75,18 @@ interface ProjectWithStats extends Project {
 }
 
 // --- Stat Card with count-up animation ---
-const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
+const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
-    gradientFrom?: string;
+    borderClass?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
     return (
         <Card
-            className="stat-card"
+            className={`stat-card ${borderClass || ''}`}
             variant="borderless"
-            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
             <div className="stat-card-inner">
                 <div>
@@ -469,10 +468,10 @@ export const ProjectsPage: React.FC = () => {
                 <div className="projects-page-header">
                     <div className="header-content">
                         <div className="header-title-section">
-                            <Title level={2} className="page-title" style={{ fontSize: 48, margin: 0 }}>
+                            <Title level={3} className="page-title" style={{ fontSize: 20, margin: 0, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>
                                 <ProjectOutlined /> Projects
                             </Title>
-                            <Text type="secondary" className="page-subtitle" style={{ fontSize: 30 }}>
+                            <Text type="secondary" className="page-subtitle" style={{ fontSize: 14, color: '#77787B' }}>
                                 Manage and track all your projects
                             </Text>
                         </div>
@@ -509,22 +508,22 @@ export const ProjectsPage: React.FC = () => {
                     {/* Stats Cards */}
                     <Row gutter={16} className="stats-row">
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Total" value={totalProjects} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                            <StatCardItem title="Total" value={totalProjects} icon={<FolderOutlined />} iconClass="icon-slate" borderClass="stat-border-green" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Active" value={activeProjects} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
+                            <StatCardItem title="Active" value={activeProjects} icon={<CheckCircleOutlined />} iconClass="icon-emerald" borderClass="stat-border-green" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Delay" value={delayProjects} icon={<WarningOutlined />} iconClass="icon-red" gradientFrom="#FEE2E2" />
+                            <StatCardItem title="Delay" value={delayProjects} icon={<WarningOutlined />} iconClass="icon-red" borderClass="stat-border-red" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Completed" value={completedProjects} icon={<CheckCircleOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
+                            <StatCardItem title="Completed" value={completedProjects} icon={<CheckCircleOutlined />} iconClass="icon-blue" borderClass="stat-border-blue" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Hold" value={holdProjects} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
+                            <StatCardItem title="Hold" value={holdProjects} icon={<PauseCircleOutlined />} iconClass="icon-amber" borderClass="stat-border-amber" />
                         </Col>
                         <Col xs={12} sm={4}>
-                            <StatCardItem title="Cancelled" value={cancelledProjects} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                            <StatCardItem title="Cancelled" value={cancelledProjects} icon={<StopOutlined />} iconClass="icon-slate" borderClass="stat-border-gray" />
                         </Col>
                     </Row>
 

@@ -74,19 +74,18 @@ const STATUS_COLUMNS = STATUS_COLUMN_ORDER.map(key => ({
 }));
 
 // --- Stat Card with count-up animation + gradient ---
-const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
+const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
-    gradientFrom?: string;
+    borderClass?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
     return (
         <Card
-            className="stat-card"
+            className={`stat-card ${borderClass || ''}`}
             variant="borderless"
-            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
             <div className="stat-card-inner">
                 <div>
@@ -440,8 +439,8 @@ export const MyTasksPage: React.FC = () => {
                 <Header className="my-tasks-header">
                     <div className="my-tasks-header-content">
                         <div>
-                            <Title level={2} style={{ margin: 0, fontSize: 48 }}>My Tasks</Title>
-                            <Text type="secondary" style={{ fontSize: 30 }}>Tasks assigned to or created by you</Text>
+                            <Title level={3} style={{ margin: 0, fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>My Tasks</Title>
+                            <Text type="secondary" style={{ fontSize: 14, color: '#77787B' }}>Tasks assigned to you</Text>
                         </div>
                         <Space>
                             <Button
@@ -478,25 +477,25 @@ export const MyTasksPage: React.FC = () => {
                         {/* Stats Cards */}
                         <Row gutter={16} className="stats-row">
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                                <StatCardItem title="Total" value={filteredTasks.length} icon={<FolderOutlined />} iconClass="icon-slate" borderClass="stat-border-green" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-purple" gradientFrom="#EDE9FE" />
+                                <StatCardItem title="To Do" value={todoCount} icon={<CheckCircleOutlined />} iconClass="icon-blue" borderClass="stat-border-lightgreen" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" gradientFrom="#DBEAFE" />
+                                <StatCardItem title="In Progress" value={inProgressCount} icon={<SyncOutlined />} iconClass="icon-blue" borderClass="stat-border-green" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" gradientFrom="#D1FAE5" />
+                                <StatCardItem title="Done" value={doneCount} icon={<CheckCircleOutlined />} iconClass="icon-emerald" borderClass="stat-border-blue" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" gradientFrom="#FEF3C7" />
+                                <StatCardItem title="Hold" value={holdCount} icon={<PauseCircleOutlined />} iconClass="icon-amber" borderClass="stat-border-amber" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" gradientFrom="#F1F5F9" />
+                                <StatCardItem title="Cancelled" value={cancelledCount} icon={<StopOutlined />} iconClass="icon-slate" borderClass="stat-border-gray" />
                             </Col>
                             <Col xs={12} sm={3}>
-                                <StatCardItem title="Overdue" value={overdueCount} icon={<WarningOutlined />} iconClass="icon-red" gradientFrom="#FEE2E2" />
+                                <StatCardItem title="Overdue" value={overdueCount} icon={<WarningOutlined />} iconClass="icon-red" borderClass="stat-border-red" />
                             </Col>
                         </Row>
 
@@ -775,15 +774,15 @@ export const MyTasksPage: React.FC = () => {
                                 {STATUS_COLUMNS.map(col => {
                                     const columnTasks = getTasksByStatus(col.key);
                                     return (
-                                        <div key={col.key} className="mytasks-column">
+                                        <div key={col.key} className="mytasks-column" style={{ '--col-color': col.dotColor } as React.CSSProperties}>
                                             {/* Column Header */}
-                                            <div className="mytasks-column-header">
+                                            <div className="mytasks-column-header" style={{ borderBottomColor: col.dotColor }}>
                                                 <span className="mytasks-column-dot" style={{ background: col.dotColor }} />
-                                                <span className="mytasks-column-title">{col.label}</span>
+                                                <span className="mytasks-column-title" style={{ color: col.dotColor }}>{col.label}</span>
                                                 <Badge
                                                     count={columnTasks.length}
                                                     showZero
-                                                    style={{ backgroundColor: col.color }}
+                                                    style={{ backgroundColor: col.dotColor }}
                                                 />
                                             </div>
 

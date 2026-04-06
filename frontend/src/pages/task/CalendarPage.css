@@ -72,15 +72,17 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 50%, #E2E8F0 100%);
+    background: #ffffff;
     padding: 20px 28px;
     border-radius: 12px;
     border: 1px solid #E2E8F0;
+    border-top: 3px solid #32BCAD;
 }
 
 .cal-stat-overdue {
-    background: linear-gradient(135deg, rgba(217,79,79,0.10) 0%, #F5A3A3 50%, rgba(217,79,79,0.18) 100%);
-    border: 1px solid #F5A3A3;
+    background: #ffffff;
+    border: 1px solid rgba(217,79,79,0.15);
+    border-top: 3px solid #D94F4F;
 }
 
 .cal-stat-value {

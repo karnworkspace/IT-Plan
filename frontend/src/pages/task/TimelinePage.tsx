@@ -247,14 +247,23 @@ export const TimelinePage: React.FC = () => {
                 <div className="timeline-page-header">
                     <div className="timeline-header-top">
                         <div>
-                            <Title level={2} style={{ color: '#0F172A', margin: 0, fontSize: 48 }}>
-                                <FieldTimeOutlined style={{ marginRight: 10 }} />
+                            <Title level={3} className="timeline-title">
+                                <FieldTimeOutlined style={{ marginRight: 8 }} />
                                 IT Project Tracking 2026
                             </Title>
-                            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                                <Tag color="default">{totalProjects} Projects</Tag>
-                                <Tag color="default">{totalTasks} Tasks</Tag>
-                                <Tag color="default">Avg {avgProgress}%</Tag>
+                            <div className="timeline-stats">
+                                <div className="timeline-stat-badge">
+                                    <span className="timeline-stat-number">{totalProjects}</span>
+                                    <span className="timeline-stat-label">Projects</span>
+                                </div>
+                                <div className="timeline-stat-badge">
+                                    <span className="timeline-stat-number">{totalTasks}</span>
+                                    <span className="timeline-stat-label">Tasks</span>
+                                </div>
+                                <div className="timeline-stat-badge stat-accent">
+                                    <span className="timeline-stat-number">{avgProgress}%</span>
+                                    <span className="timeline-stat-label">Avg Progress</span>
+                                </div>
                             </div>
                         </div>
                         <div className="timeline-header-filters">
@@ -383,13 +392,15 @@ export const TimelinePage: React.FC = () => {
                                                             </Tooltip>
                                                         </div>
                                                         <div className="ap-col-team ap-cell">
-                                                            <span className="ap-team-text">
-                                                                {project.members.slice(0, 3).map(m => {
-                                                                    const parts = m.name.split(' ');
-                                                                    return parts[0].length > 8 ? parts[0].substring(0, 8) : parts[0];
-                                                                }).join(', ')}
-                                                                {project.members.length > 3 && ` +${project.members.length - 3}`}
-                                                            </span>
+                                                            <Tooltip title={project.members.map(m => m.name).join(', ')} placement="topLeft">
+                                                                <span className="ap-team-text">
+                                                                    {project.members.slice(0, 3).map(m => {
+                                                                        const parts = m.name.split(' ');
+                                                                        return parts[0].length > 8 ? parts[0].substring(0, 8) : parts[0];
+                                                                    }).join(', ')}
+                                                                    {project.members.length > 3 && ` +${project.members.length - 3}`}
+                                                                </span>
+                                                            </Tooltip>
                                                         </div>
                                                         <div className="ap-col-progress ap-cell">
                                                             <div className="ap-progress-wrapper">

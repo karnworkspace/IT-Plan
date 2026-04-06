@@ -25,17 +25,19 @@
 
 .header-title-section .page-title {
     color: #000000 !important;
-    margin: 0 0 8px 0 !important;
-    font-weight: 600;
+    margin: 0 0 4px 0 !important;
+    font-weight: 500;
+    font-size: 20px !important;
+    font-family: 'Prompt', sans-serif;
 }
 
 .header-title-section .page-title .anticon {
-    margin-right: 12px;
+    margin-right: 8px;
 }
 
 .page-subtitle {
     color: #77787B !important;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .create-btn {

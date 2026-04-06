@@ -178,8 +178,8 @@ export const CalendarPage: React.FC = () => {
                 <Content className="calendar-content">
                     <div className="calendar-page-header">
                         <div>
-                            <Title level={2} style={{ margin: 0, fontSize: 48 }}>Calendar</Title>
-                            <Text type="secondary" style={{ fontSize: 30 }}>Tasks from all your projects</Text>
+                            <Title level={3} style={{ margin: 0, fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>Calendar</Title>
+                            <Text type="secondary" style={{ fontSize: 14, color: '#77787B' }}>Tasks from all your projects</Text>
                         </div>
                         <div className="shared-legend">
                             <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.TODO.dotColor }} /><span>To Do</span></div>

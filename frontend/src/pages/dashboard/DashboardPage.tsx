@@ -43,24 +43,23 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 // --- Stat Card with count-up animation + gradient ---
-const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, gradientFrom, description }: {
+const StatCardItem = ({ title, value, icon, iconClass, suffix, onClick, borderClass, description }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
     suffix?: string;
     onClick?: () => void;
-    gradientFrom?: string;
+    borderClass?: string;
     description?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
 
     return (
         <Card
-            className="stat-card"
+            className={`stat-card ${borderClass || ''}`}
             variant="borderless"
             onClick={onClick}
-            style={gradientFrom ? { background: `linear-gradient(135deg, ${gradientFrom} 0%, #ffffff 100%)` } : undefined}
         >
             <div className="stat-card-inner">
                 <div>
@@ -308,10 +307,10 @@ export const DashboardPage: React.FC = () => {
                 <Content className="dashboard-content">
                     <div className="dashboard-header-section">
                         <div>
-                            <Title level={2} style={{ margin: 0, color: '#000000', fontSize: 48 }}>
+                            <Title level={3} style={{ margin: 0, color: '#000000', fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>
                                 Dashboard
                             </Title>
-                            <Text style={{ color: '#77787B', fontSize: 30 }}>IT Overall</Text>
+                            <Text style={{ color: '#77787B', fontSize: 14 }}>IT Overall</Text>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <AutoComplete
@@ -351,6 +350,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.totalProjects}
                                     icon={<FolderOutlined />}
                                     iconClass="icon-slate"
+                                    borderClass="stat-border-green"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -360,6 +360,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
                                     iconClass="icon-blue"
+                                    borderClass="stat-border-green"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -369,6 +370,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
                                     iconClass="icon-amber"
+                                    borderClass="stat-border-amber"
                                     onClick={() => navigate('/my-tasks')}
                                 />
                             </div>
@@ -378,6 +380,7 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.teamMembers}
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
+                                    borderClass="stat-border-green"
                                     onClick={() => navigate('/projects')}
                                 />
                             </div>
@@ -387,7 +390,8 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.completionRate}
                                     suffix="%"
                                     icon={<RocketOutlined />}
-                                    iconClass="icon-purple"
+                                    iconClass="icon-blue"
+                                    borderClass="stat-border-blue"
                                     description="DONE tasks / total tasks x 100"
                                     onClick={() => navigate('/projects')}
                                 />
@@ -665,7 +669,7 @@ export const DashboardPage: React.FC = () => {
                             <Card
                                 className="annual-plan-card"
                                 variant="borderless"
-                                style={{ cursor: 'pointer', background: 'linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%)' }}
+                                style={{ cursor: 'pointer', background: '#ffffff' }}
                                 onClick={() => navigate('/timeline')}
                             >
                                 <Space>

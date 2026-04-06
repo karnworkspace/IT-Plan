@@ -548,28 +548,11 @@ export class TaskService {
 
     let where: any = {};
 
-    const isAdminView = user.role === 'ADMIN';
-    const isManagerView = user.role === 'MANAGER';
-
-    if (isAdminView) {
-      // See ALL tasks
+    if (user.role === 'ADMIN') {
+      // ADMIN: เห็นทุก task ในระบบ — oversight ทั้งองค์กร
       where = {};
-    } else if (isManagerView) {
-      // See tasks in projects where user is owner or member + own assigned tasks
-      const memberProjects = await prisma.projectMember.findMany({
-        where: { userId: user.id },
-        select: { projectId: true },
-      });
-      const projectIds = memberProjects.map(mp => mp.projectId);
-
-      where = {
-        OR: [
-          { projectId: { in: projectIds } },
-          { assigneeId: user.id },
-        ],
-      };
     } else {
-      // MEMBER: only assigned tasks
+      // MANAGER + MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง
       where = { assigneeId: user.id };
     }
 

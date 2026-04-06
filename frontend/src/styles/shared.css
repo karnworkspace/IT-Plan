@@ -11,7 +11,8 @@
 /* Base Stat Card — white minimal design */
 .stat-card {
     background: #ffffff;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #E2E8F0 !important;
+    border-style: solid !important;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     height: 100%;
@@ -23,6 +24,18 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     border-color: #CBD5E1;
+}
+
+/* Remove Ant Design focus outline on stat cards */
+.stat-card:focus,
+.stat-card:focus-visible,
+.stat-card:focus-within {
+    outline: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card.ant-card-bordered {
+    border: 1px solid #E2E8F0;
 }
 
 /* Stat Card Text */
@@ -55,13 +68,27 @@
     font-size: 18px;
 }
 
-/* Icon color variants */
+/* Icon color variants — SENA palette */
 .stat-icon-box.icon-blue      { background: rgba(50,188,173,0.12); color: #32BCAD; }
 .stat-icon-box.icon-emerald   { background: rgba(50,188,173,0.12); color: #32BCAD; }
 .stat-icon-box.icon-amber     { background: #FFF3DC; color: #E8A838; }
 .stat-icon-box.icon-red       { background: rgba(217,79,79,0.10); color: #D94F4F; }
-.stat-icon-box.icon-purple    { background: #EDE9FE; color: #8B5CF6; }
+.stat-icon-box.icon-purple    { background: rgba(50,188,173,0.08); color: #32BCAD; }
 .stat-icon-box.icon-slate     { background: #F1F5F9; color: #77787B; }
+
+/* Stat card — status-specific icon classes (My Projects) */
+.stat-icon-box.stat-icon-total     { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.stat-icon-active    { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.stat-icon-completed { background: rgba(46,125,155,0.12); color: #2E7D9B; }
+.stat-icon-box.stat-icon-hold      { background: #FFF3DC; color: #E8A838; }
+
+/* Stat card — 3px top border accent (SENA metric card pattern) */
+.stat-card.stat-border-green     { border-top: 3px solid #32BCAD !important; }
+.stat-card.stat-border-blue      { border-top: 3px solid #2E7D9B !important; }
+.stat-card.stat-border-amber     { border-top: 3px solid #E8A838 !important; }
+.stat-card.stat-border-red       { border-top: 3px solid #D94F4F !important; }
+.stat-card.stat-border-gray      { border-top: 3px solid #77787B !important; }
+.stat-card.stat-border-lightgreen { border-top: 3px solid #89D0C8 !important; }
 
 /* ==========================================
    All color variants now share white bg

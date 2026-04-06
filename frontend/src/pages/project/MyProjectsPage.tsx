@@ -36,15 +36,16 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 // --- Stat Card (white background, no gradient) ---
-const StatCardItem = ({ title, value, icon, iconClass }: {
+const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
     title: string;
     value: number;
     icon: React.ReactNode;
     iconClass: string;
+    borderClass?: string;
 }) => {
     const animatedValue = useCountUp(value, 1000);
     return (
-        <Card className="stat-card" variant="borderless">
+        <Card className={`stat-card ${borderClass || ''}`} variant="borderless">
             <div className="stat-card-inner">
                 <div>
                     <div className="stat-label">{title}</div>
@@ -216,6 +217,7 @@ export const MyProjectsPage: React.FC = () => {
                                     value={stats.total}
                                     icon={<ProjectOutlined />}
                                     iconClass="stat-icon-total"
+                                    borderClass="stat-border-green"
                                 />
                             </Col>
                             <Col xs={12} sm={6}>
@@ -224,6 +226,7 @@ export const MyProjectsPage: React.FC = () => {
                                     value={stats.active}
                                     icon={<FolderOutlined />}
                                     iconClass="stat-icon-active"
+                                    borderClass="stat-border-green"
                                 />
                             </Col>
                             <Col xs={12} sm={6}>
@@ -232,6 +235,7 @@ export const MyProjectsPage: React.FC = () => {
                                     value={stats.completed}
                                     icon={<CheckCircleOutlined />}
                                     iconClass="stat-icon-completed"
+                                    borderClass="stat-border-blue"
                                 />
                             </Col>
                             <Col xs={12} sm={6}>
@@ -240,6 +244,7 @@ export const MyProjectsPage: React.FC = () => {
                                     value={stats.hold}
                                     icon={<PauseCircleOutlined />}
                                     iconClass="stat-icon-hold"
+                                    borderClass="stat-border-amber"
                                 />
                             </Col>
                         </Row>

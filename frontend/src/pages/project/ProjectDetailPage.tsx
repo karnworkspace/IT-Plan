@@ -679,23 +679,27 @@ export const ProjectDetailPage: React.FC = () => {
 
                                 {/* Days Remaining */}
                                 <Col xs={8} sm={8}>
-                                    <Card variant="borderless" className="timeline-card" style={{ background: sg.lightBg, border: `1px solid ${sg.lightBorder}` }}>
-                                        <Statistic
-                                            title={<span style={{ color: sg.textColor, fontWeight: 600 }}><SyncOutlined /> Time Remaining</span>}
-                                            value={
-                                                (() => {
-                                                    const targetDate = project.endDate
-                                                        ? new Date(project.endDate).getTime()
-                                                        : (tasks.some(t => t.dueDate) ? Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime())) : null);
+                                    {(() => {
+                                        const targetDate = project.endDate
+                                            ? new Date(project.endDate).getTime()
+                                            : (tasks.some(t => t.dueDate) ? Math.max(...tasks.filter(t => t.dueDate).map(t => new Date(t.dueDate!).getTime())) : null);
+                                        const daysLeft = targetDate ? Math.ceil((targetDate - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                                        const isOverdue = daysLeft !== null && daysLeft < 0;
+                                        const cardBg = isOverdue ? '#FEF2F2' : sg.lightBg;
+                                        const cardBorder = isOverdue ? '#FECACA' : sg.lightBorder;
+                                        const textColor = isOverdue ? '#DC2626' : sg.textColor;
 
-                                                    if (!targetDate) return '-';
-                                                    return Math.ceil((targetDate - Date.now()) / (1000 * 60 * 60 * 24));
-                                                })()
-                                            }
-                                            suffix={<span style={{ fontSize: '1rem', color: sg.textColor }}>days left</span>}
-                                            valueStyle={{ color: sg.textColor, fontSize: '1.5rem', fontWeight: 'bold' }}
-                                        />
-                                    </Card>
+                                        return (
+                                            <Card variant="borderless" className="timeline-card" style={{ background: cardBg, border: `1px solid ${cardBorder}` }}>
+                                                <Statistic
+                                                    title={<span style={{ color: textColor, fontWeight: 600 }}><SyncOutlined /> {isOverdue ? 'Delay จาก Plan' : 'Time Remaining'}</span>}
+                                                    value={daysLeft !== null ? Math.abs(daysLeft) : '-'}
+                                                    suffix={<span style={{ fontSize: '1rem', color: textColor }}>{isOverdue ? 'วัน' : 'days left'}</span>}
+                                                    valueStyle={{ color: textColor, fontSize: '1.5rem', fontWeight: 'bold' }}
+                                                />
+                                            </Card>
+                                        );
+                                    })()}
                                 </Col>
                             </Row>
                         </div>

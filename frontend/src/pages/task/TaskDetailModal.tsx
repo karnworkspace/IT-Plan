@@ -710,6 +710,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 parentTask={task}
                                 subTasks={task.subTasks || []}
                                 onRefresh={() => taskId && loadTaskData(taskId)}
+                                projectMembers={projectMembers}
                             />
                         </div>
 

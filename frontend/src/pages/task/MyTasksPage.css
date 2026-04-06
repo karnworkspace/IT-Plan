@@ -299,6 +299,92 @@
 }
 
 /* ==========================================
+   Filter Panel
+   ========================================== */
+
+.mytasks-filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mytasks-filters-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.mytasks-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mytasks-filter-label {
+    font-size: 12px !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ==========================================
+   List View Table
+   ========================================== */
+
+.mytasks-list-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.mytasks-list-card .ant-table {
+    background: transparent;
+}
+
+.mytasks-list-card .ant-table-thead > tr > th {
+    background: #F8FAFC;
+    font-weight: 600;
+    font-size: 13px;
+    color: #64748B;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.mytasks-list-card .ant-table-tbody > tr > td {
+    font-size: 13px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.mytasks-list-card .ant-table-tbody > tr:hover > td {
+    background: #F8FAFC !important;
+}
+
+.mytasks-list-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mytasks-list-task-title {
+    font-weight: 500;
+    color: #1E293B;
+}
+
+/* Overdue row highlight */
+.mytasks-row-overdue {
+    background: #FFF5F5 !important;
+}
+
+.mytasks-row-overdue:hover > td {
+    background: #FEE2E2 !important;
+}
+
+/* ==========================================
    Responsive
    ========================================== */
 
@@ -340,5 +426,20 @@
 
     .mytasks-column-content {
         max-height: 300px;
+    }
+
+    .mytasks-filters-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .mytasks-filters-body {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .mytasks-list-card {
+        overflow-x: auto;
     }
 }

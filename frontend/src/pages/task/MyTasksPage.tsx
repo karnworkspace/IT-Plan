@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { taskService, type Task, type CreateTaskInput } from '../../services/taskService';
 import { projectService, type Project } from '../../services/projectService';
+import { tagService } from '../../services/tagService';
+import type { Tag as TagType } from '../../types';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
 import dayjs from 'dayjs';
@@ -23,8 +25,13 @@ import {
     Dropdown,
     message,
     Spin,
+    Segmented,
+    Table,
+    Avatar,
+    Tooltip,
 } from 'antd';
-import type { MenuProps } from 'antd';
+import type { MenuProps, TableProps } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import {
     CalendarOutlined,
     FolderOutlined,
@@ -39,6 +46,11 @@ import {
     EyeOutlined,
     DeleteOutlined,
     WarningOutlined,
+    AppstoreOutlined,
+    UnorderedListOutlined,
+    FilterOutlined,
+    ClearOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import { useCountUp } from '../../hooks/useCountUp';
 import { DndContext, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
@@ -129,6 +141,16 @@ export const MyTasksPage: React.FC = () => {
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
 
+    // View mode: Board or List
+    const [viewMode, setViewMode] = useState<string>(() =>
+        localStorage.getItem('myTasksViewMode') || 'board'
+    );
+
+    // Multi-filter state
+    const [statusFilters, setStatusFilters] = useState<string[]>([]);
+    const [tagFilters, setTagFilters] = useState<string[]>([]);
+    const [allTags, setAllTags] = useState<TagType[]>([]);
+
     // DnD State
     const [activeDragTask, setActiveDragTask] = useState<Task | null>(null);
     const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -184,7 +206,24 @@ export const MyTasksPage: React.FC = () => {
 
     useEffect(() => {
         loadMyTasks();
+        loadTags();
     }, []);
+
+    // Persist view mode
+    const handleViewModeChange = (value: string | number) => {
+        const mode = String(value);
+        setViewMode(mode);
+        localStorage.setItem('myTasksViewMode', mode);
+    };
+
+    const loadTags = async () => {
+        try {
+            const tags = await tagService.getAllTags();
+            setAllTags(tags);
+        } catch {
+            // silently fail — tags filter just won't show options
+        }
+    };
 
     const loadMyTasks = async () => {
         try {
@@ -201,13 +240,31 @@ export const MyTasksPage: React.FC = () => {
 
 
 
-    // Filter tasks
-    const filteredTasks = tasks.filter(task => {
+    // Filter tasks with multi-filter
+    const filteredTasks = useMemo(() => tasks.filter(task => {
         if (priorityFilter.length > 0 && !priorityFilter.includes(task.priority)) {
             return false;
         }
+        if (statusFilters.length > 0 && !statusFilters.includes(task.status)) {
+            return false;
+        }
+        if (tagFilters.length > 0) {
+            const taskTagIds = (task.taskTags || []).map(tt => tt.tagId || tt.tag?.id);
+            if (!tagFilters.some(tf => taskTagIds.includes(tf))) {
+                return false;
+            }
+        }
         return true;
-    });
+    }), [tasks, priorityFilter, statusFilters, tagFilters]);
+
+    // Active filter count
+    const activeFilterCount = (priorityFilter.length > 0 ? 1 : 0) + (statusFilters.length > 0 ? 1 : 0) + (tagFilters.length > 0 ? 1 : 0);
+
+    const clearAllFilters = () => {
+        setPriorityFilter([]);
+        setStatusFilters([]);
+        setTagFilters([]);
+    };
 
     // Overdue check helper
     const isOverdue = (task: Task) =>
@@ -414,11 +471,56 @@ export const MyTasksPage: React.FC = () => {
                             </Col>
                         </Row>
 
-                        {/* Priority Filter */}
+                        {/* View Toggle + Filters */}
                         <Card className="filters-card" style={{ marginBottom: 16 }}>
-                            <Space size="large" wrap>
-                                <div>
-                                    <Text strong style={{ marginBottom: 8, display: 'block' }}>Priority</Text>
+                            <div className="mytasks-filters-header">
+                                <Space align="center">
+                                    <FilterOutlined style={{ color: '#64748B' }} />
+                                    <Text strong>Filters</Text>
+                                    {activeFilterCount > 0 && (
+                                        <Badge count={activeFilterCount} size="small" style={{ backgroundColor: '#3B82F6' }} />
+                                    )}
+                                </Space>
+                                <Space>
+                                    {activeFilterCount > 0 && (
+                                        <Button
+                                            size="small"
+                                            icon={<ClearOutlined />}
+                                            onClick={clearAllFilters}
+                                            type="link"
+                                        >
+                                            Clear Filters
+                                        </Button>
+                                    )}
+                                    <Segmented
+                                        value={viewMode}
+                                        onChange={handleViewModeChange}
+                                        options={[
+                                            { value: 'board', icon: <AppstoreOutlined />, label: 'Board' },
+                                            { value: 'list', icon: <UnorderedListOutlined />, label: 'List' },
+                                        ]}
+                                    />
+                                </Space>
+                            </div>
+                            <div className="mytasks-filters-body">
+                                <div className="mytasks-filter-group">
+                                    <Text type="secondary" className="mytasks-filter-label">Status</Text>
+                                    <Checkbox.Group
+                                        value={statusFilters}
+                                        onChange={(values) => setStatusFilters(values as string[])}
+                                    >
+                                        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                                            <Checkbox key={key} value={key}>
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.dotColor, display: 'inline-block' }} />
+                                                    {cfg.label}
+                                                </span>
+                                            </Checkbox>
+                                        ))}
+                                    </Checkbox.Group>
+                                </div>
+                                <div className="mytasks-filter-group">
+                                    <Text type="secondary" className="mytasks-filter-label">Priority</Text>
                                     <Checkbox.Group
                                         value={priorityFilter}
                                         onChange={(values) => setPriorityFilter(values as string[])}
@@ -432,10 +534,179 @@ export const MyTasksPage: React.FC = () => {
                                         ))}
                                     </Checkbox.Group>
                                 </div>
-                            </Space>
+                                {allTags.length > 0 && (
+                                    <div className="mytasks-filter-group">
+                                        <Text type="secondary" className="mytasks-filter-label">Tags</Text>
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Select tags..."
+                                            value={tagFilters}
+                                            onChange={setTagFilters}
+                                            style={{ minWidth: 200 }}
+                                            maxTagCount={3}
+                                            allowClear
+                                            size="small"
+                                        >
+                                            {allTags.map(tag => (
+                                                <Select.Option key={tag.id} value={tag.id}>
+                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                                        <span style={{ width: 8, height: 8, borderRadius: 2, background: tag.color || '#8c8c8c', display: 'inline-block' }} />
+                                                        {tag.name}
+                                                    </span>
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    </div>
+                                )}
+                            </div>
                         </Card>
 
+                        {/* List View Table */}
+                        {viewMode === 'list' && (
+                            <Card className="mytasks-list-card" style={{ marginBottom: 16 }}>
+                                <Table<Task>
+                                    dataSource={filteredTasks}
+                                    rowKey="id"
+                                    size="middle"
+                                    pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50'], showTotal: (total) => `${total} tasks` }}
+                                    onRow={(record) => ({
+                                        onClick: () => { setSelectedTaskId(record.id); setDetailModalVisible(true); },
+                                        className: isOverdue(record) ? 'mytasks-row-overdue' : '',
+                                        style: { cursor: 'pointer' },
+                                    })}
+                                    columns={[
+                                        {
+                                            title: 'Task',
+                                            dataIndex: 'title',
+                                            key: 'title',
+                                            sorter: (a, b) => a.title.localeCompare(b.title),
+                                            render: (title: string, record: Task) => {
+                                                const sCfg = STATUS_CONFIG[record.status];
+                                                return (
+                                                    <Space>
+                                                        <span className="mytasks-list-dot" style={{ background: sCfg?.dotColor || '#6B7280' }} />
+                                                        <span className="mytasks-list-task-title">{title}</span>
+                                                    </Space>
+                                                );
+                                            },
+                                            ellipsis: true,
+                                            width: '25%',
+                                        },
+                                        {
+                                            title: 'Project',
+                                            dataIndex: ['project', 'name'],
+                                            key: 'project',
+                                            sorter: (a, b) => (a.project?.name || '').localeCompare(b.project?.name || ''),
+                                            render: (_: unknown, record: Task) => (
+                                                <Tag
+                                                    style={{
+                                                        borderColor: record.project?.color || '#d9d9d9',
+                                                        color: record.project?.color || '#666',
+                                                        background: `${record.project?.color || '#666'}10`,
+                                                    }}
+                                                >
+                                                    {record.project?.name || 'Unknown'}
+                                                </Tag>
+                                            ),
+                                            ellipsis: true,
+                                            width: '15%',
+                                        },
+                                        {
+                                            title: 'Assignees',
+                                            key: 'assignees',
+                                            width: '10%',
+                                            render: (_: unknown, record: Task) => {
+                                                const assignees = record.taskAssignees || [];
+                                                if (assignees.length === 0 && record.assignee) {
+                                                    return (
+                                                        <Tooltip title={record.assignee.name}>
+                                                            <Avatar size="small" style={{ backgroundColor: '#3B82F6' }}>
+                                                                {record.assignee.name?.charAt(0)?.toUpperCase()}
+                                                            </Avatar>
+                                                        </Tooltip>
+                                                    );
+                                                }
+                                                return (
+                                                    <Avatar.Group maxCount={3} size="small">
+                                                        {assignees.map(a => (
+                                                            <Tooltip key={a.id} title={a.user?.name}>
+                                                                <Avatar size="small" style={{ backgroundColor: '#3B82F6' }}>
+                                                                    {a.user?.name?.charAt(0)?.toUpperCase() || <UserOutlined />}
+                                                                </Avatar>
+                                                            </Tooltip>
+                                                        ))}
+                                                    </Avatar.Group>
+                                                );
+                                            },
+                                        },
+                                        {
+                                            title: 'Start Date',
+                                            dataIndex: 'startDate',
+                                            key: 'startDate',
+                                            sorter: (a, b) => (a.startDate || '').localeCompare(b.startDate || ''),
+                                            render: (date: string) => date ? dayjs(date).format('DD MMM YY') : '-',
+                                            width: '10%',
+                                        },
+                                        {
+                                            title: 'Due Date',
+                                            dataIndex: 'dueDate',
+                                            key: 'dueDate',
+                                            sorter: (a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''),
+                                            render: (date: string, record: Task) => {
+                                                if (!date) return '-';
+                                                const overdue = isOverdue(record);
+                                                return (
+                                                    <span style={{ color: overdue ? '#EF4444' : undefined, fontWeight: overdue ? 600 : undefined }}>
+                                                        {dayjs(date).format('DD MMM YY')}
+                                                        {overdue && <WarningOutlined style={{ marginLeft: 4, color: '#EF4444' }} />}
+                                                    </span>
+                                                );
+                                            },
+                                            width: '10%',
+                                        },
+                                        {
+                                            title: 'Priority',
+                                            dataIndex: 'priority',
+                                            key: 'priority',
+                                            sorter: (a, b) => {
+                                                const order = ['URGENT', 'HIGH', 'MEDIUM', 'LOW'];
+                                                return order.indexOf(a.priority) - order.indexOf(b.priority);
+                                            },
+                                            render: (priority: string) => {
+                                                const pCfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.MEDIUM;
+                                                return (
+                                                    <Tag style={{ color: pCfg.color, background: pCfg.bg, borderColor: pCfg.color, fontWeight: 600, fontSize: 11 }}>
+                                                        {pCfg.label}
+                                                    </Tag>
+                                                );
+                                            },
+                                            width: '10%',
+                                            filters: Object.entries(PRIORITY_CONFIG).map(([k, v]) => ({ text: v.label, value: k })),
+                                            onFilter: (value, record) => record.priority === value,
+                                        },
+                                        {
+                                            title: 'Status',
+                                            dataIndex: 'status',
+                                            key: 'status',
+                                            sorter: (a, b) => {
+                                                const order = STATUS_COLUMN_ORDER as readonly string[];
+                                                return order.indexOf(a.status) - order.indexOf(b.status);
+                                            },
+                                            render: (status: string) => {
+                                                const sCfg = STATUS_CONFIG[status];
+                                                return <Tag color={sCfg?.tagColor || 'default'}>{sCfg?.label || status}</Tag>;
+                                            },
+                                            width: '10%',
+                                            filters: Object.entries(STATUS_CONFIG).map(([k, v]) => ({ text: v.label, value: k })),
+                                            onFilter: (value, record) => record.status === value,
+                                        },
+                                    ] as ColumnsType<Task>}
+                                />
+                            </Card>
+                        )}
+
                         {/* Kanban Board */}
+                        {viewMode === 'board' && (
                         <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                             <div className="mytasks-board">
                                 {STATUS_COLUMNS.map(col => {
@@ -541,6 +812,7 @@ export const MyTasksPage: React.FC = () => {
                                 )}
                             </DragOverlay>
                         </DndContext>
+                        )}
                     </Spin>
                 </Content>
             </Layout>

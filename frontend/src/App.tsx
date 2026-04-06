@@ -14,6 +14,7 @@ import { TimelinePage } from './pages/task/TimelinePage';
 import { ConfigurationPage } from './pages/admin/ConfigurationPage';
 import { UserListPage } from './pages/admin/UserListPage';
 import { TagTasksPage } from './pages/task/TagTasksPage';
+import { MyProjectsPage } from './pages/project/MyProjectsPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import './App.css';
 
@@ -58,6 +59,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProjectDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-projects"
+            element={
+              <ProtectedRoute>
+                <MyProjectsPage />
               </ProtectedRoute>
             }
           />

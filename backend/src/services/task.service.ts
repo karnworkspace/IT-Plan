@@ -214,6 +214,9 @@ export class TaskService {
     const assigneeIds = data.assigneeIds?.length ? data.assigneeIds : (data.assigneeId ? [data.assigneeId] : []);
     const primaryAssigneeId = assigneeIds[0] || null;
 
+    // D04: Subtasks inherit parent's tags, don't set their own
+    const effectiveTagIds = data.parentTaskId ? [] : (data.tagIds || []);
+
     const task = await prisma.task.create({
       data: {
         title: data.title,
@@ -230,8 +233,8 @@ export class TaskService {
         taskAssignees: assigneeIds.length > 0 ? {
           create: assigneeIds.map(uid => ({ userId: uid })),
         } : undefined,
-        taskTags: data.tagIds?.length ? {
-          create: data.tagIds.map(tid => ({ tagId: tid })),
+        taskTags: effectiveTagIds.length > 0 ? {
+          create: effectiveTagIds.map(tid => ({ tagId: tid })),
         } : undefined,
       },
       include: {
@@ -448,6 +451,16 @@ export class TaskService {
       throw new Error('You do not have permission to update this task');
     }
 
+    // V07: If trying to set parent task to DONE, check all subtasks are DONE first
+    if (status === 'DONE' && !existingTask.parentTaskId) {
+      const openSubTasks = await prisma.task.count({
+        where: { parentTaskId: id, status: { notIn: ['DONE', 'CANCELLED'] } },
+      });
+      if (openSubTasks > 0) {
+        throw new Error(`Cannot complete task: ${openSubTasks} subtask(s) still open`);
+      }
+    }
+
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
@@ -477,6 +490,24 @@ export class TaskService {
         taskId: id,
         projectId: existingTask.projectId,
       });
+    }
+
+    // V08: If subtask is delayed, check if it exceeds parent's due date
+    if (existingTask.parentTaskId && status !== 'DONE') {
+      const parentTask = await prisma.task.findUnique({ where: { id: existingTask.parentTaskId } });
+      if (parentTask && parentTask.dueDate && existingTask.dueDate) {
+        if (new Date(existingTask.dueDate) > new Date(parentTask.dueDate)) {
+          const notifyUserId = parentTask.assigneeId || parentTask.createdById;
+          await notificationService.createNotification({
+            userId: notifyUserId,
+            type: 'TASK_DUE_SOON',
+            title: 'Subtask exceeds parent deadline',
+            message: `Subtask "${existingTask.title}" due date exceeds parent task "${parentTask.title}" deadline`,
+            taskId: parentTask.id,
+            projectId: parentTask.projectId,
+          });
+        }
+      }
     }
 
     // Log activity

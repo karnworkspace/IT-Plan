@@ -13,6 +13,7 @@ import {
     Tooltip,
     Empty,
     Modal,
+    DatePicker,
 } from 'antd';
 import {
     PlusOutlined,
@@ -22,7 +23,9 @@ import {
     DeleteOutlined,
     SyncOutlined,
     SwapOutlined,
+    CalendarOutlined,
 } from '@ant-design/icons';
+import dayjs, { type Dayjs } from 'dayjs';
 import { taskService, type Task } from '../../services/taskService';
 import { STATUS_CONFIG } from '../../constants';
 
@@ -33,11 +36,15 @@ interface SubTaskListProps {
     parentTask: Task;
     subTasks: Task[];
     onRefresh: () => void;
+    projectMembers?: { id: string; name: string }[];
 }
 
-export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, onRefresh }) => {
+export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, onRefresh, projectMembers }) => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [newTitle, setNewTitle] = useState('');
+    const [newStartDate, setNewStartDate] = useState<Dayjs | null>(null);
+    const [newDueDate, setNewDueDate] = useState<Dayjs | null>(null);
+    const [newAssigneeId, setNewAssigneeId] = useState<string | undefined>(undefined);
     const [submitting, setSubmitting] = useState(false);
 
     // Status change modal state
@@ -63,8 +70,14 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                 parentTaskId: parentTask.id,
                 priority: 'MEDIUM',
                 status: 'TODO',
+                startDate: newStartDate ? newStartDate.toISOString() : undefined,
+                dueDate: newDueDate ? newDueDate.toISOString() : undefined,
+                assigneeIds: newAssigneeId ? [newAssigneeId] : undefined,
             });
             setNewTitle('');
+            setNewStartDate(null);
+            setNewDueDate(null);
+            setNewAssigneeId(undefined);
             setShowAddForm(false);
             message.success('Sub-task added');
             onRefresh();
@@ -224,12 +237,30 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                     </Text>
                                 }
                                 description={
-                                    subTask.assignee && (
-                                        <Space size={4}>
-                                            <Avatar size={16} icon={<UserOutlined />} />
-                                            <Text type="secondary" style={{ fontSize: 12 }}>{subTask.assignee.name}</Text>
-                                        </Space>
-                                    )
+                                    <Space size={8} wrap>
+                                        {subTask.assignee && (
+                                            <Space size={4}>
+                                                <Avatar size={16} icon={<UserOutlined />} />
+                                                <Text type="secondary" style={{ fontSize: 12 }}>{subTask.assignee.name}</Text>
+                                            </Space>
+                                        )}
+                                        {subTask.startDate && (
+                                            <Text type="secondary" style={{ fontSize: 11 }}>
+                                                <CalendarOutlined style={{ marginRight: 2 }} />
+                                                {dayjs(subTask.startDate).format('DD MMM')}
+                                            </Text>
+                                        )}
+                                        {subTask.dueDate && (
+                                            <Text
+                                                type={!isDone && dayjs(subTask.dueDate).isBefore(dayjs(), 'day') ? 'danger' : 'secondary'}
+                                                style={{ fontSize: 11 }}
+                                            >
+                                                <CalendarOutlined style={{ marginRight: 2 }} />
+                                                Due {dayjs(subTask.dueDate).format('DD MMM')}
+                                                {!isDone && dayjs(subTask.dueDate).isBefore(dayjs(), 'day') && ' (overdue)'}
+                                            </Text>
+                                        )}
+                                    </Space>
                                 }
                             />
                         </List.Item>
@@ -238,7 +269,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
             />
 
             {showAddForm ? (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <Input
                         placeholder="Sub-task title..."
                         value={newTitle}
@@ -246,12 +277,46 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                         onPressEnter={handleAddSubTask}
                         autoFocus
                     />
-                    <Button type="primary" loading={submitting} onClick={handleAddSubTask}>
-                        Add
-                    </Button>
-                    <Button onClick={() => { setShowAddForm(false); setNewTitle(''); }}>
-                        Cancel
-                    </Button>
+                    <Space wrap size={8}>
+                        <DatePicker
+                            placeholder="Start Date"
+                            value={newStartDate}
+                            onChange={(date) => setNewStartDate(date)}
+                            size="small"
+                            style={{ width: 140 }}
+                        />
+                        <DatePicker
+                            placeholder="Due Date"
+                            value={newDueDate}
+                            onChange={(date) => setNewDueDate(date)}
+                            size="small"
+                            style={{ width: 140 }}
+                        />
+                        {projectMembers && projectMembers.length > 0 && (
+                            <Select
+                                placeholder="Assignee"
+                                value={newAssigneeId}
+                                onChange={(v) => setNewAssigneeId(v)}
+                                allowClear
+                                showSearch
+                                optionFilterProp="children"
+                                size="small"
+                                style={{ width: 160 }}
+                            >
+                                {projectMembers.map(m => (
+                                    <Option key={m.id} value={m.id}>{m.name}</Option>
+                                ))}
+                            </Select>
+                        )}
+                    </Space>
+                    <Space>
+                        <Button type="primary" loading={submitting} onClick={handleAddSubTask}>
+                            Add
+                        </Button>
+                        <Button onClick={() => { setShowAddForm(false); setNewTitle(''); setNewStartDate(null); setNewDueDate(null); setNewAssigneeId(undefined); }}>
+                            Cancel
+                        </Button>
+                    </Space>
                 </div>
             ) : (
                 <Button

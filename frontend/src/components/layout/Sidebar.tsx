@@ -31,15 +31,16 @@ export const Sidebar: React.FC = () => {
     };
 
     const isAdmin = user?.role === 'ADMIN';
+    const isManager = user?.role === 'MANAGER';
+    const isAdminOrManager = isAdmin || isManager;
 
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: <DashboardOutlined /> },
-        { path: '/timeline', label: 'Projects', icon: <FolderOutlined /> },
+        ...(isAdminOrManager ? [{ path: '/timeline', label: 'Projects', icon: <FolderOutlined /> }] : []),
+        { path: '/my-projects', label: 'My Projects', icon: <AppstoreOutlined /> },
         { path: '/my-tasks', label: 'My Tasks', icon: <CheckCircleOutlined /> },
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
-        ...(isAdmin ? [
-            { path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> },
-        ] : []),
+        ...(isAdminOrManager ? [{ path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> }] : []),
     ];
 
     return (

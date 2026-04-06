@@ -146,6 +146,10 @@ export const MyTasksPage: React.FC = () => {
         localStorage.getItem('myTasksViewMode') || 'board'
     );
 
+    // Bulk selection state (List view only)
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [bulkLoading, setBulkLoading] = useState(false);
+
     // Multi-filter state
     const [statusFilters, setStatusFilters] = useState<string[]>([]);
     const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -370,6 +374,31 @@ export const MyTasksPage: React.FC = () => {
         setStatusChangeNote('');
     };
 
+    // Bulk status change handler
+    const handleBulkStatusChange = async (newStatus: string) => {
+        if (selectedRowKeys.length === 0) return;
+        setBulkLoading(true);
+        try {
+            const progress = newStatus === 'DONE' ? 100 : undefined;
+            await Promise.all(
+                selectedRowKeys.map(id =>
+                    taskService.updateTaskStatus(id as string, {
+                        status: newStatus,
+                        progress,
+                        note: 'Bulk status change',
+                    })
+                )
+            );
+            message.success(`${selectedRowKeys.length} tasks updated to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
+            setSelectedRowKeys([]);
+            loadMyTasks();
+        } catch {
+            message.error('Failed to update some tasks');
+        } finally {
+            setBulkLoading(false);
+        }
+    };
+
     // New Task handlers
     const handleNewTask = async () => {
         try {
@@ -564,10 +593,44 @@ export const MyTasksPage: React.FC = () => {
                         {/* List View Table */}
                         {viewMode === 'list' && (
                             <Card className="mytasks-list-card" style={{ marginBottom: 16 }}>
+                                {/* Bulk Action Bar */}
+                                {selectedRowKeys.length > 0 && (
+                                    <div className="mytasks-bulk-bar">
+                                        <Space size="middle" align="center">
+                                            <Text strong style={{ color: '#fff' }}>
+                                                {selectedRowKeys.length} task{selectedRowKeys.length > 1 ? 's' : ''} selected
+                                            </Text>
+                                            <Select
+                                                placeholder="Change Status"
+                                                style={{ width: 180 }}
+                                                onChange={handleBulkStatusChange}
+                                                loading={bulkLoading}
+                                                value={undefined}
+                                                size="middle"
+                                            >
+                                                {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                                                    <Select.Option key={key} value={key}>
+                                                        <Space>
+                                                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.dotColor, display: 'inline-block' }} />
+                                                            {cfg.label}
+                                                        </Space>
+                                                    </Select.Option>
+                                                ))}
+                                            </Select>
+                                            <Button size="small" type="link" style={{ color: '#fff' }} onClick={() => setSelectedRowKeys([])}>
+                                                Clear
+                                            </Button>
+                                        </Space>
+                                    </div>
+                                )}
                                 <Table<Task>
                                     dataSource={filteredTasks}
                                     rowKey="id"
                                     size="middle"
+                                    rowSelection={{
+                                        selectedRowKeys,
+                                        onChange: (keys) => setSelectedRowKeys(keys),
+                                    }}
                                     pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50'], showTotal: (total) => `${total} tasks` }}
                                     onRow={(record) => ({
                                         onClick: () => { setSelectedTaskId(record.id); setDetailModalVisible(true); },

@@ -65,6 +65,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
     CORPORATE: { label: 'CORPORATE', color: '#7C3AED' },
     PRODUCT: { label: 'PRODUCT DEVELOPMENT', color: '#059669' },
     CUSTOMER_SERVICE: { label: 'CUSTOMER SERVICE & AUTOMATION', color: '#DC2626' },
+    INFRASTRUCTURE_NETWORK: { label: 'INFRASTRUCTURE & NETWORK', color: '#6366F1' },
 };
 
 // Month labels

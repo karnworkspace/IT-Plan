@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Layout,
     Card,
@@ -9,6 +9,9 @@ import {
     List,
     Spin,
     Button,
+    Progress,
+    AutoComplete,
+    Input,
 } from 'antd';
 import {
     ProjectOutlined,
@@ -20,6 +23,8 @@ import {
     FolderOutlined,
     UserOutlined,
     ThunderboltOutlined,
+    PieChartOutlined,
+    SearchOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -166,6 +171,9 @@ export const DashboardPage: React.FC = () => {
     const [myTasks, setMyTasks] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentActivities, setRecentActivities] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [allTasksList, setAllTasksList] = useState<any[]>([]);
+    const [searchValue, setSearchValue] = useState('');
 
     useEffect(() => {
         if (user) {
@@ -211,6 +219,7 @@ export const DashboardPage: React.FC = () => {
             });
 
             setRecentProjects(projectsRes.projects);
+            setAllTasksList(allTasks);
             setMyTasks(allTasks.filter((t: any) => t.status === 'IN_PROGRESS').slice(0, 5));
             setRecentActivities(activitiesRes?.data?.activities || []);
         } catch (error) {
@@ -219,6 +228,77 @@ export const DashboardPage: React.FC = () => {
             setLoading(false);
         }
     };
+
+    // --- Project status distribution for summary chart ---
+    const projectStatusCounts = useMemo(() => {
+        const counts: Record<string, number> = { ACTIVE: 0, DELAY: 0, COMPLETED: 0, HOLD: 0, CANCELLED: 0 };
+        recentProjects.forEach((p: any) => {
+            if (counts[p.status] !== undefined) counts[p.status]++;
+            else counts[p.status] = 1;
+        });
+        return counts;
+    }, [recentProjects]);
+
+    // --- Global search: client-side search over loaded projects + tasks ---
+    const searchOptions = useMemo(() => {
+        if (!searchValue.trim()) return [];
+        const q = searchValue.toLowerCase();
+        const projectResults = recentProjects
+            .filter((p: any) => p.name?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
+            .slice(0, 5)
+            .map((p: any) => ({
+                value: `project-${p.id}`,
+                label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <FolderOutlined style={{ color: '#3B82F6' }} />
+                        <div>
+                            <div style={{ fontWeight: 500, fontSize: 13 }}>{p.name}</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Project</div>
+                        </div>
+                    </div>
+                ),
+            }));
+        const taskResults = allTasksList
+            .filter((t: any) => t.title?.toLowerCase().includes(q))
+            .slice(0, 5)
+            .map((t: any) => ({
+                value: `task-${t.projectId}-${t.id}`,
+                label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <CheckCircleOutlined style={{ color: '#10B981' }} />
+                        <div>
+                            <div style={{ fontWeight: 500, fontSize: 13 }}>{t.title}</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Task - {t.project?.name || 'Unknown'}</div>
+                        </div>
+                    </div>
+                ),
+            }));
+
+        const options: any[] = [];
+        if (projectResults.length > 0) {
+            options.push({ label: <span style={{ fontWeight: 600, color: '#64748B', fontSize: 11, textTransform: 'uppercase' as const }}>Projects</span>, options: projectResults });
+        }
+        if (taskResults.length > 0) {
+            options.push({ label: <span style={{ fontWeight: 600, color: '#64748B', fontSize: 11, textTransform: 'uppercase' as const }}>Tasks</span>, options: taskResults });
+        }
+        if (options.length === 0) {
+            options.push({ label: <span style={{ color: '#94A3B8', fontSize: 12 }}>No results found</span>, options: [{ value: '__empty__', label: <span style={{ color: '#94A3B8' }}>Try a different search term</span>, disabled: true }] });
+        }
+        return options;
+    }, [searchValue, recentProjects, allTasksList]);
+
+    const handleSearchSelect = useCallback((value: string) => {
+        if (value.startsWith('project-')) {
+            const projectId = value.replace('project-', '');
+            navigate(`/projects/${projectId}`);
+        } else if (value.startsWith('task-')) {
+            const parts = value.split('-');
+            const projectId = parts[1];
+            const taskId = parts.slice(2).join('-');
+            navigate(`/projects/${projectId}?taskId=${taskId}`);
+        }
+        setSearchValue('');
+    }, [navigate]);
 
     return (
         <Layout className="dashboard-layout">
@@ -233,15 +313,33 @@ export const DashboardPage: React.FC = () => {
                             </Title>
                             <Text style={{ color: '#64748B', fontSize: 30 }}>IT Overall</Text>
                         </div>
-                        <Button
-                            type="primary"
-                            size="large"
-                            onClick={() => navigate('/projects')}
-                            style={{ background: '#3B82F6', borderColor: '#3B82F6' }}
-                            icon={<ArrowRightOutlined />}
-                        >
-                            View My Projects
-                        </Button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <AutoComplete
+                                value={searchValue}
+                                options={searchOptions}
+                                onSelect={handleSearchSelect}
+                                onSearch={setSearchValue}
+                                style={{ width: 300 }}
+                                popupMatchSelectWidth={360}
+                            >
+                                <Input
+                                    prefix={<SearchOutlined style={{ color: '#94A3B8' }} />}
+                                    placeholder="Search projects & tasks..."
+                                    allowClear
+                                    size="large"
+                                    style={{ borderRadius: 10 }}
+                                />
+                            </AutoComplete>
+                            <Button
+                                type="primary"
+                                size="large"
+                                onClick={() => navigate('/projects')}
+                                style={{ background: '#3B82F6', borderColor: '#3B82F6' }}
+                                icon={<ArrowRightOutlined />}
+                            >
+                                View My Projects
+                            </Button>
+                        </div>
                     </div>
 
                     <Spin spinning={loading}>
@@ -295,6 +393,93 @@ export const DashboardPage: React.FC = () => {
                                 />
                             </div>
                         </div>
+
+                        {/* Summary Chart Section */}
+                        <Row gutter={[16, 16]} style={{ marginTop: 20, marginBottom: 8 }}>
+                            <Col xs={24} md={16}>
+                                <Card
+                                    variant="borderless"
+                                    style={{ borderRadius: 12, border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', height: '100%' }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                                        <PieChartOutlined style={{ fontSize: 16, color: '#3B82F6' }} />
+                                        <Text strong style={{ fontSize: 15, color: '#1E293B' }}>Project Status Distribution</Text>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        {[
+                                            { key: 'ACTIVE', label: 'Active', color: '#10B981' },
+                                            { key: 'DELAY', label: 'Delay', color: '#EF4444' },
+                                            { key: 'COMPLETED', label: 'Completed', color: '#3B82F6' },
+                                            { key: 'HOLD', label: 'Hold', color: '#F59E0B' },
+                                            { key: 'CANCELLED', label: 'Cancelled', color: '#6B7280' },
+                                        ].map(s => {
+                                            const count = projectStatusCounts[s.key] || 0;
+                                            const total = recentProjects.length || 1;
+                                            const pct = Math.round((count / total) * 100);
+                                            return (
+                                                <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                    <span style={{
+                                                        width: 80, fontSize: 13, fontWeight: 500, color: '#475569',
+                                                        display: 'flex', alignItems: 'center', gap: 6,
+                                                    }}>
+                                                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, display: 'inline-block' }} />
+                                                        {s.label}
+                                                    </span>
+                                                    <div style={{ flex: 1 }}>
+                                                        <Progress
+                                                            percent={pct}
+                                                            strokeColor={s.color}
+                                                            trailColor="#F1F5F9"
+                                                            showInfo={false}
+                                                            size="small"
+                                                        />
+                                                    </div>
+                                                    <span style={{ width: 56, textAlign: 'right', fontSize: 13, fontWeight: 600, color: '#1E293B' }}>
+                                                        {count} <span style={{ color: '#94A3B8', fontWeight: 400 }}>({pct}%)</span>
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </Card>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Card
+                                    variant="borderless"
+                                    style={{
+                                        borderRadius: 12, border: '1px solid #E2E8F0',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                                        height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}
+                                >
+                                    <div style={{ textAlign: 'center' }}>
+                                        <Text strong style={{ fontSize: 15, color: '#1E293B', display: 'block', marginBottom: 16 }}>
+                                            Task Completion
+                                        </Text>
+                                        <Progress
+                                            type="circle"
+                                            percent={stats.completionRate}
+                                            size={140}
+                                            strokeColor={{
+                                                '0%': '#3B82F6',
+                                                '100%': '#10B981',
+                                            }}
+                                            trailColor="#F1F5F9"
+                                            strokeWidth={10}
+                                            format={(pct) => (
+                                                <div>
+                                                    <div style={{ fontSize: 28, fontWeight: 700, color: '#1E293B' }}>{pct}%</div>
+                                                    <div style={{ fontSize: 11, color: '#94A3B8' }}>Complete</div>
+                                                </div>
+                                            )}
+                                        />
+                                        <div style={{ marginTop: 12, fontSize: 12, color: '#64748B' }}>
+                                            {stats.completedTasks} of {stats.totalTasks} tasks done
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Col>
+                        </Row>
 
                         <div className="dashboard-sections">
                             {/* Recent Projects */}

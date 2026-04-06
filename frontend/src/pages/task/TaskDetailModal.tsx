@@ -31,6 +31,8 @@ import {
     PictureOutlined,
     TagOutlined,
     SwapOutlined,
+    EditOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -62,17 +64,31 @@ interface TaskDetailModalProps {
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../../constants';
 import { STATUS_ICONS } from '../../constants/statusIcons';
 
-// --- ClickableTag: คลิก tag badge → navigate ไปหน้า TagTasksPage ---
+// --- ClickableTag: คลิก tag badge → navigate ไปหน้า TagTasksPage + edit/delete ---
 const ClickableTag: React.FC<{
     tag: { id: string; name: string; color: string };
     onNavigate: (tagId: string) => void;
-}> = ({ tag, onNavigate }) => (
+    onEdit?: (tag: { id: string; name: string; color: string }) => void;
+    onDelete?: (tagId: string) => void;
+}> = ({ tag, onNavigate, onEdit, onDelete }) => (
     <Tag
         color={tag.color}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
         onClick={() => onNavigate(tag.id)}
     >
         {tag.name}
+        {onEdit && (
+            <EditOutlined
+                style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}
+                onClick={(e) => { e.stopPropagation(); onEdit(tag); }}
+            />
+        )}
+        {onDelete && (
+            <DeleteOutlined
+                style={{ fontSize: 10, opacity: 0.7, color: '#ff4d4f' }}
+                onClick={(e) => { e.stopPropagation(); onDelete(tag.id); }}
+            />
+        )}
     </Tag>
 );
 
@@ -119,6 +135,43 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }>({ visible: false, fromStatus: '', toStatus: '' });
     const [statusChangeNote, setStatusChangeNote] = useState('');
     const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+
+    // Tag edit/delete state
+    const [editingTag, setEditingTag] = useState<{ id: string; name: string; color: string } | null>(null);
+    const [editTagName, setEditTagName] = useState('');
+    const [editTagColor, setEditTagColor] = useState('');
+
+    const TAG_COLORS = ['blue', 'green', 'red', 'orange', 'purple', 'cyan', 'magenta', 'gold', 'lime', 'volcano'];
+
+    const handleEditTag = (tag: { id: string; name: string; color: string }) => {
+        setEditingTag(tag);
+        setEditTagName(tag.name);
+        setEditTagColor(tag.color);
+    };
+
+    const handleSaveTag = async () => {
+        if (!editingTag || !editTagName.trim()) return;
+        try {
+            const updated = await tagService.updateTag(editingTag.id, { name: editTagName.trim(), color: editTagColor });
+            setAllTags(prev => prev.map(t => t.id === updated.id ? updated : t));
+            if (task && taskId) await loadTaskData(taskId);
+            setEditingTag(null);
+            message.success('Tag updated');
+        } catch {
+            message.error('Failed to update tag');
+        }
+    };
+
+    const handleDeleteTag = async (tagId: string) => {
+        try {
+            await tagService.deleteTag(tagId);
+            setAllTags(prev => prev.filter(t => t.id !== tagId));
+            if (task && taskId) await loadTaskData(taskId);
+            message.success('Tag deleted');
+        } catch {
+            message.error('Failed to delete tag');
+        }
+    };
 
     useEffect(() => {
         if (visible) {
@@ -549,7 +602,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                                         {task.taskTags && task.taskTags.length > 0 ? (
                                             task.taskTags.map((tt: { id: string; tag: { id: string; name: string; color: string } }) => (
-                                                <ClickableTag key={tt.id} tag={tt.tag} onNavigate={(tagId) => { onClose(); navigate(`/tags/${tagId}`); }} />
+                                                <ClickableTag
+                                                    key={tt.id}
+                                                    tag={tt.tag}
+                                                    onNavigate={(tagId) => { onClose(); navigate(`/tags/${tagId}`); }}
+                                                    onEdit={handleEditTag}
+                                                    onDelete={handleDeleteTag}
+                                                />
                                             ))
                                         ) : (
                                             <Text type="secondary">No tags</Text>
@@ -984,6 +1043,51 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         </div>
                     ))
                 )}
+            </div>
+        </Modal>
+
+        {/* Tag Edit Modal */}
+        <Modal
+            title="Edit Tag"
+            open={!!editingTag}
+            onCancel={() => setEditingTag(null)}
+            onOk={handleSaveTag}
+            okText="Save"
+            width={360}
+        >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                <div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Tag Name</Text>
+                    <Input
+                        value={editTagName}
+                        onChange={e => setEditTagName(e.target.value)}
+                        placeholder="Tag name"
+                        style={{ marginTop: 4 }}
+                    />
+                </div>
+                <div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Color</Text>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        {TAG_COLORS.map(c => (
+                            <Tag
+                                key={c}
+                                color={c}
+                                style={{
+                                    cursor: 'pointer',
+                                    border: editTagColor === c ? '2px solid #1677ff' : '2px solid transparent',
+                                    borderRadius: 4,
+                                }}
+                                onClick={() => setEditTagColor(c)}
+                            >
+                                {c}
+                            </Tag>
+                        ))}
+                    </div>
+                </div>
+                <div style={{ marginTop: 4 }}>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Preview: </Text>
+                    <Tag color={editTagColor}>{editTagName || 'Tag'}</Tag>
+                </div>
             </div>
         </Modal>
         </>

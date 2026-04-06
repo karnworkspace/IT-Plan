@@ -384,6 +384,27 @@
     background: #FEE2E2 !important;
 }
 
+/* Bulk Action Bar */
+.mytasks-bulk-bar {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    animation: bulkBarSlideIn 0.25s ease-out;
+}
+
+.mytasks-bulk-bar .ant-select-selector {
+    border-radius: 8px !important;
+}
+
+@keyframes bulkBarSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ==========================================
    Responsive
    ========================================== */

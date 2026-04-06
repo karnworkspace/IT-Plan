@@ -94,31 +94,31 @@ const getStatusBadgeClass = (status: string) => {
 
 const getStatusProgressColor = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return '#10B981';
-        case 'DELAY': return '#EF4444';
-        case 'COMPLETED': return '#3B82F6';
-        case 'HOLD': return '#F59E0B';
-        default: return '#6B7280';
+        case 'ACTIVE': return '#32BCAD';
+        case 'DELAY': return '#D94F4F';
+        case 'COMPLETED': return '#2E7D9B';
+        case 'HOLD': return '#E8A838';
+        default: return '#77787B';
     }
 };
 
 const getStatusIconBg = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return '#D1FAE5';
-        case 'DELAY': return '#FEE2E2';
-        case 'COMPLETED': return '#DBEAFE';
-        case 'HOLD': return '#FEF3C7';
+        case 'ACTIVE': return 'rgba(50,188,173,0.12)';
+        case 'DELAY': return 'rgba(217,79,79,0.10)';
+        case 'COMPLETED': return 'rgba(46,125,155,0.08)';
+        case 'HOLD': return '#FFF3DC';
         default: return '#F1F5F9';
     }
 };
 
 const getStatusIconColor = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return '#10B981';
-        case 'DELAY': return '#EF4444';
-        case 'COMPLETED': return '#3B82F6';
-        case 'HOLD': return '#F59E0B';
-        default: return '#6B7280';
+        case 'ACTIVE': return '#32BCAD';
+        case 'DELAY': return '#D94F4F';
+        case 'COMPLETED': return '#2E7D9B';
+        case 'HOLD': return '#E8A838';
+        default: return '#77787B';
     }
 };
 
@@ -133,12 +133,12 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 const ACTION_COLORS: Record<string, string> = {
-    CREATED: '#10B981',
-    UPDATED: '#3B82F6',
-    DELETED: '#EF4444',
+    CREATED: '#32BCAD',
+    UPDATED: '#2E7D9B',
+    DELETED: '#D94F4F',
     ASSIGNED: '#8B5CF6',
-    COMPLETED: '#10B981',
-    COMMENTED: '#F59E0B',
+    COMPLETED: '#32BCAD',
+    COMMENTED: '#E8A838',
 };
 
 const getInitials = (name: string) => {
@@ -250,7 +250,7 @@ export const DashboardPage: React.FC = () => {
                 value: `project-${p.id}`,
                 label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FolderOutlined style={{ color: '#3B82F6' }} />
+                        <FolderOutlined style={{ color: '#32BCAD' }} />
                         <div>
                             <div style={{ fontWeight: 500, fontSize: 13 }}>{p.name}</div>
                             <div style={{ fontSize: 11, color: '#94A3B8' }}>Project</div>
@@ -265,7 +265,7 @@ export const DashboardPage: React.FC = () => {
                 value: `task-${t.projectId}-${t.id}`,
                 label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <CheckCircleOutlined style={{ color: '#10B981' }} />
+                        <CheckCircleOutlined style={{ color: '#32BCAD' }} />
                         <div>
                             <div style={{ fontWeight: 500, fontSize: 13 }}>{t.title}</div>
                             <div style={{ fontSize: 11, color: '#94A3B8' }}>Task - {t.project?.name || 'Unknown'}</div>
@@ -276,10 +276,10 @@ export const DashboardPage: React.FC = () => {
 
         const options: any[] = [];
         if (projectResults.length > 0) {
-            options.push({ label: <span style={{ fontWeight: 600, color: '#64748B', fontSize: 11, textTransform: 'uppercase' as const }}>Projects</span>, options: projectResults });
+            options.push({ label: <span style={{ fontWeight: 600, color: '#77787B', fontSize: 11, textTransform: 'uppercase' as const }}>Projects</span>, options: projectResults });
         }
         if (taskResults.length > 0) {
-            options.push({ label: <span style={{ fontWeight: 600, color: '#64748B', fontSize: 11, textTransform: 'uppercase' as const }}>Tasks</span>, options: taskResults });
+            options.push({ label: <span style={{ fontWeight: 600, color: '#77787B', fontSize: 11, textTransform: 'uppercase' as const }}>Tasks</span>, options: taskResults });
         }
         if (options.length === 0) {
             options.push({ label: <span style={{ color: '#94A3B8', fontSize: 12 }}>No results found</span>, options: [{ value: '__empty__', label: <span style={{ color: '#94A3B8' }}>Try a different search term</span>, disabled: true }] });
@@ -308,10 +308,10 @@ export const DashboardPage: React.FC = () => {
                 <Content className="dashboard-content">
                     <div className="dashboard-header-section">
                         <div>
-                            <Title level={2} style={{ margin: 0, color: '#1E293B', fontSize: 48 }}>
+                            <Title level={2} style={{ margin: 0, color: '#000000', fontSize: 48 }}>
                                 Dashboard
                             </Title>
-                            <Text style={{ color: '#64748B', fontSize: 30 }}>IT Overall</Text>
+                            <Text style={{ color: '#77787B', fontSize: 30 }}>IT Overall</Text>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <AutoComplete
@@ -334,7 +334,7 @@ export const DashboardPage: React.FC = () => {
                                 type="primary"
                                 size="large"
                                 onClick={() => navigate('/projects')}
-                                style={{ background: '#3B82F6', borderColor: '#3B82F6' }}
+                                style={{ background: '#32BCAD', borderColor: '#32BCAD' }}
                                 icon={<ArrowRightOutlined />}
                             >
                                 View My Projects
@@ -402,16 +402,16 @@ export const DashboardPage: React.FC = () => {
                                     style={{ borderRadius: 12, border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', height: '100%' }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                                        <PieChartOutlined style={{ fontSize: 16, color: '#3B82F6' }} />
-                                        <Text strong style={{ fontSize: 15, color: '#1E293B' }}>Project Status Distribution</Text>
+                                        <PieChartOutlined style={{ fontSize: 16, color: '#32BCAD' }} />
+                                        <Text strong style={{ fontSize: 15, color: '#000000' }}>Project Status Distribution</Text>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                         {[
-                                            { key: 'ACTIVE', label: 'Active', color: '#10B981' },
-                                            { key: 'DELAY', label: 'Delay', color: '#EF4444' },
-                                            { key: 'COMPLETED', label: 'Completed', color: '#3B82F6' },
-                                            { key: 'HOLD', label: 'Hold', color: '#F59E0B' },
-                                            { key: 'CANCELLED', label: 'Cancelled', color: '#6B7280' },
+                                            { key: 'ACTIVE', label: 'Active', color: '#32BCAD' },
+                                            { key: 'DELAY', label: 'Delay', color: '#D94F4F' },
+                                            { key: 'COMPLETED', label: 'Completed', color: '#2E7D9B' },
+                                            { key: 'HOLD', label: 'Hold', color: '#E8A838' },
+                                            { key: 'CANCELLED', label: 'Cancelled', color: '#77787B' },
                                         ].map(s => {
                                             const count = projectStatusCounts[s.key] || 0;
                                             const total = recentProjects.length || 1;
@@ -434,7 +434,7 @@ export const DashboardPage: React.FC = () => {
                                                             size="small"
                                                         />
                                                     </div>
-                                                    <span style={{ width: 56, textAlign: 'right', fontSize: 13, fontWeight: 600, color: '#1E293B' }}>
+                                                    <span style={{ width: 56, textAlign: 'right', fontSize: 13, fontWeight: 600, color: '#000000' }}>
                                                         {count} <span style={{ color: '#94A3B8', fontWeight: 400 }}>({pct}%)</span>
                                                     </span>
                                                 </div>
@@ -453,7 +453,7 @@ export const DashboardPage: React.FC = () => {
                                     }}
                                 >
                                     <div style={{ textAlign: 'center' }}>
-                                        <Text strong style={{ fontSize: 15, color: '#1E293B', display: 'block', marginBottom: 16 }}>
+                                        <Text strong style={{ fontSize: 15, color: '#000000', display: 'block', marginBottom: 16 }}>
                                             Task Completion
                                         </Text>
                                         <Progress
@@ -461,19 +461,19 @@ export const DashboardPage: React.FC = () => {
                                             percent={stats.completionRate}
                                             size={140}
                                             strokeColor={{
-                                                '0%': '#3B82F6',
-                                                '100%': '#10B981',
+                                                '0%': '#2E7D9B',
+                                                '100%': '#32BCAD',
                                             }}
                                             trailColor="#F1F5F9"
                                             strokeWidth={10}
                                             format={(pct) => (
                                                 <div>
-                                                    <div style={{ fontSize: 28, fontWeight: 700, color: '#1E293B' }}>{pct}%</div>
+                                                    <div style={{ fontSize: 28, fontWeight: 700, color: '#000000' }}>{pct}%</div>
                                                     <div style={{ fontSize: 11, color: '#94A3B8' }}>Complete</div>
                                                 </div>
                                             )}
                                         />
-                                        <div style={{ marginTop: 12, fontSize: 12, color: '#64748B' }}>
+                                        <div style={{ marginTop: 12, fontSize: 12, color: '#77787B' }}>
                                             {stats.completedTasks} of {stats.totalTasks} tasks done
                                         </div>
                                     </div>
@@ -484,7 +484,7 @@ export const DashboardPage: React.FC = () => {
                         <div className="dashboard-sections">
                             {/* Recent Projects */}
                             <div className="section-header">
-                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Recent Projects</Title>
+                                <Title level={4} style={{ color: '#000000', margin: 0 }}>Recent Projects</Title>
                                 <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
                             </div>
                             <Row gutter={[16, 16]}>
@@ -523,8 +523,8 @@ export const DashboardPage: React.FC = () => {
 
                             {/* Quick Access Panel */}
                             <div className="section-header" style={{ marginTop: 32 }}>
-                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>
-                                    <ThunderboltOutlined style={{ marginRight: 8, color: '#F59E0B' }} />
+                                <Title level={4} style={{ color: '#000000', margin: 0 }}>
+                                    <ThunderboltOutlined style={{ marginRight: 8, color: '#E8A838' }} />
                                     Quick Access
                                 </Title>
                             </div>
@@ -555,8 +555,8 @@ export const DashboardPage: React.FC = () => {
                                     className="quick-access-item qa-highlight"
                                     onClick={() => navigate('/my-tasks')}
                                 >
-                                    <div className="qa-icon" style={{ background: '#DBEAFE' }}>
-                                        <CheckCircleOutlined style={{ color: '#3B82F6', fontSize: 14 }} />
+                                    <div className="qa-icon" style={{ background: 'rgba(50,188,173,0.12)' }}>
+                                        <CheckCircleOutlined style={{ color: '#32BCAD', fontSize: 14 }} />
                                     </div>
                                     <div className="qa-info">
                                         <span className="qa-name">My Tasks</span>
@@ -570,7 +570,7 @@ export const DashboardPage: React.FC = () => {
 
                             {/* My Active Tasks */}
                             <div className="section-header" style={{ marginTop: 32 }}>
-                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>My Active Tasks</Title>
+                                <Title level={4} style={{ color: '#000000', margin: 0 }}>My Active Tasks</Title>
                                 <button className="view-all-link" onClick={() => navigate('/my-tasks')}>View all</button>
                             </div>
                             <Card className="tasks-list-card" variant="borderless">
@@ -593,11 +593,11 @@ export const DashboardPage: React.FC = () => {
                                                             <CheckCircleOutlined />
                                                         </div>
                                                     }
-                                                    title={<Text strong style={{ color: '#1E293B' }}>{task.title}</Text>}
+                                                    title={<Text strong style={{ color: '#000000' }}>{task.title}</Text>}
                                                     description={
                                                         <Space split={<span style={{ color: '#CBD5E1' }}>·</span>}>
-                                                            <Text style={{ color: '#64748B', fontSize: 13 }}>{task.project?.name}</Text>
-                                                            <Text style={{ color: '#64748B', fontSize: 13 }}>
+                                                            <Text style={{ color: '#77787B', fontSize: 13 }}>{task.project?.name}</Text>
+                                                            <Text style={{ color: '#77787B', fontSize: 13 }}>
                                                                 Due {task.dueDate ? dayjs(task.dueDate).format('MMM D') : 'No date'}
                                                             </Text>
                                                         </Space>
@@ -613,7 +613,7 @@ export const DashboardPage: React.FC = () => {
 
                             {/* Team Activity */}
                             <div className="section-header" style={{ marginTop: 32 }}>
-                                <Title level={4} style={{ color: '#1E293B', margin: 0 }}>Team Activity</Title>
+                                <Title level={4} style={{ color: '#000000', margin: 0 }}>Team Activity</Title>
                             </div>
                             <div className="activity-feed">
                                 {recentActivities.length > 0 ? recentActivities.map((log, index) => {
@@ -633,7 +633,7 @@ export const DashboardPage: React.FC = () => {
                                             )}
                                             <div
                                                 className="activity-avatar"
-                                                style={{ background: ACTION_COLORS[log.action] || '#6B7280' }}
+                                                style={{ background: ACTION_COLORS[log.action] || '#77787B' }}
                                                 title={log.user?.name || 'Unknown'}
                                             >
                                                 {log.user ? getInitials(log.user.name) : <UserOutlined />}
@@ -659,7 +659,7 @@ export const DashboardPage: React.FC = () => {
 
                             {/* Total IT Project (Annual Plan) */}
                             <div className="section-header" style={{ marginTop: 32 }}>
-                                <Title level={4} style={{ color: '#1E293B', margin: 0, fontWeight: 700 }}>Total IT Project</Title>
+                                <Title level={4} style={{ color: '#000000', margin: 0, fontWeight: 700 }}>Total IT Project</Title>
                                 <button className="view-all-link" onClick={() => navigate('/timeline')}>View Annual Plan →</button>
                             </div>
                             <Card

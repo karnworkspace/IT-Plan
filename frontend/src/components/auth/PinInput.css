@@ -21,6 +21,6 @@
 
 .pin-input-box:focus,
 .pin-input-box:focus-within {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  border-color: #32BCAD !important;
+  box-shadow: 0 0 0 2px rgba(50, 188, 173, 0.2) !important;
 }

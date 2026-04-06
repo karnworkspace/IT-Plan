@@ -103,11 +103,11 @@ const StatCardItem = ({ title, value, icon, iconClass, gradientFrom }: {
 };
 
 const STATUS_FILTER_COLORS: Record<string, string> = {
-    ACTIVE: '#10B981',
-    DELAY: '#EF4444',
-    COMPLETED: '#3B82F6',
-    HOLD: '#F59E0B',
-    CANCELLED: '#6B7280',
+    ACTIVE: '#32BCAD',
+    DELAY: '#D94F4F',
+    COMPLETED: '#32BCAD',
+    HOLD: '#E8A838',
+    CANCELLED: '#77787B',
 };
 
 const getStatusBadgeClass = (status: string) => {
@@ -123,11 +123,11 @@ const getStatusBadgeClass = (status: string) => {
 
 const getStatusProgressColor = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return '#10B981';
-        case 'DELAY': return '#EF4444';
-        case 'COMPLETED': return '#3B82F6';
-        case 'HOLD': return '#F59E0B';
-        default: return '#6B7280';
+        case 'ACTIVE': return '#32BCAD';
+        case 'DELAY': return '#D94F4F';
+        case 'COMPLETED': return '#32BCAD';
+        case 'HOLD': return '#E8A838';
+        default: return '#77787B';
     }
 };
 
@@ -143,11 +143,11 @@ const getStatusIconBg = (status: string) => {
 
 const getStatusIconColor = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return '#10B981';
-        case 'DELAY': return '#EF4444';
-        case 'COMPLETED': return '#3B82F6';
-        case 'HOLD': return '#F59E0B';
-        default: return '#6B7280';
+        case 'ACTIVE': return '#32BCAD';
+        case 'DELAY': return '#D94F4F';
+        case 'COMPLETED': return '#32BCAD';
+        case 'HOLD': return '#E8A838';
+        default: return '#77787B';
     }
 };
 
@@ -280,7 +280,7 @@ export const ProjectsPage: React.FC = () => {
     const handleCreate = () => {
         setEditingProject(null);
         form.resetFields();
-        form.setFieldsValue({ color: '#3B82F6', status: 'ACTIVE' });
+        form.setFieldsValue({ color: '#32BCAD', status: 'ACTIVE' });
         setIsModalVisible(true);
     };
 
@@ -393,11 +393,11 @@ export const ProjectsPage: React.FC = () => {
     ];
 
     const BOARD_COLUMNS = [
-        { status: 'ACTIVE', label: 'Active', dotColor: '#10B981' },
-        { status: 'DELAY', label: 'Delay', dotColor: '#EF4444' },
-        { status: 'COMPLETED', label: 'Completed', dotColor: '#3B82F6' },
-        { status: 'HOLD', label: 'Hold', dotColor: '#F59E0B' },
-        { status: 'CANCELLED', label: 'Cancelled', dotColor: '#6B7280' },
+        { status: 'ACTIVE', label: 'Active', dotColor: '#32BCAD' },
+        { status: 'DELAY', label: 'Delay', dotColor: '#D94F4F' },
+        { status: 'COMPLETED', label: 'Completed', dotColor: '#32BCAD' },
+        { status: 'HOLD', label: 'Hold', dotColor: '#E8A838' },
+        { status: 'CANCELLED', label: 'Cancelled', dotColor: '#77787B' },
     ];
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -678,7 +678,7 @@ export const ProjectsPage: React.FC = () => {
                                                     </div>
                                                     <div className="project-card-footer-v2">
                                                         <TeamOutlined style={{ color: '#94A3B8', fontSize: 14 }} />
-                                                        <span style={{ color: '#64748B', fontSize: 13 }}>{project.members?.length || 0} members</span>
+                                                        <span style={{ color: '#77787B', fontSize: 13 }}>{project.members?.length || 0} members</span>
                                                     </div>
                                                 </div>
                                             </Col>

@@ -32,7 +32,7 @@
 }
 
 .notification-item.unread {
-    background-color: #e6f7ff;
+    background-color: rgba(50,188,173,0.08);
 }
 
 .notification-title {

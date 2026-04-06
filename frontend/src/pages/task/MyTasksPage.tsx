@@ -504,10 +504,10 @@ export const MyTasksPage: React.FC = () => {
                         <Card className="filters-card" style={{ marginBottom: 16 }}>
                             <div className="mytasks-filters-header">
                                 <Space align="center">
-                                    <FilterOutlined style={{ color: '#64748B' }} />
+                                    <FilterOutlined style={{ color: '#77787B' }} />
                                     <Text strong>Filters</Text>
                                     {activeFilterCount > 0 && (
-                                        <Badge count={activeFilterCount} size="small" style={{ backgroundColor: '#3B82F6' }} />
+                                        <Badge count={activeFilterCount} size="small" style={{ backgroundColor: '#32BCAD' }} />
                                     )}
                                 </Space>
                                 <Space>
@@ -647,7 +647,7 @@ export const MyTasksPage: React.FC = () => {
                                                 const sCfg = STATUS_CONFIG[record.status];
                                                 return (
                                                     <Space>
-                                                        <span className="mytasks-list-dot" style={{ background: sCfg?.dotColor || '#6B7280' }} />
+                                                        <span className="mytasks-list-dot" style={{ background: sCfg?.dotColor || '#77787B' }} />
                                                         <span className="mytasks-list-task-title">{title}</span>
                                                     </Space>
                                                 );
@@ -683,7 +683,7 @@ export const MyTasksPage: React.FC = () => {
                                                 if (assignees.length === 0 && record.assignee) {
                                                     return (
                                                         <Tooltip title={record.assignee.name}>
-                                                            <Avatar size="small" style={{ backgroundColor: '#3B82F6' }}>
+                                                            <Avatar size="small" style={{ backgroundColor: '#32BCAD' }}>
                                                                 {record.assignee.name?.charAt(0)?.toUpperCase()}
                                                             </Avatar>
                                                         </Tooltip>
@@ -693,7 +693,7 @@ export const MyTasksPage: React.FC = () => {
                                                     <Avatar.Group maxCount={3} size="small">
                                                         {assignees.map(a => (
                                                             <Tooltip key={a.id} title={a.user?.name}>
-                                                                <Avatar size="small" style={{ backgroundColor: '#3B82F6' }}>
+                                                                <Avatar size="small" style={{ backgroundColor: '#32BCAD' }}>
                                                                     {a.user?.name?.charAt(0)?.toUpperCase() || <UserOutlined />}
                                                                 </Avatar>
                                                             </Tooltip>
@@ -719,9 +719,9 @@ export const MyTasksPage: React.FC = () => {
                                                 if (!date) return '-';
                                                 const overdue = isOverdue(record);
                                                 return (
-                                                    <span style={{ color: overdue ? '#EF4444' : undefined, fontWeight: overdue ? 600 : undefined }}>
+                                                    <span style={{ color: overdue ? '#D94F4F' : undefined, fontWeight: overdue ? 600 : undefined }}>
                                                         {dayjs(date).format('DD MMM YY')}
-                                                        {overdue && <WarningOutlined style={{ marginLeft: 4, color: '#EF4444' }} />}
+                                                        {overdue && <WarningOutlined style={{ marginLeft: 4, color: '#D94F4F' }} />}
                                                     </span>
                                                 );
                                             },
@@ -798,7 +798,7 @@ export const MyTasksPage: React.FC = () => {
                                                     return (
                                                         <SortableMyTaskCard key={task.id} id={task.id} className={isOverdue(task) ? 'mytasks-card-overdue' : ''} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
                                                             {/* Project Color Bar */}
-                                                            <div className="mytasks-card-color" style={{ background: isOverdue(task) ? '#EF4444' : (task.project?.color || '#1890ff') }} />
+                                                            <div className="mytasks-card-color" style={{ background: isOverdue(task) ? '#D94F4F' : (task.project?.color || '#32BCAD') }} />
 
                                                             <div className="mytasks-card-body">
                                                                 {/* Project Name + Menu */}
@@ -850,7 +850,7 @@ export const MyTasksPage: React.FC = () => {
                                                                     <div className="progress-bar-track">
                                                                         <div
                                                                             className="progress-bar-fill"
-                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
+                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#32BCAD' }}
                                                                         />
                                                                     </div>
                                                                 </div>
@@ -867,7 +867,7 @@ export const MyTasksPage: React.FC = () => {
                             <DragOverlay>
                                 {activeDragTask && (
                                     <div className="mytasks-card mytasks-card-dragging">
-                                        <div className="mytasks-card-color" style={{ background: activeDragTask.project?.color || '#1890ff' }} />
+                                        <div className="mytasks-card-color" style={{ background: activeDragTask.project?.color || '#32BCAD' }} />
                                         <div className="mytasks-card-body">
                                             <div className="mytasks-card-title">{activeDragTask.title}</div>
                                         </div>

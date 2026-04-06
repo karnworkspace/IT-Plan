@@ -44,7 +44,7 @@ const { TabPane } = Tabs;
 
 // Colors for groups
 const GROUP_COLORS = [
-    '#1890ff', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96',
+    '#32BCAD', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96',
     '#13c2c2', '#2f54eb', '#faad14', '#f5222d', '#a0d911',
 ];
 
@@ -120,7 +120,7 @@ export const GroupsPage: React.FC = () => {
     const handleCreate = () => {
         setEditingGroup(null);
         form.resetFields();
-        form.setFieldsValue({ type: 'USER_GROUP', color: '#1890ff' });
+        form.setFieldsValue({ type: 'USER_GROUP', color: '#32BCAD' });
         setModalVisible(true);
     };
 
@@ -467,7 +467,7 @@ export const GroupsPage: React.FC = () => {
                                         ]}
                                     >
                                         <List.Item.Meta
-                                            avatar={<Avatar style={{ backgroundColor: '#1890ff' }}>{member.user.name?.[0]}</Avatar>}
+                                            avatar={<Avatar style={{ backgroundColor: '#32BCAD' }}>{member.user.name?.[0]}</Avatar>}
                                             title={member.user.name}
                                             description={member.user.email}
                                         />

@@ -39,7 +39,7 @@
 }
 
 .header-top .ant-breadcrumb a:hover {
-    color: #1890ff;
+    color: #32BCAD;
 }
 
 .header-content {
@@ -75,21 +75,21 @@
 }
 
 .create-task-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #32BCAD 0%, #2E7D9B 100%);
     border: none;
     height: 48px;
     padding: 0 32px;
     font-size: 15px;
     font-weight: 500;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(50, 188, 173, 0.4);
     transition: all 0.3s ease;
 }
 
 .create-task-btn:hover {
-    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    background: linear-gradient(135deg, #2E7D9B 0%, #256A85 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 20px rgba(50, 188, 173, 0.5);
 }
 
 /* Stats Cards */
@@ -123,21 +123,21 @@
     border: 1px solid #E2E8F0;
 }
 
-/* Completed — เขียวอ่อนไล่เฉด */
+/* Completed — SENA green light gradient */
 .project-stats .stat-completed {
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%);
-    border: 1px solid #A7F3D0;
+    background: linear-gradient(135deg, rgba(50,188,173,0.05) 0%, rgba(50,188,173,0.12) 50%, rgba(50,188,173,0.20) 100%);
+    border: 1px solid rgba(50,188,173,0.25);
 }
 
-/* In Progress — ฟ้าอ่อนไล่เฉด */
+/* In Progress — SENA blue light gradient */
 .project-stats .stat-inprogress {
-    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 50%, #BFDBFE 100%);
-    border: 1px solid #BFDBFE;
+    background: linear-gradient(135deg, rgba(46,125,155,0.05) 0%, rgba(46,125,155,0.12) 50%, rgba(46,125,155,0.20) 100%);
+    border: 1px solid rgba(46,125,155,0.25);
 }
 
-/* Progress — เหลืองอ่อนไล่เฉด */
+/* Progress — Amber light gradient */
 .project-stats .stat-progress {
-    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%);
+    background: linear-gradient(135deg, #FFFBEB 0%, #FFF3DC 50%, #FDE68A 100%);
     border: 1px solid #FDE68A;
 }
 
@@ -228,7 +228,7 @@
 }
 
 .column-content-over {
-    background: #e8f4fd;
+    background: rgba(50,188,173,0.08);
     border-radius: 0 0 12px 12px;
 }
 

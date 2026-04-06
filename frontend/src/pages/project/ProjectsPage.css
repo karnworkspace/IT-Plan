@@ -24,7 +24,7 @@
 }
 
 .header-title-section .page-title {
-    color: #1E293B !important;
+    color: #000000 !important;
     margin: 0 0 8px 0 !important;
     font-weight: 600;
 }
@@ -34,26 +34,26 @@
 }
 
 .page-subtitle {
-    color: #64748B !important;
+    color: #77787B !important;
     font-size: 15px;
 }
 
 .create-btn {
-    background: #3B82F6;
+    background: #32BCAD;
     border: none;
     height: 48px;
     padding: 0 32px;
     font-size: 15px;
     font-weight: 500;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px rgba(50, 188, 173, 0.3);
     transition: all 0.2s ease;
 }
 
 .create-btn:hover {
-    background: #2563EB;
+    background: #2E7D9B;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(50, 188, 173, 0.4);
 }
 
 /* ==========================================
@@ -69,14 +69,14 @@
 .stat-label {
     font-size: 13px;
     font-weight: 500;
-    color: #64748B;
+    color: #77787B;
     margin-bottom: 4px;
 }
 
 .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #1E293B;
+    color: #000000;
     line-height: 1.2;
 }
 
@@ -188,7 +188,7 @@
 .project-card-title {
     font-size: 15px;
     font-weight: 600;
-    color: #1E293B;
+    color: #000000;
     margin: 0 0 4px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -197,7 +197,7 @@
 
 .project-card-id {
     font-size: 13px;
-    color: #64748B;
+    color: #77787B;
     margin: 0 0 16px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -217,13 +217,13 @@
 
 .progress-label {
     font-size: 12px;
-    color: #64748B;
+    color: #77787B;
 }
 
 .progress-value {
     font-size: 12px;
     font-weight: 600;
-    color: #1E293B;
+    color: #000000;
 }
 
 .project-card-footer-v2 {
@@ -291,7 +291,7 @@
 .board-column-title {
     font-weight: 600;
     font-size: 14px;
-    color: #1E293B;
+    color: #000000;
     flex: 1;
 }
 
@@ -308,7 +308,7 @@
 }
 
 .board-column-content.board-column-over {
-    background: #EFF6FF;
+    background: rgba(50,188,173,0.06);
     border-radius: 0 0 12px 12px;
 }
 
@@ -353,7 +353,7 @@
 .board-card-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1E293B;
+    color: #000000;
     line-height: 1.4;
     margin-bottom: 8px;
     overflow: hidden;
@@ -399,7 +399,7 @@
 
 .board-member-more {
     background: #E2E8F0;
-    color: #64748B;
+    color: #77787B;
     font-weight: 500;
 }
 
@@ -466,8 +466,8 @@
 }
 
 .color-option.selected {
-    border-color: #1E293B;
-    box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.2);
+    border-color: #000000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
     transform: scale(1.15);
 }
 
@@ -486,12 +486,12 @@
 .filters-section .ant-btn-group .ant-btn {
     background: white;
     border-color: #E2E8F0;
-    color: #64748B;
+    color: #77787B;
 }
 
 .filters-section .ant-btn-group .ant-btn-primary {
-    background: #3B82F6;
-    border-color: #3B82F6;
+    background: #32BCAD;
+    border-color: #32BCAD;
     color: white;
 }
 

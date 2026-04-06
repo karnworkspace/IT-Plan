@@ -141,7 +141,7 @@ export const CalendarPage: React.FC = () => {
                             <div
                                 className={`cal-task-bar ${overdue ? 'cal-task-overdue' : ''}`}
                                 style={{
-                                    borderLeftColor: overdue ? '#EF4444' : statusCfg.dotColor,
+                                    borderLeftColor: overdue ? '#D94F4F' : statusCfg.dotColor,
                                     backgroundColor: overdue ? '#FEF2F2' : `${statusCfg.dotColor}12`,
                                 }}
                             >
@@ -186,7 +186,7 @@ export const CalendarPage: React.FC = () => {
                             <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.IN_PROGRESS.dotColor }} /><span>In Progress</span></div>
                             <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.DONE.dotColor }} /><span>Done</span></div>
                             <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.HOLD.dotColor }} /><span>Hold</span></div>
-                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Overdue</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#D94F4F' }} /><span>Overdue</span></div>
                         </div>
                     </div>
 
@@ -308,7 +308,7 @@ export const CalendarPage: React.FC = () => {
                             const overdue = isOverdue(task);
                             return (
                                 <div key={task.id} className="cal-modal-task-card cal-modal-task-clickable" onClick={() => { setStatModalType(null); setSelectedTaskId(task.id); setTaskDetailVisible(true); }}>
-                                    <div className="cal-modal-task-color" style={{ background: overdue ? '#EF4444' : statusCfg.color }} />
+                                    <div className="cal-modal-task-color" style={{ background: overdue ? '#D94F4F' : statusCfg.color }} />
                                     <div className="cal-modal-task-body">
                                         {task.project && (
                                             <div className="cal-modal-task-project">
@@ -343,7 +343,7 @@ export const CalendarPage: React.FC = () => {
                                             </Text>
                                         )}
                                         {task.progress > 0 && (
-                                            <Progress percent={task.progress} size="small" strokeColor={overdue ? '#EF4444' : statusCfg.color} />
+                                            <Progress percent={task.progress} size="small" strokeColor={overdue ? '#D94F4F' : statusCfg.color} />
                                         )}
                                     </div>
                                 </div>

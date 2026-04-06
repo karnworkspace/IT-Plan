@@ -20,30 +20,30 @@
 }
 
 .my-tasks-header-content .ant-typography {
-    color: #1E293B !important;
+    color: #000000 !important;
 }
 
 .my-tasks-header-content .ant-typography-secondary {
-    color: #64748B !important;
+    color: #77787B !important;
 }
 
 /* Create Task Button */
 .create-task-btn {
-    background: #3B82F6 !important;
+    background: #32BCAD !important;
     border: none !important;
     height: 48px;
     padding: 0 32px;
     font-size: 15px;
     font-weight: 500;
     border-radius: 12px !important;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px rgba(50, 188, 173, 0.3);
     transition: all 0.2s ease;
 }
 
 .create-task-btn:hover {
-    background: #2563EB !important;
+    background: #2E7D9B !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(50, 188, 173, 0.4);
 }
 
 /* ==========================================
@@ -59,14 +59,14 @@
 .stat-label {
     font-size: 13px;
     font-weight: 500;
-    color: #64748B;
+    color: #77787B;
     margin-bottom: 4px;
 }
 
 .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #1E293B;
+    color: #000000;
     line-height: 1.2;
 }
 
@@ -132,7 +132,7 @@
 .mytasks-column-title {
     font-weight: 600;
     font-size: 14px;
-    color: #1E293B;
+    color: #000000;
     flex: 1;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .mytasks-column-content.mytasks-column-over {
-    background: #EFF6FF;
+    background: rgba(50,188,173,0.05);
     border-radius: 0 0 12px 12px;
 }
 
@@ -181,14 +181,14 @@
 
 /* Overdue Card */
 .mytasks-card.mytasks-card-overdue {
-    border-color: #EF4444;
-    border-left: 3px solid #EF4444;
+    border-color: #D94F4F;
+    border-left: 3px solid #D94F4F;
     background: #FFF5F5;
 }
 
 .mytasks-card.mytasks-card-overdue:hover {
-    border-color: #DC2626;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    border-color: #9B2C2C;
+    box-shadow: 0 4px 12px rgba(217, 79, 79, 0.15);
 }
 
 .mytasks-card-dragging {
@@ -229,7 +229,7 @@
 .mytasks-card-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1E293B;
+    color: #000000;
     line-height: 1.4;
     margin-bottom: 8px;
     overflow: hidden;
@@ -348,7 +348,7 @@
     background: #F8FAFC;
     font-weight: 600;
     font-size: 13px;
-    color: #64748B;
+    color: #77787B;
     border-bottom: 1px solid #E2E8F0;
 }
 
@@ -372,7 +372,7 @@
 
 .mytasks-list-task-title {
     font-weight: 500;
-    color: #1E293B;
+    color: #000000;
 }
 
 /* Overdue row highlight */
@@ -381,18 +381,18 @@
 }
 
 .mytasks-row-overdue:hover > td {
-    background: #FEE2E2 !important;
+    background: rgba(217,79,79,0.10) !important;
 }
 
 /* Bulk Action Bar */
 .mytasks-bulk-bar {
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #32BCAD 0%, #2E7D9B 100%);
     padding: 10px 20px;
     border-radius: 10px;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(50, 188, 173, 0.3);
     animation: bulkBarSlideIn 0.25s ease-out;
 }
 

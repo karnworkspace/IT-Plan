@@ -87,13 +87,13 @@ const getMonthOf = (dateStr: string | null | undefined): number | null => {
 
 // Status color map for timeline bars
 const STATUS_BAR_COLORS: Record<string, string> = {
-    PLAN: '#3B82F6',       // ฟ้า
-    PENDING: '#3B82F6',    // ฟ้า
-    ACTIVE: '#10B981',     // เขียว
-    DELAY: '#EF4444',      // แดง
-    COMPLETED: '#2563EB',  // น้ำเงิน
-    HOLD: '#F59E0B',       // เหลือง
-    CANCELLED: '#6B7280',  // เทา
+    PLAN: '#89D0C8',       // SENA Light Green
+    PENDING: '#89D0C8',    // SENA Light Green
+    ACTIVE: '#32BCAD',     // SENA Green
+    DELAY: '#D94F4F',      // Status Red
+    COMPLETED: '#2E7D9B',  // Status Blue
+    HOLD: '#E8A838',       // Status Amber
+    CANCELLED: '#77787B',  // SENA Gray
 };
 
 // Get bar color for PROJECT row — only show bars within startDate..endDate
@@ -257,12 +257,12 @@ export const TimelinePage: React.FC = () => {
                         </div>
                         <div className="timeline-header-filters">
                             <div className="shared-legend">
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#3B82F6' }} /><span>Plan</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#10B981' }} /><span>Active</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Delay</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#2563EB' }} /><span>Complete</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#F59E0B' }} /><span>Hold</span></div>
-                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#6B7280' }} /><span>Cancel</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#89D0C8' }} /><span>Plan</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#32BCAD' }} /><span>Active</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#D94F4F' }} /><span>Delay</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#2E7D9B' }} /><span>Complete</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#E8A838' }} /><span>Hold</span></div>
+                                <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#77787B' }} /><span>Cancel</span></div>
                                 <div className="shared-legend-item"><div className="shared-legend-current" /><span>Current</span></div>
                             </div>
                             <Select
@@ -334,7 +334,7 @@ export const TimelinePage: React.FC = () => {
                                 {groupedProjects.map(([category, catProjects]) => (
                                     <React.Fragment key={category}>
                                         {/* Category Header */}
-                                        <div className="ap-category-row" style={{ borderLeftColor: CATEGORY_CONFIG[category]?.color || '#64748B' }}>
+                                        <div className="ap-category-row" style={{ borderLeftColor: CATEGORY_CONFIG[category]?.color || '#77787B' }}>
                                             <div className="ap-category-label">
                                                 {CATEGORY_CONFIG[category]?.label || category}
                                             </div>
@@ -392,7 +392,7 @@ export const TimelinePage: React.FC = () => {
                                                                 <Progress
                                                                     percent={project.progress}
                                                                     size="small"
-                                                                    strokeColor={project.progress >= 100 ? '#10B981' : project.progress > 0 ? '#3B82F6' : '#E2E8F0'}
+                                                                    strokeColor={project.progress >= 100 ? '#32BCAD' : project.progress > 0 ? '#32BCAD' : '#E2E8F0'}
                                                                     railColor="#F1F5F9"
                                                                     format={p => <span className="ap-progress-text">{p}%</span>}
                                                                 />
@@ -460,7 +460,7 @@ export const TimelinePage: React.FC = () => {
                                                                 <Progress
                                                                     percent={task.progress}
                                                                     size="small"
-                                                                    strokeColor={task.status === 'DONE' ? '#10B981' : '#3B82F6'}
+                                                                    strokeColor={task.status === 'DONE' ? '#32BCAD' : '#32BCAD'}
                                                                     railColor="#F1F5F9"
                                                                     format={p => <span className="ap-progress-text">{p}%</span>}
                                                                 />

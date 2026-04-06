@@ -116,7 +116,7 @@ export const UserListPage: React.FC = () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
-            render: (email: string) => <span style={{ color: '#64748B' }}>{email}</span>,
+            render: (email: string) => <span style={{ color: '#77787B' }}>{email}</span>,
         },
         {
             title: 'Role',
@@ -163,7 +163,7 @@ export const UserListPage: React.FC = () => {
                         type="text"
                         icon={<EditOutlined />}
                         onClick={() => openEditModal(record)}
-                        style={{ color: '#3B82F6' }}
+                        style={{ color: '#32BCAD' }}
                     />
                 );
             },
@@ -180,7 +180,7 @@ export const UserListPage: React.FC = () => {
                             type="text"
                             icon={<ArrowLeftOutlined />}
                             onClick={() => navigate('/configuration')}
-                            style={{ color: '#64748B' }}
+                            style={{ color: '#77787B' }}
                         />
                         <div>
                             <Title level={3} style={{ margin: 0 }}>
@@ -200,14 +200,14 @@ export const UserListPage: React.FC = () => {
                         marginBottom: 20,
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                            <InfoCircleOutlined style={{ color: '#64748B' }} />
+                            <InfoCircleOutlined style={{ color: '#77787B' }} />
                             <Text strong style={{ color: '#334155' }}>Role Permissions</Text>
                         </div>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748B', fontWeight: 600, width: 120 }}>Role</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#64748B', fontWeight: 600 }}>Permissions</th>
+                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#77787B', fontWeight: 600, width: 120 }}>Role</th>
+                                    <th style={{ textAlign: 'left', padding: '8px 12px', color: '#77787B', fontWeight: 600 }}>Permissions</th>
                                 </tr>
                             </thead>
                             <tbody>

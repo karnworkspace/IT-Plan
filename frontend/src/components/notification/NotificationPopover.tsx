@@ -141,7 +141,7 @@ export const NotificationPopover: React.FC = () => {
     const getIcon = (type: string) => {
         switch (type) {
             case 'TASK_ASSIGNED':
-                return <FileTextOutlined style={{ color: '#1890ff' }} />;
+                return <FileTextOutlined style={{ color: '#32BCAD' }} />;
             case 'TASK_COMPLETED':
                 return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
             case 'TASK_DUE_SOON':

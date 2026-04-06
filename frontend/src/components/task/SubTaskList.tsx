@@ -157,7 +157,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                         percent={progressPercent}
                         size="small"
                         style={{ width: 120 }}
-                        strokeColor={progressPercent === 100 ? '#52c41a' : '#1890ff'}
+                        strokeColor={progressPercent === 100 ? '#52c41a' : '#32BCAD'}
                     />
                 )}
             </div>
@@ -223,7 +223,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                     isDone
                                         ? <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 18 }} />
                                         : subTask.status === 'IN_PROGRESS'
-                                            ? <SyncOutlined style={{ color: '#1890ff', fontSize: 18 }} />
+                                            ? <SyncOutlined style={{ color: '#32BCAD', fontSize: 18 }} />
                                             : <ClockCircleOutlined style={{ color: '#d9d9d9', fontSize: 18 }} />
                                 }
                                 title={

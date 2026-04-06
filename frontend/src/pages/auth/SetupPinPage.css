@@ -29,7 +29,7 @@
 
 .lock-icon {
     font-size: 48px;
-    color: #1890ff;
+    color: #32BCAD;
     margin-bottom: 16px;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .requirement-item.valid {
-    color: #52c41a;
+    color: #32BCAD;
 }
 
 .requirement-item .anticon {
@@ -70,12 +70,12 @@
 .security-tip {
     margin-top: 16px;
     padding: 12px;
-    background: #e6f7ff;
+    background: rgba(50,188,173,0.08);
     border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #1890ff;
+    color: #32BCAD;
 }
 
 .security-tip .anticon {

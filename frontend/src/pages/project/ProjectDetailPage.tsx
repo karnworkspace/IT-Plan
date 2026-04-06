@@ -713,7 +713,7 @@ export const ProjectDetailPage: React.FC = () => {
                                 <Statistic
                                     title="Total Tasks"
                                     value={stats?.total_tasks || tasks.length}
-                                    prefix={<FolderOutlined style={{ color: '#64748B' }} />}
+                                    prefix={<FolderOutlined style={{ color: '#77787B' }} />}
                                 />
                             </Card>
                         </Col>
@@ -723,7 +723,7 @@ export const ProjectDetailPage: React.FC = () => {
                                     title="Completed"
                                     value={stats?.completed_tasks || tasksByStatus.DONE.length}
                                     valueStyle={{ color: '#065F46' }}
-                                    prefix={<CheckCircleOutlined style={{ color: '#10B981' }} />}
+                                    prefix={<CheckCircleOutlined style={{ color: '#32BCAD' }} />}
                                 />
                             </Card>
                         </Col>
@@ -733,7 +733,7 @@ export const ProjectDetailPage: React.FC = () => {
                                     title="In Progress"
                                     value={stats?.in_progress_tasks || tasksByStatus.IN_PROGRESS.length}
                                     valueStyle={{ color: '#1E40AF' }}
-                                    prefix={<SyncOutlined style={{ color: '#3B82F6' }} />}
+                                    prefix={<SyncOutlined style={{ color: '#32BCAD' }} />}
                                 />
                             </Card>
                         </Col>
@@ -776,7 +776,7 @@ export const ProjectDetailPage: React.FC = () => {
                                                         return (
                                                             <SortableTaskCard key={task.id} id={task.id} onClick={() => handleTaskClick(task.id)}>
                                                                 {/* Color bar */}
-                                                                <div className="task-card-color" style={{ background: project?.color || '#1890ff' }} />
+                                                                <div className="task-card-color" style={{ background: project?.color || '#32BCAD' }} />
                                                                 <div className="task-card-body">
                                                                     {/* Title */}
                                                                     <div className="task-card-title">{task.title}</div>
@@ -856,7 +856,7 @@ export const ProjectDetailPage: React.FC = () => {
                                                                         percent={task.progress}
                                                                         size="small"
                                                                         showInfo={false}
-                                                                        strokeColor={project?.color || '#1890ff'}
+                                                                        strokeColor={project?.color || '#32BCAD'}
                                                                         style={{ marginBottom: 0 }}
                                                                     />
                                                                 </div>
@@ -874,7 +874,7 @@ export const ProjectDetailPage: React.FC = () => {
                                         const pBadge = PRIORITY_BADGE[activeDragTask.priority] || PRIORITY_BADGE.MEDIUM;
                                         return (
                                             <div className="task-card task-card-dragging">
-                                                <div className="task-card-color" style={{ background: project?.color || '#1890ff' }} />
+                                                <div className="task-card-color" style={{ background: project?.color || '#32BCAD' }} />
                                                 <div className="task-card-body">
                                                     <div className="task-card-title">{activeDragTask.title}</div>
                                                     <span className="task-priority-badge" style={{ color: pBadge.color, background: pBadge.bg, borderColor: pBadge.color }}>

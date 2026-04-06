@@ -18,7 +18,7 @@ const configMenus = [
         icon: <UserOutlined />,
         title: 'User',
         description: 'Manage users, roles and permissions',
-        color: '#3B82F6',
+        color: '#32BCAD',
         path: '/configuration/users',
     },
     {
@@ -34,7 +34,7 @@ const configMenus = [
         icon: <LayoutOutlined />,
         title: 'Mockup',
         description: 'Frame placeholder',
-        color: '#10B981',
+        color: '#32BCAD',
         path: null,
     },
 ];

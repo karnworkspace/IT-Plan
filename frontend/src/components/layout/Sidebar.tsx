@@ -85,7 +85,7 @@ export const Sidebar: React.FC = () => {
             <div className="sidebar-user">
                 <div style={{ display: 'flex', justifyContent: collapsed ? 'center' : 'space-between', alignItems: 'center', width: '100%', marginBottom: collapsed ? 0 : 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Avatar style={{ backgroundColor: '#3B82F6' }}>{user?.name?.charAt(0) || 'U'}</Avatar>
+                        <Avatar style={{ backgroundColor: '#32BCAD' }}>{user?.name?.charAt(0) || 'U'}</Avatar>
                         {!collapsed && <Text style={{ color: 'white', maxWidth: 120 }} ellipsis>{user?.name || 'User'}</Text>}
                     </div>
                     {!collapsed && <NotificationPopover />}

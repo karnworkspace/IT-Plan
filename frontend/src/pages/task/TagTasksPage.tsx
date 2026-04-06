@@ -326,7 +326,7 @@ export const TagTasksPage: React.FC = () => {
                             />
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <TagOutlined style={{ fontSize: 28, color: tagInfo?.color || '#1890ff' }} />
+                                    <TagOutlined style={{ fontSize: 28, color: tagInfo?.color || '#32BCAD' }} />
                                     <Title level={2} style={{ margin: 0, fontSize: 48 }}>
                                         {tagInfo ? (
                                             <Tag color={tagInfo.color} style={{ fontSize: 28, padding: '4px 16px', lineHeight: '36px' }}>
@@ -410,7 +410,7 @@ export const TagTasksPage: React.FC = () => {
                                                     const pConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
                                                     return (
                                                         <SortableTaskCard key={task.id} id={task.id} onClick={() => { setSelectedTaskId(task.id); setDetailModalVisible(true); }}>
-                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#1890ff' }} />
+                                                            <div className="mytasks-card-color" style={{ background: task.project?.color || '#32BCAD' }} />
                                                             <div className="mytasks-card-body">
                                                                 {/* Project Name + Menu */}
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -459,7 +459,7 @@ export const TagTasksPage: React.FC = () => {
                                                                     <div className="progress-bar-track">
                                                                         <div
                                                                             className="progress-bar-fill"
-                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#3B82F6' }}
+                                                                            style={{ width: `${task.progress}%`, background: task.project?.color || '#32BCAD' }}
                                                                         />
                                                                     </div>
                                                                 </div>
@@ -476,7 +476,7 @@ export const TagTasksPage: React.FC = () => {
                             <DragOverlay>
                                 {activeDragTask && (
                                     <div className="mytasks-card mytasks-card-dragging">
-                                        <div className="mytasks-card-color" style={{ background: activeDragTask.project?.color || '#1890ff' }} />
+                                        <div className="mytasks-card-color" style={{ background: activeDragTask.project?.color || '#32BCAD' }} />
                                         <div className="mytasks-card-body">
                                             <div className="mytasks-card-title">{activeDragTask.title}</div>
                                         </div>

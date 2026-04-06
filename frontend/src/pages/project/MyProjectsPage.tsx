@@ -60,11 +60,11 @@ const StatCardItem = ({ title, value, icon, iconClass }: {
 
 // --- Status filter options ---
 const STATUS_OPTIONS: { value: ProjectStatus; label: string; color: string }[] = [
-    { value: 'ACTIVE', label: 'Active', color: '#10B981' },
-    { value: 'DELAY', label: 'Delay', color: '#EF4444' },
-    { value: 'COMPLETED', label: 'Completed', color: '#3B82F6' },
-    { value: 'HOLD', label: 'Hold', color: '#F59E0B' },
-    { value: 'CANCELLED', label: 'Cancelled', color: '#6B7280' },
+    { value: 'ACTIVE', label: 'Active', color: '#32BCAD' },
+    { value: 'DELAY', label: 'Delay', color: '#D94F4F' },
+    { value: 'COMPLETED', label: 'Completed', color: '#32BCAD' },
+    { value: 'HOLD', label: 'Hold', color: '#E8A838' },
+    { value: 'CANCELLED', label: 'Cancelled', color: '#77787B' },
 ];
 
 export const MyProjectsPage: React.FC = () => {
@@ -122,7 +122,7 @@ export const MyProjectsPage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div
                         className="project-list-status-bar"
-                        style={{ backgroundColor: PROJECT_STATUS_GRADIENT[record.status]?.accentColor || '#6B7280' }}
+                        style={{ backgroundColor: PROJECT_STATUS_GRADIENT[record.status]?.accentColor || '#77787B' }}
                     />
                     <div>
                         <Text strong>{name}</Text>
@@ -148,7 +148,7 @@ export const MyProjectsPage: React.FC = () => {
                 const gradient = PROJECT_STATUS_GRADIENT[status];
                 return (
                     <Tag
-                        color={gradient?.accentColor || '#6B7280'}
+                        color={gradient?.accentColor || '#77787B'}
                         style={{ borderRadius: 6, fontWeight: 500 }}
                     >
                         {PROJECT_STATUS_LABELS[status] || status}
@@ -294,7 +294,7 @@ export const MyProjectsPage: React.FC = () => {
                             /* Empty State */
                             <div className="empty-state">
                                 <FolderOutlined style={{ fontSize: 48, color: '#94A3B8', marginBottom: 16 }} />
-                                <Title level={4} style={{ color: '#64748B' }}>No projects found</Title>
+                                <Title level={4} style={{ color: '#77787B' }}>No projects found</Title>
                                 <Text type="secondary">
                                     {statusFilter.length > 0
                                         ? 'Try changing the status filter'
@@ -306,7 +306,7 @@ export const MyProjectsPage: React.FC = () => {
                             <Row gutter={[16, 16]}>
                                 {filteredProjects.map((project) => {
                                     const gradient = PROJECT_STATUS_GRADIENT[project.status];
-                                    const accentColor = gradient?.accentColor || '#6B7280';
+                                    const accentColor = gradient?.accentColor || '#77787B';
                                     return (
                                         <Col key={project.id} xs={24} sm={12} lg={8} xl={6}>
                                             <div

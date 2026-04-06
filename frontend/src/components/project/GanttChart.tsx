@@ -210,7 +210,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             width: `${Math.max(2, widthPercent)}%`,
             minWidth: '40px',
             backgroundColor: statusStyle.bg,
-            borderLeft: `4px solid ${PRIORITY_COLORS[task.priority] || '#1890ff'}`,
+            borderLeft: `4px solid ${PRIORITY_COLORS[task.priority] || '#32BCAD'}`,
             color: statusStyle.text,
         };
     }, [dragState, rangeStart, totalDays]);
@@ -487,7 +487,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                                     fontWeight: 500,
                                     maxWidth: 180,
                                     cursor: onTaskClick ? 'pointer' : 'default',
-                                    color: onTaskClick ? '#1890ff' : undefined,
+                                    color: onTaskClick ? '#32BCAD' : undefined,
                                 }}
                                 onClick={(e) => {
                                     e.stopPropagation();

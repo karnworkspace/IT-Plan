@@ -674,13 +674,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                         {statusChangeLogs.map(log => (
                                             <Timeline.Item
                                                 key={log.id}
-                                                color={STATUS_CONFIG[log.toStatus]?.dotColor || '#6B7280'}
+                                                color={STATUS_CONFIG[log.toStatus]?.dotColor || '#77787B'}
                                                 label={dayjs(log.createdAt).format('MMM D, HH:mm')}
                                             >
                                                 <Card size="small" className="update-card">
                                                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
                                                         <Space>
-                                                            <Avatar size={20} style={{ backgroundColor: '#1890ff', fontSize: 11 }}>
+                                                            <Avatar size={20} style={{ backgroundColor: '#32BCAD', fontSize: 11 }}>
                                                                 {log.user?.name?.[0] || 'U'}
                                                             </Avatar>
                                                             <Text strong style={{ fontSize: 12 }}>{log.user?.name || 'Unknown'}</Text>
@@ -790,7 +790,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                                 {/* Parent comment bubble */}
                                                 <div className={`chat-bubble-row ${isOwn ? 'own' : ''}`}>
                                                     {!isOwn && (
-                                                        <Avatar size={32} style={{ backgroundColor: '#1890ff', flexShrink: 0 }}>
+                                                        <Avatar size={32} style={{ backgroundColor: '#32BCAD', flexShrink: 0 }}>
                                                             {comment.user?.name?.[0] || 'U'}
                                                         </Avatar>
                                                     )}
@@ -831,7 +831,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                                         </div>
                                                     </div>
                                                     {isOwn && (
-                                                        <Avatar size={32} style={{ backgroundColor: '#1890ff', flexShrink: 0 }}>
+                                                        <Avatar size={32} style={{ backgroundColor: '#32BCAD', flexShrink: 0 }}>
                                                             {comment.user?.name?.[0] || 'U'}
                                                         </Avatar>
                                                     )}

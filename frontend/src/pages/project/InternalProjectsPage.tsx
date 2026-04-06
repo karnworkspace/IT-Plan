@@ -8,6 +8,10 @@ import {
     Typography,
     Tag,
     Spin,
+    Modal,
+    Form,
+    Input,
+    message,
     Checkbox,
     Table,
     Button,
@@ -23,6 +27,8 @@ import {
     AppstoreOutlined,
     BarsOutlined,
     FileTextOutlined,
+    ExperimentOutlined,
+    PlusOutlined,
 } from '@ant-design/icons';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { projectService } from '../../services/projectService';
@@ -35,7 +41,7 @@ import './ProjectsPage.css';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-// --- Stat Card (white background, no gradient) ---
+// --- Stat Card ---
 const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
     title: string;
     value: number;
@@ -68,30 +74,49 @@ const STATUS_OPTIONS: { value: ProjectStatus; label: string; color: string }[] =
     { value: 'CANCELLED', label: 'Cancelled', color: '#77787B' },
 ];
 
-export const MyProjectsPage: React.FC = () => {
+export const InternalProjectsPage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<Project[]>([]);
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [form] = Form.useForm();
     const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
-        return (localStorage.getItem('myProjectsViewMode') as 'card' | 'list') || 'card';
+        return (localStorage.getItem('internalProjectsViewMode') as 'card' | 'list') || 'card';
     });
 
-    // --- Fetch my projects ---
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                setLoading(true);
-                const data = await projectService.getMyProjects({ projectType: 'PROJECT' });
-                setProjects(data.projects || data || []);
-            } catch (err) {
-                console.error('Failed to fetch my projects:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProjects();
-    }, []);
+    // --- Fetch INTERNAL projects ---
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            const data = await projectService.getMyProjects({ projectType: 'INTERNAL' });
+            setProjects(data.projects || data || []);
+        } catch (err) {
+            console.error('Failed to fetch internal projects:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchProjects(); }, []);
+
+    // --- Create internal project ---
+    const handleCreate = async () => {
+        try {
+            setSubmitting(true);
+            const values = await form.validateFields();
+            await projectService.createProject({ ...values, projectType: 'INTERNAL' });
+            message.success('สร้าง Internal Project สำเร็จ');
+            setIsModalVisible(false);
+            form.resetFields();
+            await fetchProjects();
+        } catch (error) {
+            message.error('ไม่สามารถสร้าง Internal Project ได้');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     // --- Filtered projects ---
     const filteredProjects = useMemo(() => {
@@ -110,7 +135,7 @@ export const MyProjectsPage: React.FC = () => {
     // --- View mode toggle ---
     const handleViewChange = (mode: 'card' | 'list') => {
         setViewMode(mode);
-        localStorage.setItem('myProjectsViewMode', mode);
+        localStorage.setItem('internalProjectsViewMode', mode);
     };
 
     // --- Table columns for list view ---
@@ -201,12 +226,21 @@ export const MyProjectsPage: React.FC = () => {
                         <div className="header-content">
                             <div className="header-title-section">
                                 <Title level={3} className="page-title">
-                                    <FolderOutlined /> My Projects
+                                    <ExperimentOutlined /> Internal Projects
                                 </Title>
                                 <Text className="page-subtitle">
-                                    Projects you are a member of
+                                    งานภายในที่ได้รับมอบหมายอื่นๆ และงาน Support ผู้ใช้งานระบบ IT SENA Development
                                 </Text>
                             </div>
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                size="large"
+                                className="create-btn"
+                                onClick={() => setIsModalVisible(true)}
+                            >
+                                New Internal Project
+                            </Button>
                         </div>
 
                         {/* Stat Cards */}
@@ -217,7 +251,7 @@ export const MyProjectsPage: React.FC = () => {
                                     value={stats.total}
                                     icon={<ProjectOutlined />}
                                     iconClass="stat-icon-total"
-                                    borderClass="stat-border-green"
+                                    borderClass="stat-border-gray"
                                 />
                             </Col>
                             <Col xs={12} sm={6}>
@@ -298,12 +332,12 @@ export const MyProjectsPage: React.FC = () => {
                         ) : filteredProjects.length === 0 ? (
                             /* Empty State */
                             <div className="empty-state">
-                                <FolderOutlined style={{ fontSize: 48, color: '#94A3B8', marginBottom: 16 }} />
-                                <Title level={4} style={{ color: '#77787B' }}>No projects found</Title>
+                                <ExperimentOutlined style={{ fontSize: 48, color: '#94A3B8', marginBottom: 16 }} />
+                                <Title level={4} style={{ color: '#77787B' }}>No internal projects</Title>
                                 <Text type="secondary">
                                     {statusFilter.length > 0
                                         ? 'Try changing the status filter'
-                                        : 'You are not a member of any projects yet'}
+                                        : 'ยังไม่มีงานภายในที่ได้รับมอบหมาย'}
                                 </Text>
                             </div>
                         ) : viewMode === 'card' ? (
@@ -327,7 +361,7 @@ export const MyProjectsPage: React.FC = () => {
                                                                 ? project.description.length > 50
                                                                     ? `${project.description.slice(0, 50)}...`
                                                                     : project.description
-                                                                : 'No description'}
+                                                                : 'Project ID: ' + (project.projectCode || '-')}
                                                         </div>
                                                     </div>
                                                     <Tag
@@ -365,7 +399,7 @@ export const MyProjectsPage: React.FC = () => {
                                     dataSource={filteredProjects}
                                     columns={columns}
                                     rowKey="id"
-                                    pagination={{ pageSize: 10, showSizeChanger: false }}
+                                    pagination={false}
                                     onRow={(record) => ({
                                         onClick: () => navigate(`/projects/${record.id}`),
                                         style: { cursor: 'pointer' },
@@ -377,8 +411,30 @@ export const MyProjectsPage: React.FC = () => {
                     </div>
                 </Content>
             </Layout>
+
+            {/* Create Internal Project Modal */}
+            <Modal
+                title={<span><ExperimentOutlined style={{ marginRight: 8 }} />New Internal Project</span>}
+                open={isModalVisible}
+                onOk={handleCreate}
+                onCancel={() => setIsModalVisible(false)}
+                width={480}
+                okText="Create"
+                confirmLoading={submitting}
+            >
+                <Form form={form} layout="vertical" size="large">
+                    <Form.Item
+                        name="name"
+                        label="Project Name"
+                        rules={[{ required: true, message: 'กรุณาใส่ชื่อ project' }]}
+                    >
+                        <Input placeholder="ชื่อ Internal Project" />
+                    </Form.Item>
+                    <Form.Item name="description" label="Description">
+                        <Input.TextArea rows={3} placeholder="รายละเอียด (optional)" maxLength={500} showCount />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </Layout>
     );
 };
-
-export default MyProjectsPage;

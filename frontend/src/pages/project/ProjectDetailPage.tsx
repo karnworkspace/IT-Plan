@@ -1203,6 +1203,7 @@ export const ProjectDetailPage: React.FC = () => {
                             size="large"
                             options={allUsers
                                 .filter(u => !project?.members?.some(m => m.user.id === u.id))
+                                .filter(u => u.email !== 'Pending to search email' && u.name !== 'TEAM' && u.email !== 'team@sena.co.th')
                                 .map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))}
                         />
                     </div>
@@ -1215,7 +1216,6 @@ export const ProjectDetailPage: React.FC = () => {
                             size="large"
                             options={[
                                 { value: 'MEMBER', label: 'Member' },
-                                { value: 'ADMIN', label: 'Admin' },
                                 { value: 'OWNER', label: 'Owner' },
                             ]}
                         />

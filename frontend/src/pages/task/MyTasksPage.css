@@ -243,6 +243,22 @@
     font-size: 10px;
 }
 
+/* Internal badge on task card */
+.mytasks-internal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #77787B;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
 .mytasks-card-project span {
     overflow: hidden;
     white-space: nowrap;

@@ -63,11 +63,12 @@ export const getProjects = async (
   next: NextFunction
 ) => {
   try {
-    const { status, owner_id, page, limit } = req.query;
+    const { status, owner_id, project_type, page, limit } = req.query;
 
     const filters: Record<string, string | number> = {};
     if (status) filters.status = status as string;
     if (owner_id) filters.ownerId = owner_id as string;
+    if (project_type) filters.projectType = project_type as string;
     if (page) filters.page = parseInt(page as string, 10);
     if (limit) filters.limit = parseInt(limit as string, 10);
 

@@ -571,6 +571,7 @@ export class TaskService {
             id: true,
             name: true,
             color: true,
+            projectType: true,
           },
         },
         assignee: {

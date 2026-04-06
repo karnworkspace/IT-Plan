@@ -49,7 +49,18 @@ router.get('/', getProjects);
  * @desc    Create a new project
  * @access  Private
  */
-router.post('/', requireManager, createProject);
+// MEMBER สร้างได้เฉพาะ INTERNAL, MANAGER/ADMIN สร้างได้ทุกประเภท
+router.post('/', (req, res, next) => {
+  const authReq = req as any;
+  const projectType = req.body.projectType || 'PROJECT';
+  if (projectType === 'INTERNAL') {
+    // ทุก role สร้าง Internal ได้
+    next();
+  } else {
+    // PROJECT ต้องเป็น MANAGER ขึ้นไป
+    requireManager(req, res, next);
+  }
+}, createProject);
 
 /**
  * @route   GET /api/v1/projects/:id/stats

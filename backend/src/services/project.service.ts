@@ -27,6 +27,7 @@ export interface UpdateProjectInput {
 export interface ProjectFilters {
   status?: string;
   ownerId?: string;
+  projectType?: string;
   page?: number;
   limit?: number;
 }
@@ -91,12 +92,13 @@ export class ProjectService {
    * Get all projects with filters and pagination
    */
   async getAllProjects(filters: ProjectFilters = {}, user?: { id: string; role: string }): Promise<PaginationResult<any>> {
-    const { status, ownerId, page = 1, limit = 20 } = filters;
+    const { status, ownerId, projectType, page = 1, limit = 20 } = filters;
 
     // Build where clause
     const where: any = {};
     if (status) where.status = status;
     if (ownerId) where.ownerId = ownerId;
+    if (projectType) where.projectType = projectType;
 
     // Role-based filtering
     if (user) {

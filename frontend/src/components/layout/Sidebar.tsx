@@ -10,6 +10,7 @@ import {
     SettingOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
+    ExperimentOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../../store/authStore';
 import { NotificationPopover } from '../notification/NotificationPopover';
@@ -39,6 +40,7 @@ export const Sidebar: React.FC = () => {
         ...(isAdminOrManager ? [{ path: '/timeline', label: 'Projects', icon: <FolderOutlined /> }] : []),
         { path: '/my-projects', label: 'My Projects', icon: <AppstoreOutlined /> },
         { path: '/my-tasks', label: 'My Tasks', icon: <CheckCircleOutlined /> },
+        { path: '/internal-projects', label: 'Internal', icon: <ExperimentOutlined /> },
         { path: '/calendar', label: 'Calendar', icon: <CalendarOutlined /> },
         ...(isAdminOrManager ? [{ path: '/configuration', label: 'Configuration', icon: <SettingOutlined /> }] : []),
     ];

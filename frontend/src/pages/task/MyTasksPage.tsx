@@ -805,6 +805,9 @@ export const MyTasksPage: React.FC = () => {
                                                                     <div className="mytasks-card-project">
                                                                         <FolderOutlined />
                                                                         <span>{task.project?.name || 'Unknown'}</span>
+                                                                        {(task.project as any)?.projectType === 'INTERNAL' && (
+                                                                            <span className="mytasks-internal-badge">Internal</span>
+                                                                        )}
                                                                     </div>
                                                                     <Dropdown menu={{ items: getTaskMenuItems(task) }} trigger={['click']}>
                                                                         <Button

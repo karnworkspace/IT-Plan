@@ -148,8 +148,8 @@
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Desktop responsive */
-@media (max-width: 1100px) {
+/* Notebook / small desktop */
+@media (max-width: 1199px) {
     .app-sider:not(.collapsed) {
         max-width: 200px !important;
         min-width: 200px !important;
@@ -173,5 +173,51 @@
 
     .sidebar-user {
         padding: 16px 12px;
+    }
+}
+
+/* iPad landscape — auto-collapse to icon-only */
+@media (max-width: 1023px) {
+    .app-sider:not(.collapsed) {
+        max-width: 64px !important;
+        min-width: 64px !important;
+        width: 64px !important;
+        flex: 0 0 64px !important;
+    }
+
+    .app-sider:not(.collapsed) .logo {
+        justify-content: center;
+        padding: 24px 8px 32px;
+    }
+
+    .app-sider:not(.collapsed) .sidebar-menu {
+        padding: 0 8px;
+    }
+
+    .app-sider:not(.collapsed) .menu-item {
+        justify-content: center;
+        padding: 14px 0;
+        gap: 0;
+        min-height: 44px;
+    }
+
+    .app-sider:not(.collapsed) .sidebar-user {
+        padding: 12px 8px;
+    }
+
+    .sidebar-toggle {
+        padding: 0 8px 8px;
+    }
+}
+
+/* iPad portrait — stays collapsed, ensure touch targets */
+@media (max-width: 767px) {
+    .menu-item {
+        min-height: 44px;
+    }
+
+    .toggle-btn {
+        width: 44px;
+        height: 44px;
     }
 }

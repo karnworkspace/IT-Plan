@@ -218,9 +218,74 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+
+/* iPad landscape */
+@media (max-width: 1023px) {
+    .task-detail-modal .ant-modal {
+        max-width: 90vw !important;
+        margin: 20px auto;
+    }
+
+    .metadata-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 14px;
+    }
+
+    .task-detail-header {
+        padding: 20px 24px;
+    }
+
+    .task-detail-content {
+        padding: 20px 24px;
+    }
+}
+
+/* iPad portrait — full width, single column metadata */
+@media (max-width: 767px) {
+    .task-detail-modal .ant-modal {
+        max-width: 96vw !important;
+        margin: 12px auto;
+    }
+
+    .task-detail-container {
+        max-height: 90vh;
+    }
+
     .metadata-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .task-detail-header {
+        padding: 16px;
+    }
+
+    .task-detail-content {
+        padding: 16px;
+    }
+
+    .chat-bubble-row {
+        max-width: 95%;
+    }
+
+    .chat-replies {
+        margin-left: 24px;
+    }
+
+    .chat-reply-input {
+        margin-left: 24px;
+    }
+
+    .comment-input-area {
+        padding: 12px;
+    }
+
+    /* Touch targets */
+    .chat-bubble-actions .ant-btn {
+        min-height: 32px;
+        min-width: 32px;
+        padding: 0 8px;
     }
 }

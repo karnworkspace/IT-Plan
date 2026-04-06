@@ -409,7 +409,8 @@
    Responsive
    ========================================== */
 
-@media (max-width: 1200px) {
+/* Notebook */
+@media (max-width: 1199px) {
     .my-tasks-header {
         padding: 24px !important;
     }
@@ -421,11 +422,55 @@
     .mytasks-column {
         min-width: 200px;
     }
+
+    .stat-value {
+        font-size: 24px;
+    }
 }
 
-@media (max-width: 768px) {
+/* iPad landscape — kanban horizontal scroll */
+@media (max-width: 1023px) {
     .my-tasks-header {
-        padding: 24px 20px !important;
+        padding: 20px !important;
+    }
+
+    .my-tasks-content {
+        padding: 16px;
+    }
+
+    .mytasks-board {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .mytasks-column {
+        min-width: 240px;
+        flex: 0 0 240px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+    }
+
+    .mytasks-list-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mytasks-list-card .ant-table {
+        min-width: 700px;
+    }
+
+    .mytasks-filters-body {
+        gap: 12px;
+    }
+}
+
+/* iPad portrait */
+@media (max-width: 767px) {
+    .my-tasks-header {
+        padding: 20px 16px !important;
     }
 
     .my-tasks-header-content {
@@ -434,19 +479,26 @@
     }
 
     .my-tasks-content {
-        padding: 20px;
+        padding: 16px 12px;
     }
 
     .create-task-btn {
         width: 100%;
+        min-height: 44px;
     }
 
     .mytasks-board {
-        flex-direction: column;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mytasks-column {
+        min-width: 220px;
+        flex: 0 0 220px;
     }
 
     .mytasks-column-content {
-        max-height: 300px;
+        max-height: 400px;
     }
 
     .mytasks-filters-header {
@@ -457,10 +509,43 @@
 
     .mytasks-filters-body {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .mytasks-list-card {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mytasks-list-card .ant-table {
+        min-width: 600px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+    }
+
+    .mytasks-card-body {
+        padding: 10px 12px;
+    }
+
+    .mytasks-bulk-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* Ensure touch targets on all tablet sizes */
+@media (max-width: 1023px) {
+    .mytasks-card {
+        min-height: 44px;
+    }
+
+    .mytasks-column-header {
+        min-height: 44px;
     }
 }

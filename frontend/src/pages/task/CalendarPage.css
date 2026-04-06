@@ -272,7 +272,8 @@
    Responsive
    ========================================== */
 
-@media (max-width: 1200px) {
+/* Notebook */
+@media (max-width: 1199px) {
     .calendar-content {
         padding: 20px;
     }
@@ -280,19 +281,96 @@
     .cal-stat-item {
         padding: 16px 20px;
     }
+
+    .cal-stat-value {
+        font-size: 24px;
+    }
 }
 
-@media (max-width: 768px) {
+/* iPad landscape */
+@media (max-width: 1023px) {
+    .calendar-content {
+        padding: 16px;
+    }
+
+    .cal-stat-item {
+        padding: 14px 16px;
+    }
+
+    .cal-stat-value {
+        font-size: 22px;
+    }
+
+    .cal-stat-label {
+        font-size: 13px;
+    }
+
+    /* Calendar cells: reduce padding */
+    .calendar-card .ant-picker-cell-inner {
+        padding: 4px 2px;
+    }
+
+    .cal-task-bar {
+        padding: 1px 4px;
+    }
+
+    .cal-task-bar-title {
+        font-size: 10px;
+    }
+
+    .cal-task-bar-project {
+        font-size: 8px;
+    }
+
+    .cal-filter-row {
+        gap: 10px;
+    }
+}
+
+/* iPad portrait */
+@media (max-width: 767px) {
     .calendar-page-header {
         flex-direction: column;
         gap: 12px;
     }
 
     .cal-stats-row {
-        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .cal-stat-item {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 140px;
+        padding: 12px 14px;
+    }
+
+    .cal-stat-value {
+        font-size: 20px;
     }
 
     .calendar-content {
-        padding: 16px;
+        padding: 12px;
+    }
+
+    .cal-filter-row {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .cal-filter-group {
+        width: 100%;
+    }
+
+    /* Touch targets */
+    .cal-task-bar {
+        min-height: 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .cal-stat-clickable {
+        min-height: 44px;
     }
 }

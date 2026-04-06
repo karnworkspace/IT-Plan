@@ -363,13 +363,23 @@
    Responsive
    ========================================== */
 
-@media (max-width: 1200px) {
+/* Notebook */
+@media (max-width: 1199px) {
     .dashboard-content {
         padding: 20px 20px;
     }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .project-card-v2 {
+        padding: 16px;
+    }
 }
 
-@media (max-width: 1024px) {
+/* iPad landscape */
+@media (max-width: 1023px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
@@ -377,9 +387,22 @@
     .dashboard-content {
         padding: 20px 16px;
     }
+
+    .stat-value {
+        font-size: 22px;
+    }
+
+    .project-card-title {
+        font-size: 14px;
+    }
+
+    .activity-feed {
+        max-height: 360px;
+    }
 }
 
-@media (max-width: 768px) {
+/* iPad portrait */
+@media (max-width: 767px) {
     .dashboard-header-section {
         flex-direction: column;
         align-items: flex-start;
@@ -388,5 +411,33 @@
 
     .dashboard-header-section button {
         width: 100%;
+        min-height: 44px;
+    }
+
+    .dashboard-content {
+        padding: 16px 12px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+    }
+
+    .project-card-v2 {
+        padding: 14px;
+    }
+
+    .quick-access-item {
+        padding: 14px 16px;
+        min-height: 44px;
+    }
+
+    .view-all-link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
     }
 }

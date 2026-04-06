@@ -973,6 +973,15 @@ export const ProjectDetailPage: React.FC = () => {
                                     tasks={tasks}
                                     projectStartDate={project?.startDate}
                                     projectEndDate={project?.endDate}
+                                    onTaskDateChange={async (taskId, startDate, dueDate) => {
+                                        await taskService.updateTask(taskId, {
+                                            ...(startDate ? { startDate } : {}),
+                                            ...(dueDate ? { dueDate } : {}),
+                                        });
+                                        message.success('Updated task dates');
+                                        await loadProjectData();
+                                    }}
+                                    onTaskClick={handleTaskClick}
                                 />
                             </div>
                         </TabPane>

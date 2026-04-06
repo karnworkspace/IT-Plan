@@ -115,6 +115,9 @@ model Project {
   groupProjects GroupProject[]
 
   @@index([ownerId])
+  @@index([status])
+  @@index([projectType])
+  @@index([category])
   @@map("projects")
 }
 

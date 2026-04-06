@@ -378,7 +378,9 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
+
+/* Notebook */
+@media (max-width: 1199px) {
     .project-detail-header {
         padding: 20px 24px 24px;
     }
@@ -390,15 +392,54 @@
     .board-column {
         min-width: 200px;
     }
+
+    .project-stats .stat-card .ant-statistic-content {
+        font-size: 24px;
+    }
 }
 
-@media (max-width: 768px) {
+/* iPad landscape — kanban horizontal scroll */
+@media (max-width: 1023px) {
     .project-detail-header {
         padding: 20px;
     }
 
     .project-detail-content {
-        padding: 20px;
+        padding: 16px 20px;
+    }
+
+    .task-board {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .board-column {
+        min-width: 240px;
+        flex: 0 0 240px;
+    }
+
+    .project-stats .stat-card .ant-statistic-content {
+        font-size: 22px;
+    }
+
+    .project-stats .stat-card .ant-statistic-title {
+        font-size: 12px;
+    }
+
+    .task-list-item .ant-card-body {
+        padding: 14px 16px;
+    }
+}
+
+/* iPad portrait */
+@media (max-width: 767px) {
+    .project-detail-header {
+        padding: 16px;
+    }
+
+    .project-detail-content {
+        padding: 16px;
     }
 
     .header-content {
@@ -408,18 +449,29 @@
 
     .create-task-btn {
         width: 100%;
+        min-height: 44px;
     }
 
     .task-board {
-        flex-direction: column;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .board-column {
+        min-width: 220px;
+        flex: 0 0 220px;
     }
 
     .column-content {
-        max-height: 300px;
+        max-height: 400px;
     }
 
     .project-stats .ant-col {
         margin-bottom: 12px;
+    }
+
+    .project-stats .stat-card .ant-statistic-content {
+        font-size: 20px;
     }
 
     .task-list-content {
@@ -431,6 +483,30 @@
     .task-meta {
         width: 100%;
         justify-content: space-between;
+    }
+
+    .project-desc {
+        max-width: 100%;
+    }
+
+    .header-top {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* Touch targets for tablet */
+@media (max-width: 1023px) {
+    .task-card {
+        min-height: 44px;
+    }
+
+    .column-header {
+        min-height: 44px;
+    }
+
+    .task-card-assignee {
+        min-height: 28px;
     }
 }
 

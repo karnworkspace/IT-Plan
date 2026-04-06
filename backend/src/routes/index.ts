@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import prisma from '../config/database';
 import authRoutes from './auth.routes';
 import projectRoutes from './project.routes';
 import taskRoutes from './task.routes';
@@ -13,13 +14,24 @@ import tagRoutes from './tag.routes';
 
 const router = Router();
 
-// Health check endpoint
-router.get('/health', (_req, res) => {
-    res.json({
-        success: true,
-        message: 'TaskFlow API is running',
-        timestamp: new Date().toISOString(),
-    });
+// Health check endpoint with DB connectivity
+router.get('/health', async (_req, res) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        res.json({
+            success: true,
+            message: 'TaskFlow API is running',
+            timestamp: new Date().toISOString(),
+            database: 'connected',
+        });
+    } catch {
+        res.status(503).json({
+            success: false,
+            message: 'TaskFlow API is running but database is unreachable',
+            timestamp: new Date().toISOString(),
+            database: 'disconnected',
+        });
+    }
 });
 
 // Mount routes

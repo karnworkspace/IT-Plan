@@ -25,26 +25,36 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter: images only
+// File filter: images, PDF, Excel, video
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const allowed = [
+    // Images
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    // PDF
+    'application/pdf',
+    // Excel
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+    'application/vnd.ms-excel', // xls
+    // Video
+    'video/mp4', 'video/quicktime', // mp4, mov
+  ];
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files (JPEG, PNG, GIF, WebP) are allowed'));
+    cb(new Error('ไฟล์ที่รองรับ: รูปภาพ (JPEG, PNG, GIF, WebP), PDF, Excel (xlsx/xls), วิดีโอ (MP4, MOV)'));
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max per file
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max per file
 });
 
 // All routes require authentication
 router.use(authenticate);
 
-// Upload images for a comment (max 5 files)
+// Upload files for a comment (max 5 files, 20MB each)
 router.post('/comments/:commentId/attachments', upload.array('images', 5), uploadCommentImages);
 
 // Get attachments for a comment

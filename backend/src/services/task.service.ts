@@ -470,13 +470,20 @@ export class TaskService {
     });
 
     // Create StatusChangeLog entry
+    // When moving TO HOLD, record holdStartedAt in the note for tracking
+    const holdNote = status === 'HOLD'
+      ? `${note} [holdStartedAt:${new Date().toISOString()}]`
+      : existingTask.status === 'HOLD'
+        ? `${note} [resumedFromHoldAt:${new Date().toISOString()}]`
+        : note;
+
     await prisma.statusChangeLog.create({
       data: {
         taskId: id,
         userId,
         fromStatus: existingTask.status,
         toStatus: status,
-        note,
+        note: holdNote,
       },
     });
 
@@ -510,7 +517,13 @@ export class TaskService {
       }
     }
 
-    // Log activity
+    // Log activity — include holdInfo for HOLD transitions
+    const holdInfo = status === 'HOLD'
+      ? 'Task put on hold'
+      : existingTask.status === 'HOLD'
+        ? 'Task resumed from hold'
+        : undefined;
+
     await activityLogService.createActivityLog({
       userId,
       action: status === 'DONE' ? 'COMPLETED' : 'UPDATED',
@@ -518,7 +531,7 @@ export class TaskService {
       entityId: id,
       projectId: existingTask.projectId,
       taskId: id,
-      metadata: { status, progress, fromStatus: existingTask.status, note }
+      metadata: { status, progress, fromStatus: existingTask.status, note, holdInfo }
     });
 
     return updatedTask;
@@ -590,6 +603,7 @@ export class TaskService {
             name: true,
           },
         },
+        taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
         _count: {
           select: {
             comments: true,

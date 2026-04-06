@@ -18,6 +18,7 @@ import {
     Upload,
     Image,
     Mentions,
+    Tooltip,
 } from 'antd';
 import {
     UserOutlined,
@@ -875,16 +876,23 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 <Space>
                                     <Upload
                                         beforeUpload={(file) => {
+                                            const maxSize = 20 * 1024 * 1024; // 20MB
+                                            if (file.size > maxSize) {
+                                                message.error(`ไฟล์ ${file.name} มีขนาดเกิน 20MB`);
+                                                return Upload.LIST_IGNORE;
+                                            }
                                             setPendingFiles(prev => [...prev, file]);
                                             return false;
                                         }}
                                         showUploadList={false}
-                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        accept="image/jpeg,image/png,image/gif,image/webp,.pdf,.xlsx,.xls,video/mp4,video/quicktime"
                                         multiple
                                     >
-                                        <Button icon={<PaperClipOutlined />}>
-                                            Attach Image
-                                        </Button>
+                                        <Tooltip title="รองรับ: รูปภาพ, PDF, Excel, วิดีโอ (สูงสุด 20MB/ไฟล์)">
+                                            <Button icon={<PaperClipOutlined />}>
+                                                แนบไฟล์
+                                            </Button>
+                                        </Tooltip>
                                     </Upload>
                                     <Button
                                         type="primary"

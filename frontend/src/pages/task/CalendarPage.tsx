@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { taskService, type Task } from '../../services/taskService';
+import { tagService } from '../../services/tagService';
 import { Sidebar } from '../../components/layout/Sidebar';
 import {
     Layout,
@@ -14,11 +15,16 @@ import {
     Spin,
     Progress,
     Tooltip,
+    Checkbox,
+    Select,
+    Button,
 } from 'antd';
 import {
     CalendarOutlined,
     FolderOutlined,
     UserOutlined,
+    FilterOutlined,
+    ClearOutlined,
 } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '../../constants';
@@ -37,8 +43,15 @@ export const CalendarPage: React.FC = () => {
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [taskDetailVisible, setTaskDetailVisible] = useState(false);
 
+    // Filter states
+    const [statusFilters, setStatusFilters] = useState<string[]>([]);
+    const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
+    const [tagFilters, setTagFilters] = useState<string[]>([]);
+    const [allTags, setAllTags] = useState<{ id: string; name: string; color: string }[]>([]);
+
     useEffect(() => {
         loadTasks();
+        tagService.getAllTags().then(tags => setAllTags(tags)).catch(() => {});
     }, []);
 
     const loadTasks = async () => {
@@ -54,10 +67,25 @@ export const CalendarPage: React.FC = () => {
         }
     };
 
+    // Filter tasks
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(t => {
+            if (statusFilters.length > 0 && !statusFilters.includes(t.status)) return false;
+            if (priorityFilters.length > 0 && !priorityFilters.includes(t.priority)) return false;
+            if (tagFilters.length > 0) {
+                const taskTagIds = (t as any).taskTags?.map((tt: any) => tt.tagId || tt.tag?.id) || [];
+                if (!tagFilters.some(tf => taskTagIds.includes(tf))) return false;
+            }
+            return true;
+        });
+    }, [tasks, statusFilters, priorityFilters, tagFilters]);
+
+    const hasActiveFilters = statusFilters.length > 0 || priorityFilters.length > 0 || tagFilters.length > 0;
+
     // Build a map: dateStr -> Task[]
     const tasksByDate = useMemo(() => {
         const map: Record<string, Task[]> = {};
-        tasks.forEach(task => {
+        filteredTasks.forEach(task => {
             if (task.dueDate) {
                 const d = new Date(task.dueDate);
                 const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -66,11 +94,11 @@ export const CalendarPage: React.FC = () => {
             }
         });
         return map;
-    }, [tasks]);
+    }, [filteredTasks]);
 
     // Stats
-    const totalWithDue = tasks.filter(t => t.dueDate).length;
-    const overdueCount = tasks.filter(t => {
+    const totalWithDue = filteredTasks.filter(t => t.dueDate).length;
+    const overdueCount = filteredTasks.filter(t => {
         if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
         return new Date(t.dueDate) < new Date(new Date().toDateString());
     }).length;
@@ -135,11 +163,11 @@ export const CalendarPage: React.FC = () => {
     const selectedTasks = selectedDate ? (tasksByDate[selectedDate] || []) : [];
 
     // Tasks for stat modals
-    const tasksWithDue = useMemo(() => tasks.filter(t => t.dueDate), [tasks]);
-    const overdueTasks = useMemo(() => tasks.filter(t => {
+    const tasksWithDue = useMemo(() => filteredTasks.filter(t => t.dueDate), [filteredTasks]);
+    const overdueTasks = useMemo(() => filteredTasks.filter(t => {
         if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
         return new Date(t.dueDate) < new Date(new Date().toDateString());
-    }), [tasks]);
+    }), [filteredTasks]);
     const statModalTasks = statModalType === 'due' ? tasksWithDue : statModalType === 'overdue' ? overdueTasks : [];
 
     return (
@@ -161,6 +189,71 @@ export const CalendarPage: React.FC = () => {
                             <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#EF4444' }} /><span>Overdue</span></div>
                         </div>
                     </div>
+
+                    {/* Filter Panel */}
+                    <Card className="cal-filter-panel" size="small" style={{ marginBottom: 16 }}>
+                        <div className="cal-filter-row">
+                            <div className="cal-filter-group">
+                                <FilterOutlined style={{ marginRight: 8, color: '#8c8c8c' }} />
+                                <span className="cal-filter-label">Status:</span>
+                                <Checkbox.Group
+                                    value={statusFilters}
+                                    onChange={(vals) => setStatusFilters(vals as string[])}
+                                    options={Object.entries(STATUS_CONFIG).map(([key, cfg]) => ({
+                                        label: <Tag color={cfg.tagColor}>{cfg.label}</Tag>,
+                                        value: key,
+                                    }))}
+                                />
+                            </div>
+                            <div className="cal-filter-group">
+                                <span className="cal-filter-label">Priority:</span>
+                                <Checkbox.Group
+                                    value={priorityFilters}
+                                    onChange={(vals) => setPriorityFilters(vals as string[])}
+                                    options={Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => ({
+                                        label: <span style={{ color: cfg.color, fontWeight: 500 }}>{cfg.label}</span>,
+                                        value: key,
+                                    }))}
+                                />
+                            </div>
+                            {allTags.length > 0 && (
+                                <div className="cal-filter-group">
+                                    <span className="cal-filter-label">Tags:</span>
+                                    <Select
+                                        mode="multiple"
+                                        placeholder="Select tags"
+                                        value={tagFilters}
+                                        onChange={setTagFilters}
+                                        style={{ minWidth: 200 }}
+                                        allowClear
+                                        maxTagCount={2}
+                                        options={allTags.map(tag => ({
+                                            label: <Tag color={tag.color}>{tag.name}</Tag>,
+                                            value: tag.id,
+                                        }))}
+                                    />
+                                </div>
+                            )}
+                            {hasActiveFilters && (
+                                <Button
+                                    icon={<ClearOutlined />}
+                                    size="small"
+                                    onClick={() => {
+                                        setStatusFilters([]);
+                                        setPriorityFilters([]);
+                                        setTagFilters([]);
+                                    }}
+                                >
+                                    Clear Filters
+                                </Button>
+                            )}
+                            {hasActiveFilters && (
+                                <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                                    Showing {filteredTasks.length} of {tasks.length} tasks
+                                </Text>
+                            )}
+                        </div>
+                    </Card>
 
                     {/* Stats summary — removed per feedback U19 */}
                     {/* <div className="cal-stats-row">

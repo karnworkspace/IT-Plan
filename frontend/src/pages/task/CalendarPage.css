@@ -20,6 +20,44 @@
 }
 
 /* ==========================================
+   Filter Panel
+   ========================================== */
+
+.cal-filter-panel {
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+}
+
+.cal-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cal-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cal-filter-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    white-space: nowrap;
+}
+
+.cal-filter-panel .ant-checkbox-group {
+    display: flex;
+    gap: 4px;
+}
+
+.cal-filter-panel .ant-checkbox-wrapper {
+    margin-inline-end: 0 !important;
+}
+
+/* ==========================================
    Stats Row
    ========================================== */
 

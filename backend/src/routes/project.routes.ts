@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, requireManager } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
 import {
   getTimeline,
@@ -49,7 +49,7 @@ router.get('/', getProjects);
  * @desc    Create a new project
  * @access  Private
  */
-router.post('/', createProject);
+router.post('/', requireManager, createProject);
 
 /**
  * @route   GET /api/v1/projects/:id/stats

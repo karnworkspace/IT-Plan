@@ -30,7 +30,7 @@ import {
     Avatar,
     Tooltip,
 } from 'antd';
-import type { MenuProps, TableProps } from 'antd';
+import type { MenuProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
     CalendarOutlined,

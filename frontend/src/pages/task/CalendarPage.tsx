@@ -97,8 +97,8 @@ export const CalendarPage: React.FC = () => {
     }, [filteredTasks]);
 
     // Stats
-    const totalWithDue = filteredTasks.filter(t => t.dueDate).length;
-    const overdueCount = filteredTasks.filter(t => {
+    const _totalWithDue = filteredTasks.filter(t => t.dueDate).length;
+    const _overdueCount = filteredTasks.filter(t => {
         if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
         return new Date(t.dueDate) < new Date(new Date().toDateString());
     }).length;

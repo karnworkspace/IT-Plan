@@ -5,7 +5,7 @@ import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/authStore';
 import './LoginPage.css';
 
-const { Title, Text, Link } = Typography;
+const { Title, Text } = Typography;
 
 export const LoginPage: React.FC = () => {
     const { loginWithEmail, isLoading, clearError } = useAuthStore();

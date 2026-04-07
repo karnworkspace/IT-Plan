@@ -361,7 +361,7 @@ export const InternalProjectsPage: React.FC = () => {
                                                                 ? project.description.length > 50
                                                                     ? `${project.description.slice(0, 50)}...`
                                                                     : project.description
-                                                                : 'Project ID: ' + (project.projectCode || '-')}
+                                                                : 'Project ID: ' + ((project as any).projectCode || '-')}
                                                         </div>
                                                     </div>
                                                     <Tag

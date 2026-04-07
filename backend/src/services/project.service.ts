@@ -8,6 +8,7 @@ export interface CreateProjectInput {
   color?: string;
   icon?: string;
   status?: string;
+  projectType?: string;
   startDate?: Date;
   endDate?: Date;
   ownerId: string;
@@ -26,6 +27,7 @@ export interface UpdateProjectInput {
 export interface ProjectFilters {
   status?: string;
   ownerId?: string;
+  projectType?: string;
   page?: number;
   limit?: number;
 }
@@ -45,7 +47,7 @@ export class ProjectService {
    */
   async getTimelineData(): Promise<any[]> {
     const projects = await prisma.project.findMany({
-      where: { category: { not: null } },
+      where: { category: { not: null }, projectType: 'PROJECT' },
       include: {
         owner: { select: { id: true, name: true, email: true } },
         members: {
@@ -69,7 +71,10 @@ export class ProjectService {
     return projects.map(p => {
       const totalTasks = p.tasks.length;
       const doneTasks = p.tasks.filter(t => t.status === 'DONE').length;
-      const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      const holdTasks = p.tasks.filter(t => t.status === 'HOLD').length;
+      const cancelledTasks = p.tasks.filter(t => t.status === 'CANCELLED').length;
+      const countable = totalTasks - holdTasks - cancelledTasks;
+      const progress = countable > 0 ? Math.round((doneTasks / countable) * 100) : 0;
       return {
         id: p.id, name: p.name, projectCode: p.projectCode, category: p.category,
         status: p.status, color: p.color, businessOwner: p.businessOwner,
@@ -86,13 +91,27 @@ export class ProjectService {
   /**
    * Get all projects with filters and pagination
    */
-  async getAllProjects(filters: ProjectFilters = {}): Promise<PaginationResult<any>> {
-    const { status, ownerId, page = 1, limit = 20 } = filters;
+  async getAllProjects(filters: ProjectFilters = {}, user?: { id: string; role: string }): Promise<PaginationResult<any>> {
+    const { status, ownerId, projectType, page = 1, limit = 20 } = filters;
 
     // Build where clause
     const where: any = {};
     if (status) where.status = status;
     if (ownerId) where.ownerId = ownerId;
+    if (projectType) where.projectType = projectType;
+
+    // Role-based filtering
+    if (user) {
+      if (user.role === 'ADMIN') {
+        // Admin sees all — no additional filter
+      } else if (user.role === 'MANAGER') {
+        // Manager sees projects they own or are a member of
+        where.members = { some: { userId: user.id } };
+      } else {
+        // MEMBER sees only projects they're a member of
+        where.members = { some: { userId: user.id } };
+      }
+    }
 
     // Get total count
     const total = await prisma.project.count({ where });
@@ -142,6 +161,37 @@ export class ProjectService {
         total,
       },
     };
+  }
+
+  /**
+   * Get projects where the user is a member
+   */
+  async getMyProjects(userId: string, filters: { status?: string; projectType?: string; page?: number; limit?: number } = {}): Promise<PaginationResult<any>> {
+    const { status, projectType, page = 1, limit = 100 } = filters;
+
+    const where: any = {
+      members: { some: { userId } },
+    };
+    if (status) where.status = status;
+    if (projectType) where.projectType = projectType;
+
+    const total = await prisma.project.count({ where });
+
+    const projects = await prisma.project.findMany({
+      where,
+      include: {
+        owner: { select: { id: true, name: true, email: true } },
+        members: {
+          include: { user: { select: { id: true, name: true, email: true } } },
+        },
+        _count: { select: { tasks: true, members: true } },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    return { data: projects, pagination: { page, limit, total } };
   }
 
   /**
@@ -208,6 +258,7 @@ export class ProjectService {
           color: data.color || '#1890ff',
           icon: data.icon,
           status: data.status || 'ACTIVE',
+          projectType: data.projectType || 'PROJECT',
           startDate: data.startDate,
           endDate: data.endDate,
           ownerId: data.ownerId,
@@ -309,6 +360,10 @@ export class ProjectService {
     const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
     const todo = tasks.filter(t => t.status === 'TODO').length;
     const blocked = tasks.filter(t => t.status === 'BLOCKED').length;
+    const hold = tasks.filter(t => t.status === 'HOLD').length;
+    const cancelled = tasks.filter(t => t.status === 'CANCELLED').length;
+    const countable = total - hold - cancelled;
+    const progress = countable > 0 ? Math.round((completed / countable) * 100) : 0;
 
     return {
       total_tasks: total,
@@ -316,7 +371,9 @@ export class ProjectService {
       in_progress_tasks: inProgress,
       todo_tasks: todo,
       blocked_tasks: blocked,
-      progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+      hold_tasks: hold,
+      cancelled_tasks: cancelled,
+      progress,
     };
   }
 

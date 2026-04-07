@@ -58,3 +58,24 @@ export const requireAdmin = (
 
     next();
 };
+
+/**
+ * Middleware to check if user is admin or manager
+ */
+export const requireManager = (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+): void => {
+    if (!req.user) {
+        sendError(res, 'Authentication required', 401);
+        return;
+    }
+
+    if (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGER') {
+        sendError(res, 'Manager access required', 403);
+        return;
+    }
+
+    next();
+};

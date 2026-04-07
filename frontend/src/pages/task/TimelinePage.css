@@ -1,0 +1,636 @@
+/* ====================================
+   TimelinePage — Annual Plan View
+   ==================================== */
+
+.timeline-layout {
+    min-height: 100vh;
+    background: #F8FAFC;
+}
+
+.timeline-main {
+    background: transparent;
+}
+
+/* Header */
+.timeline-page-header {
+    background: #fff;
+    padding: 20px 32px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.timeline-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.timeline-header-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* timeline-legend-inline: moved to shared.css as .shared-legend */
+
+/* Title */
+.timeline-title {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Prompt', sans-serif;
+}
+
+/* Stats badges */
+.timeline-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.timeline-stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #F1F5F9;
+    border-radius: 8px;
+    padding: 4px 12px;
+    border: 0.5px solid #E2E8F0;
+}
+
+.timeline-stat-badge.stat-accent {
+    border-left: 3px solid #32BCAD;
+    background: rgba(50, 188, 173, 0.05);
+}
+
+.timeline-stat-number {
+    font-family: 'Prompt', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0F172A;
+}
+
+.timeline-stat-label {
+    font-size: 12px;
+    color: #77787B;
+    font-weight: 400;
+}
+
+.timeline-page-header .ant-select-selector {
+    border-radius: 8px !important;
+}
+
+/* Content */
+.timeline-content {
+    padding: 20px 32px;
+    background: transparent;
+    min-height: calc(100vh - 120px);
+}
+
+/* Annual Plan Wrapper — horizontal scroll */
+.annual-plan-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.annual-plan-table {
+    min-width: 1000px;
+}
+
+/* ====================================
+   Column widths
+   ==================================== */
+.ap-col-no { width: 36px; min-width: 36px; text-align: center; white-space: nowrap; }
+.ap-col-code { width: 105px; min-width: 105px; white-space: nowrap; font-size: 12px; }
+.ap-col-name { width: 300px; min-width: 180px; overflow: hidden; }
+.ap-col-team { width: 120px; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ap-col-progress { width: 90px; min-width: 80px; white-space: nowrap; }
+.ap-col-timeline { flex: 1; min-width: 300px; }
+
+/* ====================================
+   Header Row
+   ==================================== */
+.ap-header-row {
+    display: flex;
+    background: #0F172A;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 10px 10px 0 0;
+}
+
+.ap-header-row > div {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ap-header-row > div:last-child {
+    border-right: none;
+    padding: 0;
+}
+
+/* Quarters + Months header */
+.ap-quarters {
+    display: flex;
+    width: 100%;
+}
+
+.ap-quarter {
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ap-quarter:last-child {
+    border-right: none;
+}
+
+.ap-quarter-label {
+    text-align: center;
+    padding: 6px 0;
+    font-weight: 700;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ap-months {
+    display: flex;
+}
+
+.ap-month-header {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ap-month-header:last-child {
+    border-right: none;
+}
+
+.ap-month-header.ap-current-month {
+    background: rgba(50, 188, 173, 0.4);
+    color: #fff;
+    font-weight: 700;
+    position: relative;
+}
+
+/* ====================================
+   Category Row
+   ==================================== */
+.ap-category-row {
+    display: flex;
+    align-items: center;
+    background: #F0FAF9;
+    border-left: 4px solid #32BCAD;
+    padding: 10px 16px;
+    gap: 12px;
+    border-bottom: 1px solid #E2E8F0;
+    border-top: 1px solid #E2E8F0;
+}
+
+.ap-category-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.ap-category-count {
+    font-size: 11px;
+    color: #77787B;
+    font-weight: 600;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* ====================================
+   Project Row
+   ==================================== */
+.ap-project-row {
+    display: flex;
+    border-bottom: 1px solid #F1F5F9;
+    transition: background 0.15s;
+}
+
+.ap-project-row:nth-child(even) {
+    background: rgba(50, 188, 173, 0.02);
+}
+
+.ap-project-row:hover {
+    background: rgba(50, 188, 173, 0.06);
+}
+
+.ap-project-row.ap-expanded {
+    background: rgba(50,188,173,0.05);
+    border-bottom-color: #89D0C8;
+}
+
+.ap-cell {
+    padding: 10px 10px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #F1F5F9;
+    font-size: 13px;
+}
+
+.ap-cell:last-child {
+    border-right: none;
+    padding: 0;
+}
+
+/* NO badge */
+.ap-no-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: #E2E8F0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    transition: background 0.2s, color 0.2s;
+}
+
+.ap-no-badge.badge-active { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-plan { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-pending { background: rgba(50,188,173,0.15); color: #1a7a6e; }
+.ap-no-badge.badge-delay { background: rgba(217,79,79,0.15); color: #9B2C2C; }
+.ap-no-badge.badge-hold { background: rgba(232,168,56,0.15); color: #8B6914; }
+.ap-no-badge.badge-completed { background: rgba(46,125,155,0.15); color: #1a5a6e; }
+.ap-no-badge.badge-cancelled { background: #E2E8F0; color: #77787B; }
+
+/* Project code */
+.ap-code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: #77787B;
+    font-weight: 500;
+}
+
+/* Project name cell */
+.ap-project-name-cell {
+    gap: 8px;
+    overflow: hidden;
+}
+
+.ap-expand-icon {
+    color: #94A3B8;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.ap-project-name {
+    font-weight: 600;
+    color: #000000;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+/* Status dot */
+.ap-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: auto;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+.ap-status-plan { background: #32BCAD; }
+.ap-status-pending { background: #32BCAD; }
+.ap-status-active { background: #32BCAD; }
+.ap-status-delay { background: #D94F4F; }
+.ap-status-completed { background: #2E7D9B; }
+.ap-status-hold { background: #E8A838; }
+.ap-status-cancelled { background: #77787B; }
+
+/* Team text */
+.ap-team-text {
+    font-size: 12px;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Progress */
+.ap-progress-wrapper {
+    width: 100%;
+}
+
+.ap-progress-text {
+    font-family: 'Prompt', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #000000;
+}
+
+.ap-progress-zero {
+    color: #94A3B8;
+    font-weight: 500;
+}
+
+/* Make 0% progress rail more visible */
+.ap-progress-wrapper .ant-progress-bg[style*="width: 0%"] + .ant-progress-inner,
+.ap-progress-wrapper .ant-progress-inner {
+    background: #E2E8F0 !important;
+}
+
+.ap-col-progress .ant-progress {
+    margin-bottom: 0;
+}
+
+.ap-col-progress .ant-progress-inner {
+    border-radius: 3px !important;
+}
+
+.ap-col-progress .ant-progress-bg {
+    border-radius: 3px !important;
+    height: 6px !important;
+}
+
+/* ====================================
+   Month Bars (Timeline)
+   ==================================== */
+.ap-month-bars {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 38px;
+}
+
+.ap-month-cell {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 1px;
+    border-right: 1px solid #F8FAFC;
+    position: relative;
+}
+
+.ap-month-cell:last-child {
+    border-right: none;
+}
+
+.ap-month-cell.ap-current-month-cell {
+    background: rgba(50, 188, 173, 0.06);
+}
+
+.ap-month-cell.ap-current-month-cell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 100%;
+    background: rgba(50, 188, 173, 0.2);
+}
+
+.ap-month-bar {
+    width: 100%;
+    height: 20px;
+    border-radius: 4px;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.ap-month-bar.future-bar {
+    opacity: 0.5;
+}
+
+.ap-project-row:hover .ap-month-bar {
+    opacity: 1;
+    transform: scaleY(1.1);
+}
+
+.ap-task-month-bar {
+    height: 10px;
+    border-radius: 2px;
+}
+
+/* ====================================
+   Task Row (expanded sub-rows)
+   ==================================== */
+.ap-task-row {
+    display: flex;
+    border-bottom: 1px solid #F8FAFC;
+    background: #FAFBFC;
+}
+
+.ap-task-row:hover {
+    background: #F1F5F9;
+}
+
+.ap-task-name-cell {
+    padding-left: 48px !important;
+    gap: 4px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ap-task-name {
+    font-size: 12px;
+    color: #475569;
+}
+
+.ap-task-status {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ap-task-status-todo { background: #F1F5F9; color: #77787B; }
+.ap-task-status-in_progress { background: rgba(50,188,173,0.05); color: #32BCAD; }
+.ap-task-status-in_review { background: #F5F3FF; color: #8B5CF6; }
+.ap-task-status-done { background: rgba(46,125,155,0.08); color: #2E7D9B; }
+.ap-task-status-blocked { background: rgba(217,79,79,0.10); color: #D94F4F; }
+.ap-task-status-hold { background: #FFF3DC; color: #E8A838; }
+.ap-task-status-cancelled { background: #F1F5F9; color: #77787B; }
+
+.ap-task-assignee {
+    font-size: 11px;
+    color: #77787B;
+}
+
+/* Clickable names */
+.ap-clickable {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.ap-clickable:hover {
+    color: #32BCAD !important;
+    text-decoration: underline;
+}
+
+.ap-task-bars {
+    min-height: 30px;
+}
+
+/* Legend: moved to shared.css as .shared-legend-* */
+
+/* ====================================
+   Responsive
+   ==================================== */
+
+/* Notebook */
+@media (max-width: 1199px) {
+    .timeline-page-header {
+        padding: 16px 20px;
+    }
+
+    .timeline-content {
+        padding: 16px 20px;
+    }
+
+    .timeline-header-filters {
+        flex-wrap: wrap;
+    }
+
+    .ap-col-name {
+        width: 240px;
+        min-width: 160px;
+    }
+}
+
+/* iPad landscape — horizontal scroll for timeline */
+@media (max-width: 1023px) {
+    .timeline-page-header {
+        padding: 14px 16px;
+    }
+
+    .timeline-content {
+        padding: 14px 16px;
+    }
+
+    .annual-plan-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .annual-plan-table {
+        min-width: 900px;
+    }
+
+    .ap-col-name {
+        width: 200px;
+        min-width: 140px;
+    }
+
+    .ap-col-code {
+        width: 90px;
+        min-width: 90px;
+    }
+
+    .ap-col-team {
+        width: 100px;
+        min-width: 80px;
+    }
+
+    .ap-project-name {
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 160px;
+    }
+
+    .ap-cell {
+        padding: 6px 6px;
+        font-size: 12px;
+    }
+
+    .timeline-header-filters {
+        gap: 10px;
+    }
+}
+
+/* iPad portrait */
+@media (max-width: 767px) {
+    .timeline-page-header {
+        padding: 12px 12px;
+    }
+
+    .timeline-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .timeline-content {
+        padding: 12px;
+    }
+
+    .annual-plan-table {
+        min-width: 800px;
+    }
+
+    .ap-col-name {
+        width: 160px;
+        min-width: 120px;
+    }
+
+    .ap-project-name {
+        max-width: 120px;
+    }
+
+    .ap-col-team {
+        width: 80px;
+        min-width: 70px;
+    }
+
+    .ap-col-code {
+        width: 80px;
+        min-width: 80px;
+        font-size: 11px;
+    }
+
+    .ap-cell {
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+
+    .timeline-header-filters {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Touch targets */
+    .ap-clickable {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .ap-project-row {
+        min-height: 44px;
+    }
+}

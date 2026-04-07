@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "${POSTGRES_PRISMA_URL}"
+      },
+      "description": "Direct PostgreSQL queries for YTY TaskFlow database"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "./backend/src",
+        "./frontend/src",
+        "./Doc"
+      ],
+      "description": "File system access for source code and documentation"
+    }
+  }
+}

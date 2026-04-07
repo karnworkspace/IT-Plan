@@ -1,10 +1,11 @@
-# CLAUDE.md - YTY Project
+# CLAUDE.md - YTY TaskFlow Project
 
 ## ก่อนเริ่มงาน (บังคับ)
 
-1. อ่าน `Doc/PROJECT-PROGRESS.md` ← สถานะปัจจุบัน + Phase ล่าสุด
-2. อ่าน `Doc/QUICK-REFERENCE.md` ← Quick ref, commands, features
-3. Phase 1-11 archive อยู่ที่ `Doc/PROGRESS-ARCHIVE.md` (อ่านเมื่อต้องการเท่านั้น)
+1. อ่าน `Doc/CODE-SCHEMA.md` ← **แผนที่ codebase ทั้งหมด** (DB schema, API endpoints, file map, data flow, permissions)
+2. อ่าน `Doc/PROJECT-PROGRESS.md` ← สถานะปัจจุบัน + Phase ล่าสุด
+3. อ่าน `Doc/QUICK-REFERENCE.md` ← Quick ref, commands, features
+4. Phase 1-11 archive อยู่ที่ `Doc/PROGRESS-ARCHIVE.md` (อ่านเมื่อต้องการเท่านั้น)
 
 ## การบันทึกความคืบหน้า
 
@@ -83,6 +84,62 @@ Frontend: `services/` → `components/` → `pages/`
 
 ---
 
+## Claude Code Extensions
+
+### Slash Commands (`.claude/commands/`)
+
+| Command | Description |
+|---------|-------------|
+| `/review` | Code review — ตรวจ TypeScript, security, architecture |
+| `/deploy` | Build & deploy to production (172.22.22.11) |
+| `/test-all` | Run full test suite (TS check, API tests, lint, build) |
+| `/document` | Auto-generate & update project documentation |
+| `/db-status` | Check database connection, schema sync, data counts |
+| `/scaffold` | Scaffold new full-stack feature (service → controller → routes → frontend) |
+
+### Skills (`.claude/skills/`)
+
+Role-based skill directories with SKILL.md + scripts/ + references/:
+
+| Skill | Purpose |
+|-------|---------|
+| `dev` | Full Stack Developer — coding standards, lint/type-check scripts |
+| `ba` | Business Analyst — requirements, user stories, acceptance criteria |
+| `pm` | Project Manager — planning, risk, resource allocation |
+| `tech-lead` | Multi-Agent Coordinator — orchestrates all agent roles |
+| `sa` | System Analyst — infrastructure, Docker, CI/CD, security |
+| `database-operations` | Prisma operations, schema updates, data integrity |
+| `api-creation` | API endpoint scaffolding with validation |
+| `deployment-process` | Pre-deploy checks, Docker build, rollback plan |
+| `multi-agent` | 5-agent orchestration guide |
+
+### Hooks (`.claude/hooks/`)
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `PreCommit.sh` | Before git commit | Secret detection — blocks .env, passwords, API keys |
+| `PostToolUse.sh` | After Write/Edit | Auto-lint TypeScript files after modification |
+| `SessionStart.sh` | Session launch | Display git status, Docker status, quick links |
+| `PreToolUse.sh` | Before dangerous ops | Block DROP TABLE, force push, hard reset |
+
+### Agents (`.claude/agents/`)
+
+| Agent | Role |
+|-------|------|
+| `code-reviewer.yml` | Code quality, TypeScript strict, security checks |
+| `test-writer.yml` | Generate API + E2E tests with Jest/Playwright |
+| `security-auditor.yml` | SQL injection, XSS, auth bypass, secret exposure |
+| `devops-sre.yml` | Docker, deployment, monitoring, CI/CD |
+
+### MCP Servers (`.mcp.json`)
+
+| Server | Purpose |
+|--------|---------|
+| `postgres` | Direct database queries via MCP protocol |
+| `filesystem` | File system access for source code & docs |
+
+---
+
 ## Coding Standards
 
 - **Naming:** PascalCase (files/components), camelCase (functions), UPPER_SNAKE (constants)
@@ -105,13 +162,22 @@ Types: feat, fix, docs, refactor, test, chore
 - อัปเดต docs หลังทำงานเสร็จ
 - `backend/src/services/` = Source of Truth for business logic
 
+## Security & Compliance
+
+- ห้าม store secrets ใน CLAUDE.md — ใช้ `.env.example` เป็น template
+- `.env` และ `.env.production` ต้องอยู่ใน `.gitignore`
+- PreCommit hook จะ block การ commit secrets อัตโมัติ
+- MCP scope ใช้ minimum permissions เท่านั้น
+
 ## AI Agent Principles
 
 - **ภาษา:** ไทย + English technical terms
 - **Ask Before Action:** อธิบาย significant changes ก่อนทำ
 - **Scripts over Manual:** ใช้ ts-node scripts ตรวจ DB data
-- **Doc/` = Truth**, `services/` = Business Logic Truth
+- **Doc/ = Truth**, `services/` = Business Logic Truth
+- **Skills > Prompts:** ใช้ skills สำหรับ heavy instructions
+- **Hooks = Deterministic:** ใช้ hooks สำหรับ repeatable checks
 
 ---
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-04-06

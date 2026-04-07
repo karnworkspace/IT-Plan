@@ -1,10 +1,23 @@
-import { RequestHandler } from 'express';
+import rateLimit from 'express-rate-limit';
 
 /**
- * Rate limiting disabled - internal use only
- * Middleware pass-through (no-op)
+ * General API rate limiter — 500 requests per 15 minutes per IP
  */
-const noOp: RequestHandler = (_req, _res, next) => next();
+export const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500,
+  message: { success: false, error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-export const authLimiter = noOp;
-export const apiLimiter = noOp;
+/**
+ * Auth endpoints rate limiter — 20 requests per 15 minutes per IP
+ */
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: { success: false, error: 'Too many login attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

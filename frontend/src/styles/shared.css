@@ -11,7 +11,8 @@
 /* Base Stat Card — white minimal design */
 .stat-card {
     background: #ffffff;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #E2E8F0 !important;
+    border-style: solid !important;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     height: 100%;
@@ -25,15 +26,27 @@
     border-color: #CBD5E1;
 }
 
+/* Remove Ant Design focus outline on stat cards */
+.stat-card:focus,
+.stat-card:focus-visible,
+.stat-card:focus-within {
+    outline: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card.ant-card-bordered {
+    border: 1px solid #E2E8F0;
+}
+
 /* Stat Card Text */
 .stat-card .ant-statistic-title {
-    color: #64748B;
+    color: #77787B;
     font-size: 13px;
     font-weight: 500;
 }
 
 .stat-card .ant-statistic-content {
-    color: #1E293B;
+    color: #000000;
     font-weight: 700;
 }
 
@@ -55,13 +68,27 @@
     font-size: 18px;
 }
 
-/* Icon color variants */
-.stat-icon-box.icon-blue      { background: #DBEAFE; color: #3B82F6; }
-.stat-icon-box.icon-emerald   { background: #D1FAE5; color: #10B981; }
-.stat-icon-box.icon-amber     { background: #FEF3C7; color: #F59E0B; }
-.stat-icon-box.icon-red       { background: #FEE2E2; color: #EF4444; }
-.stat-icon-box.icon-purple    { background: #EDE9FE; color: #8B5CF6; }
-.stat-icon-box.icon-slate     { background: #F1F5F9; color: #6B7280; }
+/* Icon color variants — SENA palette */
+.stat-icon-box.icon-blue      { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.icon-emerald   { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.icon-amber     { background: #FFF3DC; color: #E8A838; }
+.stat-icon-box.icon-red       { background: rgba(217,79,79,0.10); color: #D94F4F; }
+.stat-icon-box.icon-purple    { background: rgba(50,188,173,0.08); color: #32BCAD; }
+.stat-icon-box.icon-slate     { background: #F1F5F9; color: #77787B; }
+
+/* Stat card — status-specific icon classes (My Projects) */
+.stat-icon-box.stat-icon-total     { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.stat-icon-active    { background: rgba(50,188,173,0.12); color: #32BCAD; }
+.stat-icon-box.stat-icon-completed { background: rgba(46,125,155,0.12); color: #2E7D9B; }
+.stat-icon-box.stat-icon-hold      { background: #FFF3DC; color: #E8A838; }
+
+/* Stat card — 3px top border accent (SENA metric card pattern) */
+.stat-card.stat-border-green     { border-top: 3px solid #32BCAD !important; }
+.stat-card.stat-border-blue      { border-top: 3px solid #2E7D9B !important; }
+.stat-card.stat-border-amber     { border-top: 3px solid #E8A838 !important; }
+.stat-card.stat-border-red       { border-top: 3px solid #D94F4F !important; }
+.stat-card.stat-border-gray      { border-top: 3px solid #77787B !important; }
+.stat-card.stat-border-lightgreen { border-top: 3px solid #89D0C8 !important; }
 
 /* ==========================================
    All color variants now share white bg
@@ -122,16 +149,16 @@
     border: 1px solid;
 }
 
-.status-badge.badge-active    { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
-.status-badge.badge-delay     { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
-.status-badge.badge-completed { background: #EFF6FF; color: #3B82F6; border-color: #BFDBFE; }
-.status-badge.badge-hold      { background: #FFFBEB; color: #F59E0B; border-color: #FDE68A; }
-.status-badge.badge-cancelled { background: #F1F5F9; color: #6B7280; border-color: #E2E8F0; }
+.status-badge.badge-active    { background: rgba(50,188,173,0.05); color: #32BCAD; border-color: #89D0C8; }
+.status-badge.badge-delay     { background: rgba(217,79,79,0.10); color: #D94F4F; border-color: #F5A3A3; }
+.status-badge.badge-completed { background: rgba(46,125,155,0.08); color: #2E7D9B; border-color: #89C4D8; }
+.status-badge.badge-hold      { background: #FFF3DC; color: #E8A838; border-color: #F5D88A; }
+.status-badge.badge-cancelled { background: #F5F5F5; color: #77787B; border-color: #D1D1D2; }
 
 /* Task statuses */
-.status-badge.badge-todo        { background: #F1F5F9; color: #6B7280; border-color: #E2E8F0; }
-.status-badge.badge-in_progress { background: #EFF6FF; color: #3B82F6; border-color: #BFDBFE; }
-.status-badge.badge-done        { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
+.status-badge.badge-todo        { background: #F5F5F5; color: #77787B; border-color: #D1D1D2; }
+.status-badge.badge-in_progress { background: rgba(50,188,173,0.05); color: #32BCAD; border-color: #89D0C8; }
+.status-badge.badge-done        { background: rgba(46,125,155,0.08); color: #2E7D9B; border-color: #89C4D8; }
 
 /* ==========================================
    Progress Bar — animated
@@ -150,11 +177,11 @@
     transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.progress-bar-fill.fill-emerald  { background: #10B981; }
-.progress-bar-fill.fill-red      { background: #EF4444; }
-.progress-bar-fill.fill-blue     { background: #3B82F6; }
-.progress-bar-fill.fill-amber    { background: #F59E0B; }
-.progress-bar-fill.fill-slate    { background: #6B7280; }
+.progress-bar-fill.fill-emerald  { background: #32BCAD; }
+.progress-bar-fill.fill-red      { background: #D94F4F; }
+.progress-bar-fill.fill-blue     { background: #2E7D9B; }
+.progress-bar-fill.fill-amber    { background: #E8A838; }
+.progress-bar-fill.fill-slate    { background: #77787B; }
 
 /* ==========================================
    Shared Legend — bar style (used across Calendar, Timeline, etc.)
@@ -168,7 +195,7 @@
     background: #F1F5F9;
     border-radius: 8px;
     font-size: 12px;
-    color: #64748B;
+    color: #77787B;
 }
 
 .shared-legend-item {
@@ -186,8 +213,8 @@
 .shared-legend-current {
     width: 16px;
     height: 16px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(50, 188, 173, 0.1);
+    border: 1px solid rgba(50, 188, 173, 0.3);
     border-radius: 3px;
 }
 

@@ -1,0 +1,421 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { taskService, type Task } from '../../services/taskService';
+import { tagService } from '../../services/tagService';
+import { Sidebar } from '../../components/layout/Sidebar';
+import {
+    Layout,
+    Card,
+    Calendar,
+    Typography,
+    Space,
+    Tag,
+    Badge,
+    Modal,
+    message,
+    Spin,
+    Progress,
+    Tooltip,
+    Checkbox,
+    Select,
+    Button,
+} from 'antd';
+import {
+    CalendarOutlined,
+    FolderOutlined,
+    UserOutlined,
+    FilterOutlined,
+    ClearOutlined,
+} from '@ant-design/icons';
+import type { Dayjs } from 'dayjs';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../../constants';
+import { TaskDetailModal } from './TaskDetailModal';
+import './CalendarPage.css';
+
+const { Content } = Layout;
+const { Title, Text } = Typography;
+
+export const CalendarPage: React.FC = () => {
+    const [loading, setLoading] = useState(true);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [statModalType, setStatModalType] = useState<'due' | 'overdue' | null>(null);
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+    const [taskDetailVisible, setTaskDetailVisible] = useState(false);
+
+    // Filter states
+    const [statusFilters, setStatusFilters] = useState<string[]>([]);
+    const [priorityFilters, setPriorityFilters] = useState<string[]>([]);
+    const [tagFilters, setTagFilters] = useState<string[]>([]);
+    const [allTags, setAllTags] = useState<{ id: string; name: string; color: string }[]>([]);
+
+    useEffect(() => {
+        loadTasks();
+        tagService.getAllTags().then(tags => setAllTags(tags)).catch(() => {});
+    }, []);
+
+    const loadTasks = async () => {
+        try {
+            setLoading(true);
+            const response = await taskService.getMyTasks({ pageSize: 500 });
+            setTasks(response.tasks);
+        } catch (error) {
+            message.error('Failed to load tasks');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filter tasks
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(t => {
+            if (statusFilters.length > 0 && !statusFilters.includes(t.status)) return false;
+            if (priorityFilters.length > 0 && !priorityFilters.includes(t.priority)) return false;
+            if (tagFilters.length > 0) {
+                const taskTagIds = (t as any).taskTags?.map((tt: any) => tt.tagId || tt.tag?.id) || [];
+                if (!tagFilters.some(tf => taskTagIds.includes(tf))) return false;
+            }
+            return true;
+        });
+    }, [tasks, statusFilters, priorityFilters, tagFilters]);
+
+    const hasActiveFilters = statusFilters.length > 0 || priorityFilters.length > 0 || tagFilters.length > 0;
+
+    // Build a map: dateStr -> Task[]
+    const tasksByDate = useMemo(() => {
+        const map: Record<string, Task[]> = {};
+        filteredTasks.forEach(task => {
+            if (task.dueDate) {
+                const d = new Date(task.dueDate);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (!map[key]) map[key] = [];
+                map[key].push(task);
+            }
+        });
+        return map;
+    }, [filteredTasks]);
+
+    // Stats
+    const totalWithDue = filteredTasks.filter(t => t.dueDate).length;
+    const overdueCount = filteredTasks.filter(t => {
+        if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
+        return new Date(t.dueDate) < new Date(new Date().toDateString());
+    }).length;
+
+    const handleDateSelect = (date: Dayjs) => {
+        const dateStr = date.format('YYYY-MM-DD');
+        const tasksForDate = tasksByDate[dateStr];
+        if (tasksForDate && tasksForDate.length > 0) {
+            setSelectedDate(dateStr);
+            setIsModalVisible(true);
+        }
+    };
+
+    const isOverdue = (task: Task) => {
+        if (!task.dueDate || task.status === 'DONE' || task.status === 'CANCELLED') return false;
+        return new Date(task.dueDate) < new Date(new Date().toDateString());
+    };
+
+    const dateCellRender = (date: Dayjs) => {
+        const dateStr = date.format('YYYY-MM-DD');
+        const tasksForDate = tasksByDate[dateStr] || [];
+        if (tasksForDate.length === 0) return null;
+
+        return (
+            <div className="cal-cell-tasks">
+                {tasksForDate.slice(0, 3).map(task => {
+                    const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                    const overdue = isOverdue(task);
+                    return (
+                        <Tooltip
+                            key={task.id}
+                            title={
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{task.title}</div>
+                                    {task.project && <div style={{ fontSize: 11, opacity: 0.8 }}>{task.project.name}</div>}
+                                    <div style={{ fontSize: 11 }}>{statusCfg.label}{overdue ? ' — Overdue' : ''}</div>
+                                </div>
+                            }
+                        >
+                            <div
+                                className={`cal-task-bar ${overdue ? 'cal-task-overdue' : ''}`}
+                                style={{
+                                    borderLeftColor: overdue ? '#D94F4F' : statusCfg.dotColor,
+                                    backgroundColor: overdue ? '#FEF2F2' : `${statusCfg.dotColor}12`,
+                                }}
+                            >
+                                {task.project && (
+                                    <span className="cal-task-bar-project">{task.project.name}</span>
+                                )}
+                                <span className="cal-task-bar-title">{task.title}</span>
+                            </div>
+                        </Tooltip>
+                    );
+                })}
+                {tasksForDate.length > 3 && (
+                    <div className="cal-task-more">+{tasksForDate.length - 3} more</div>
+                )}
+            </div>
+        );
+    };
+
+    const selectedTasks = selectedDate ? (tasksByDate[selectedDate] || []) : [];
+
+    // Tasks for stat modals
+    const tasksWithDue = useMemo(() => filteredTasks.filter(t => t.dueDate), [filteredTasks]);
+    const overdueTasks = useMemo(() => filteredTasks.filter(t => {
+        if (!t.dueDate || t.status === 'DONE' || t.status === 'CANCELLED') return false;
+        return new Date(t.dueDate) < new Date(new Date().toDateString());
+    }), [filteredTasks]);
+    const statModalTasks = statModalType === 'due' ? tasksWithDue : statModalType === 'overdue' ? overdueTasks : [];
+
+    return (
+        <Layout className="calendar-layout">
+            <Sidebar />
+
+            <Layout>
+                <Content className="calendar-content">
+                    <div className="calendar-page-header">
+                        <div>
+                            <Title level={3} style={{ margin: 0, fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>Calendar</Title>
+                            <Text type="secondary" style={{ fontSize: 14, color: '#77787B' }}>Tasks from all your projects</Text>
+                        </div>
+                        <div className="shared-legend">
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.TODO.dotColor }} /><span>To Do</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.IN_PROGRESS.dotColor }} /><span>In Progress</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.DONE.dotColor }} /><span>Done</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: STATUS_CONFIG.HOLD.dotColor }} /><span>Hold</span></div>
+                            <div className="shared-legend-item"><div className="shared-legend-bar" style={{ backgroundColor: '#D94F4F' }} /><span>Overdue</span></div>
+                        </div>
+                    </div>
+
+                    {/* Filter Panel */}
+                    <Card className="cal-filter-panel" size="small" style={{ marginBottom: 16 }}>
+                        <div className="cal-filter-row">
+                            <div className="cal-filter-group">
+                                <FilterOutlined style={{ marginRight: 8, color: '#8c8c8c' }} />
+                                <span className="cal-filter-label">Status:</span>
+                                <Checkbox.Group
+                                    value={statusFilters}
+                                    onChange={(vals) => setStatusFilters(vals as string[])}
+                                    options={Object.entries(STATUS_CONFIG).map(([key, cfg]) => ({
+                                        label: <Tag color={cfg.tagColor}>{cfg.label}</Tag>,
+                                        value: key,
+                                    }))}
+                                />
+                            </div>
+                            <div className="cal-filter-group">
+                                <span className="cal-filter-label">Priority:</span>
+                                <Checkbox.Group
+                                    value={priorityFilters}
+                                    onChange={(vals) => setPriorityFilters(vals as string[])}
+                                    options={Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => ({
+                                        label: <span style={{ color: cfg.color, fontWeight: 500 }}>{cfg.label}</span>,
+                                        value: key,
+                                    }))}
+                                />
+                            </div>
+                            {allTags.length > 0 && (
+                                <div className="cal-filter-group">
+                                    <span className="cal-filter-label">Tags:</span>
+                                    <Select
+                                        mode="multiple"
+                                        placeholder="Select tags"
+                                        value={tagFilters}
+                                        onChange={setTagFilters}
+                                        style={{ minWidth: 200 }}
+                                        allowClear
+                                        maxTagCount={2}
+                                        options={allTags.map(tag => ({
+                                            label: <Tag color={tag.color}>{tag.name}</Tag>,
+                                            value: tag.id,
+                                        }))}
+                                    />
+                                </div>
+                            )}
+                            {hasActiveFilters && (
+                                <Button
+                                    icon={<ClearOutlined />}
+                                    size="small"
+                                    onClick={() => {
+                                        setStatusFilters([]);
+                                        setPriorityFilters([]);
+                                        setTagFilters([]);
+                                    }}
+                                >
+                                    Clear Filters
+                                </Button>
+                            )}
+                            {hasActiveFilters && (
+                                <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                                    Showing {filteredTasks.length} of {tasks.length} tasks
+                                </Text>
+                            )}
+                        </div>
+                    </Card>
+
+                    {/* Stats summary — removed per feedback U19 */}
+                    {/* <div className="cal-stats-row">
+                        <div className="cal-stat-item cal-stat-clickable" onClick={() => setStatModalType('due')}>
+                            <CalendarOutlined style={{ fontSize: 24, color: '#667eea' }} />
+                            <div>
+                                <div className="cal-stat-value">{totalWithDue}</div>
+                                <div className="cal-stat-label">Tasks with due date</div>
+                            </div>
+                        </div>
+                        <div className="cal-stat-item cal-stat-overdue cal-stat-clickable" onClick={() => setStatModalType('overdue')}>
+                            <CalendarOutlined style={{ fontSize: 24, color: '#cf1322' }} />
+                            <div>
+                                <div className="cal-stat-value" style={{ color: overdueCount > 0 ? '#cf1322' : undefined }}>{overdueCount}</div>
+                                <div className="cal-stat-label">Overdue</div>
+                            </div>
+                        </div>
+                    </div> */}
+
+                    <Spin spinning={loading}>
+                        <Card className="calendar-card">
+                            <Calendar
+                                cellRender={dateCellRender}
+                                onSelect={handleDateSelect}
+                            />
+                        </Card>
+                    </Spin>
+                </Content>
+            </Layout>
+
+            {/* Stat tasks modal (due / overdue) */}
+            <Modal
+                title={
+                    <Space>
+                        <CalendarOutlined />
+                        <span>{statModalType === 'overdue' ? 'Overdue Tasks' : 'Tasks with Due Date'}</span>
+                        <Badge count={statModalTasks.length} style={{ backgroundColor: statModalType === 'overdue' ? '#cf1322' : '#667eea' }} />
+                    </Space>
+                }
+                open={statModalType !== null}
+                onCancel={() => setStatModalType(null)}
+                footer={null}
+                width={560}
+            >
+                <div className="cal-modal-tasks">
+                    {statModalTasks.length === 0 ? (
+                        <Text type="secondary" style={{ display: 'block', textAlign: 'center', padding: 24 }}>No tasks</Text>
+                    ) : (
+                        statModalTasks.map(task => {
+                            const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                            const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                            const overdue = isOverdue(task);
+                            return (
+                                <div key={task.id} className="cal-modal-task-card cal-modal-task-clickable" onClick={() => { setStatModalType(null); setSelectedTaskId(task.id); setTaskDetailVisible(true); }}>
+                                    <div className="cal-modal-task-color" style={{ background: overdue ? '#D94F4F' : statusCfg.color }} />
+                                    <div className="cal-modal-task-body">
+                                        {task.project && (
+                                            <div className="cal-modal-task-project">
+                                                <FolderOutlined />
+                                                <span>{task.project.name}</span>
+                                            </div>
+                                        )}
+                                        <div className="cal-modal-task-title">{task.title}</div>
+                                        <div className="cal-modal-task-meta">
+                                            <Tag color={overdue ? 'red' : statusCfg.tagColor}>
+                                                {overdue ? 'Overdue' : statusCfg.label}
+                                            </Tag>
+                                            <span
+                                                className="cal-modal-priority-badge"
+                                                style={{
+                                                    color: priorityCfg.color,
+                                                    background: priorityCfg.bg,
+                                                    border: `1px solid ${priorityCfg.color}30`,
+                                                }}
+                                            >
+                                                {priorityCfg.label}
+                                            </span>
+                                            {task.assignee && (
+                                                <span className="cal-modal-task-assignee">
+                                                    <UserOutlined /> {task.assignee.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {task.dueDate && (
+                                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                                Due: {new Date(task.dueDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </Text>
+                                        )}
+                                        {task.progress > 0 && (
+                                            <Progress percent={task.progress} size="small" strokeColor={overdue ? '#D94F4F' : statusCfg.color} />
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </Modal>
+
+            {/* Tasks for selected date modal */}
+            <Modal
+                title={
+                    <Space>
+                        <CalendarOutlined />
+                        <span>Tasks on {selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
+                        <Badge count={selectedTasks.length} style={{ backgroundColor: '#667eea' }} />
+                    </Space>
+                }
+                open={isModalVisible}
+                onCancel={() => setIsModalVisible(false)}
+                footer={null}
+                width={560}
+            >
+                <div className="cal-modal-tasks">
+                    {selectedTasks.map(task => {
+                        const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+                        const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.MEDIUM;
+                        return (
+                            <div key={task.id} className="cal-modal-task-card cal-modal-task-clickable" onClick={() => { setIsModalVisible(false); setSelectedTaskId(task.id); setTaskDetailVisible(true); }}>
+                                <div className="cal-modal-task-color" style={{ background: statusCfg.color }} />
+                                <div className="cal-modal-task-body">
+                                    {task.project && (
+                                        <div className="cal-modal-task-project">
+                                            <FolderOutlined />
+                                            <span>{task.project.name}</span>
+                                        </div>
+                                    )}
+                                    <div className="cal-modal-task-title">{task.title}</div>
+                                    <div className="cal-modal-task-meta">
+                                        <Tag color={statusCfg.tagColor}>{statusCfg.label}</Tag>
+                                        <span
+                                            className="cal-modal-priority-badge"
+                                            style={{
+                                                color: priorityCfg.color,
+                                                background: priorityCfg.bg,
+                                                border: `1px solid ${priorityCfg.color}30`,
+                                            }}
+                                        >
+                                            {priorityCfg.label}
+                                        </span>
+                                        {task.assignee && (
+                                            <span className="cal-modal-task-assignee">
+                                                <UserOutlined /> {task.assignee.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {task.progress > 0 && (
+                                        <Progress percent={task.progress} size="small" strokeColor={statusCfg.color} />
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </Modal>
+
+            <TaskDetailModal
+                visible={taskDetailVisible}
+                taskId={selectedTaskId}
+                onClose={() => { setTaskDetailVisible(false); setSelectedTaskId(null); }}
+                onUpdate={loadTasks}
+            />
+        </Layout>
+    );
+};

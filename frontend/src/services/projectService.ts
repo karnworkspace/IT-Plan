@@ -11,6 +11,7 @@ export interface CreateProjectInput {
   color?: string;
   icon?: string;
   status?: string;
+  projectType?: 'PROJECT' | 'INTERNAL';
   startDate?: string;
   endDate?: string;
 }
@@ -43,6 +44,14 @@ export const projectService = {
     if (params?.search) queryParams.append('search', params.search);
 
     const response = await api.get(`/projects?${queryParams.toString()}`);
+    return response.data.data;
+  },
+
+  /**
+   * Get my projects (assigned/owned)
+   */
+  async getMyProjects(params?: { status?: string; projectType?: string; page?: number; pageSize?: number }) {
+    const response = await api.get('/projects/my', { params });
     return response.data.data;
   },
 

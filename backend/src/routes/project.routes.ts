@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { authenticate } from '../middlewares/auth.middleware';
+import { authenticate, requireManager } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
 import {
   getTimeline,
+  getMyProjects,
   getProjects,
   getProject,
   createProject,
@@ -34,6 +35,13 @@ router.use(authenticate);
 router.get('/timeline', getTimeline);
 router.patch('/reorder', reorderProjects);
 
+/**
+ * @route   GET /api/v1/projects/my
+ * @desc    Get projects where current user is owner or member
+ * @access  Private
+ */
+router.get('/my', getMyProjects);
+
 router.get('/', getProjects);
 
 /**
@@ -41,7 +49,18 @@ router.get('/', getProjects);
  * @desc    Create a new project
  * @access  Private
  */
-router.post('/', createProject);
+// MEMBER สร้างได้เฉพาะ INTERNAL, MANAGER/ADMIN สร้างได้ทุกประเภท
+router.post('/', (req, res, next) => {
+  const authReq = req as any;
+  const projectType = req.body.projectType || 'PROJECT';
+  if (projectType === 'INTERNAL') {
+    // ทุก role สร้าง Internal ได้
+    next();
+  } else {
+    // PROJECT ต้องเป็น MANAGER ขึ้นไป
+    requireManager(req, res, next);
+  }
+}, createProject);
 
 /**
  * @route   GET /api/v1/projects/:id/stats

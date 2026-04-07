@@ -13,6 +13,7 @@ import {
   convertToSubtask,
   convertToTask,
   getTasksByTag,
+  getStatusChangeLogs,
 } from '../controllers/task.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { validateUUID } from '../middlewares/validate.middleware';
@@ -39,6 +40,7 @@ router.get('/tasks/by-tag/:tagId', validateUUID('tagId'), getTasksByTag);
 // Individual task routes
 router.get('/tasks/:id', validateUUID('id'), getTask);
 router.get('/tasks/:id/subtasks', validateUUID('id'), getSubTasks);
+router.get('/tasks/:id/status-logs', validateUUID('id'), getStatusChangeLogs);
 router.put('/tasks/:id', validateUUID('id'), updateTask);
 router.delete('/tasks/:id', validateUUID('id'), deleteTask);
 router.patch('/tasks/:id/status', validateUUID('id'), updateTaskStatus);

@@ -1,4 +1,5 @@
 import prisma from '../config/database';
+import activityLogService from './activityLog.service';
 
 // Types
 export interface CreateCommentInput {
@@ -95,7 +96,7 @@ export class CommentService {
       throw new Error('Task not found');
     }
 
-    return await prisma.comment.create({
+    const comment = await prisma.comment.create({
       data: {
         taskId: data.taskId,
         userId: data.userId,
@@ -113,6 +114,19 @@ export class CommentService {
         attachments: true,
       },
     });
+
+    // Log activity
+    await activityLogService.createActivityLog({
+      userId: data.userId,
+      action: 'COMMENTED',
+      entityType: 'comment',
+      entityId: comment.id,
+      projectId: task.projectId,
+      taskId: data.taskId,
+      metadata: { content: data.content?.substring(0, 100) },
+    });
+
+    return comment;
   }
 
   /**
@@ -179,6 +193,17 @@ export class CommentService {
 
     await prisma.comment.delete({
       where: { id },
+    });
+
+    // Log activity
+    await activityLogService.createActivityLog({
+      userId,
+      action: 'DELETED',
+      entityType: 'comment',
+      entityId: id,
+      projectId: comment.task.project.id,
+      taskId: comment.task.id,
+      metadata: { content: comment.content?.substring(0, 100) },
     });
 
     return true;

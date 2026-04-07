@@ -57,6 +57,7 @@ model User {
   activityLogs      ActivityLog[]
   groupMembers      GroupMember[]
   taskAssignments   TaskAssignee[]
+  statusChangeLogs  StatusChangeLog[]
 
   @@map("users")
 }
@@ -88,9 +89,12 @@ model Project {
   startDate   DateTime?
   endDate     DateTime?
 
+  // Project classification
+  projectType   String   @default("PROJECT") // "PROJECT" (report ผบห.) | "INTERNAL" (งานภายใน)
+
   // Annual Plan fields
   projectCode   String?  // e.g. "PP26000-01-00"
-  category      String?  // "CONSTRUCTION_OPERATION", "SALES_MARKETING", "CORPORATE", "PRODUCT", "CUSTOMER_SERVICE"
+  category      String?  // "CONSTRUCTION_OPERATION", "SALES_MARKETING", "CORPORATE", "PRODUCT", "CUSTOMER_SERVICE", "INFRASTRUCTURE_NETWORK"
   businessOwner String?  // Business Owner name
   sortOrder     Int      @default(0)
   timeline      Json?    // Monthly plan: { "2026": { "1": "planned", "2": "actual", ... } }
@@ -111,6 +115,9 @@ model Project {
   groupProjects GroupProject[]
 
   @@index([ownerId])
+  @@index([status])
+  @@index([projectType])
+  @@index([category])
   @@map("projects")
 }
 
@@ -171,6 +178,7 @@ model Task {
   dailyUpdates DailyUpdate[]
   notifications Notification[]
   activityLogs ActivityLog[]
+  statusChangeLogs StatusChangeLog[]
 
   taskAssignees TaskAssignee[]
   taskTags      TaskTag[]
@@ -398,9 +406,32 @@ model GroupProject {
 }
 
 // ============================================
+// Status Change Log (Mandatory comment on status change)
+// ============================================
+
+model StatusChangeLog {
+  id         String   @id @default(uuid())
+  taskId     String
+  userId     String
+  fromStatus String
+  toStatus   String
+  note       String   // mandatory comment why status changed
+  createdAt  DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("status_change_logs")
+}
+
+// ============================================
 // Type Constants (for TypeScript reference)
 // ============================================
-// UserRole: "ADMIN" | "MEMBER"
+// UserRole: "ADMIN" | "MANAGER" | "MEMBER"
+// ProjectType: "PROJECT" | "INTERNAL"
 // ProjectStatus: "ACTIVE" | "DELAY" | "COMPLETED" | "HOLD" | "CANCELLED" | "POSTPONE" | "ARCHIVED"
 // ProjectMemberRole: "OWNER" | "ADMIN" | "MEMBER"
 // TaskStatus: "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE" | "BLOCKED" | "HOLD" | "CANCELLED"

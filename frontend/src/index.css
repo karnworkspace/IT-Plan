@@ -1,3 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --sena-green: #32BCAD;
+  --sena-green-light: #89D0C8;
+  --sena-green-5: rgba(50, 188, 173, 0.05);
+  --sena-green-12: rgba(50, 188, 173, 0.12);
+  --sena-green-dark: #1a7a6e;
+  --sena-gray: #77787B;
+  --sena-black: #000000;
+  --status-red: #D94F4F;
+  --status-red-light: rgba(217, 79, 79, 0.10);
+  --status-amber: #E8A838;
+  --status-amber-light: #FFF3DC;
+  --status-blue: #2E7D9B;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,7 +22,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+  font-family: 'Sarabun', 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;

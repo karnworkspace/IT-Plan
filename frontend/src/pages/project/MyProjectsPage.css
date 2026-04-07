@@ -1,0 +1,20 @@
+/* MyProjectsPage — Minimal additions (reuses ProjectsPage.css) */
+
+.my-projects-status-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.my-projects-status-filter .ant-checkbox-wrapper {
+    margin-inline-start: 0;
+}
+
+/* Left border color bar for list view rows */
+.project-list-status-bar {
+    width: 4px;
+    height: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}

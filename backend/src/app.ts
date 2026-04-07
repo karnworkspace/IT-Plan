@@ -21,6 +21,18 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files as static
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+// Request logging (slow requests >1s and errors)
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        if (duration > 1000 || res.statusCode >= 400) {
+            console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+        }
+    });
+    next();
+});
+
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
 

@@ -33,6 +33,11 @@ import {
     SwapOutlined,
     EditOutlined,
     DeleteOutlined,
+    FilePdfOutlined,
+    FileExcelOutlined,
+    VideoCameraOutlined,
+    FileOutlined,
+    DownloadOutlined,
 } from '@ant-design/icons';
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -804,19 +809,55 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                                         </div>
                                                         {comment.attachments && comment.attachments.length > 0 && (
                                                             <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                                                                <Image.PreviewGroup>
-                                                                    {comment.attachments.map(att => (
-                                                                        <Image
+                                                                {/* Image attachments — preview group */}
+                                                                {comment.attachments.some(att => att.mimetype?.startsWith('image/')) && (
+                                                                    <Image.PreviewGroup>
+                                                                        {comment.attachments.filter(att => att.mimetype?.startsWith('image/')).map(att => (
+                                                                            <Image
+                                                                                key={att.id}
+                                                                                src={getImageUrl(att)}
+                                                                                alt={att.filename}
+                                                                                width={100}
+                                                                                height={75}
+                                                                                style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #e8e8e8' }}
+                                                                                fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iOTAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSI2MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWEiIGZvbnQtc2l6ZT0iMTIiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=="
+                                                                            />
+                                                                        ))}
+                                                                    </Image.PreviewGroup>
+                                                                )}
+                                                                {/* Non-image attachments — file cards */}
+                                                                {comment.attachments.filter(att => !att.mimetype?.startsWith('image/')).map(att => {
+                                                                    const isPdf = att.mimetype === 'application/pdf';
+                                                                    const isExcel = att.mimetype?.includes('spreadsheet') || att.mimetype?.includes('excel');
+                                                                    const isVideo = att.mimetype?.startsWith('video/');
+                                                                    const icon = isPdf ? <FilePdfOutlined style={{ color: '#D94F4F', fontSize: 20 }} />
+                                                                        : isExcel ? <FileExcelOutlined style={{ color: '#32BCAD', fontSize: 20 }} />
+                                                                        : isVideo ? <VideoCameraOutlined style={{ color: '#2E7D9B', fontSize: 20 }} />
+                                                                        : <FileOutlined style={{ color: '#77787B', fontSize: 20 }} />;
+                                                                    return (
+                                                                        <a
                                                                             key={att.id}
-                                                                            src={getImageUrl(att)}
-                                                                            alt={att.filename}
-                                                                            width={100}
-                                                                            height={75}
-                                                                            style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #e8e8e8' }}
-                                                                            fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iOTAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSI2MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWEiIGZvbnQtc2l6ZT0iMTIiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=="
-                                                                        />
-                                                                    ))}
-                                                                </Image.PreviewGroup>
+                                                                            href={getImageUrl(att)}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            style={{
+                                                                                display: 'flex', alignItems: 'center', gap: 8,
+                                                                                padding: '8px 12px', background: '#F8FAFC',
+                                                                                border: '1px solid #E2E8F0', borderRadius: 8,
+                                                                                textDecoration: 'none', color: '#0F172A',
+                                                                                fontSize: 12, maxWidth: 200, transition: 'all 0.2s',
+                                                                            }}
+                                                                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#32BCAD'; (e.currentTarget as HTMLElement).style.background = '#F0FDF9'; }}
+                                                                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#E2E8F0'; (e.currentTarget as HTMLElement).style.background = '#F8FAFC'; }}
+                                                                        >
+                                                                            {icon}
+                                                                            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                                                                                {att.filename}
+                                                                            </span>
+                                                                            <DownloadOutlined style={{ color: '#94A3B8', fontSize: 12, flexShrink: 0 }} />
+                                                                        </a>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         )}
                                                         <div className="chat-bubble-actions">

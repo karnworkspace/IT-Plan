@@ -7,14 +7,25 @@ import './LoginPage.css';
 
 const { Title, Text } = Typography;
 
+const REMEMBER_KEY = 'taskflow_remember_email';
+
 export const LoginPage: React.FC = () => {
     const { loginWithEmail, isLoading, clearError } = useAuthStore();
+
+    const savedEmail = localStorage.getItem(REMEMBER_KEY);
 
     const [emailForm] = Form.useForm();
 
     const handleEmailLogin = async (values: { email: string; password: string; remember: boolean }) => {
         clearError();
         try {
+            // Remember me: save or clear email
+            if (values.remember) {
+                localStorage.setItem(REMEMBER_KEY, values.email);
+            } else {
+                localStorage.removeItem(REMEMBER_KEY);
+            }
+
             await loginWithEmail(values.email, values.password, values.remember);
             message.success('Login successful!');
             window.location.href = import.meta.env.BASE_URL + 'dashboard';
@@ -44,6 +55,7 @@ export const LoginPage: React.FC = () => {
                         form={emailForm}
                         layout="vertical"
                         onFinish={handleEmailLogin}
+                        initialValues={{ email: savedEmail || '', remember: !!savedEmail }}
                         style={{ marginTop: 32 }}
                     >
                         <Form.Item

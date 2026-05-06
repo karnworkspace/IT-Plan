@@ -261,8 +261,19 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
       return sendError(res, 'Note is required when changing task status', 400);
     }
 
-    // Auto-calculate progress from status if not provided
-    const progress = rawProgress !== undefined ? rawProgress : (STATUS_PROGRESS[status] ?? 0);
+    // Auto-calculate progress from status if not explicitly provided
+    let progress: number;
+    if (rawProgress !== undefined) {
+      progress = rawProgress;
+    } else if (status === 'DONE') {
+      progress = 100;
+    } else if (status === 'HOLD' || status === 'CANCELLED') {
+      // Keep current progress — fetch from existing task
+      const existing = await prisma.task.findUnique({ where: { id }, select: { progress: true } });
+      progress = existing?.progress ?? 0;
+    } else {
+      progress = STATUS_PROGRESS[status] ?? 0;
+    }
 
     if (progress < 0 || progress > 100) {
       return sendError(res, 'Progress must be between 0 and 100', 400);

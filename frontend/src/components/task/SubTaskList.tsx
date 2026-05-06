@@ -110,7 +110,8 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
             return;
         }
         const { subTaskId, toStatus } = statusChangeModal;
-        const progress = toStatus === 'DONE' ? 100 : toStatus === 'IN_PROGRESS' ? 50 : 0;
+        // Let backend decide progress: DONE=100, HOLD/CANCELLED=keep, others=default
+        const progress = toStatus === 'DONE' ? 100 : undefined;
         setStatusChangeLoading(true);
         try {
             await taskService.updateTaskStatus(subTaskId, { status: toStatus, progress, note: statusChangeNote.trim() });

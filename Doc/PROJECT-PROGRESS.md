@@ -342,6 +342,11 @@
 - updateTask: checks taskAssignees N:M (was assigneeId only)
 - canAccessTask aligned with A1: MEMBER = assigned only (no creator fallback for reads)
 
+**H2 — API Pagination Param Consistency:**
+- All paginated controllers accept both `pageSize` and `limit` (limit takes precedence)
+- Fixed 5 endpoints: projects, my-projects, project tasks, my-tasks, tasks-by-tag
+- Impact: Dashboard/ProjectDetail now receive correct number of items (was silently capped to defaults)
+
 ---
 
 ## Known Issues
@@ -349,7 +354,7 @@
 1. Prisma 5.10.2 (7.x available but needs migration)
 2. #47 Daily Update attachment — partial (needs schema change for per-update attachments)
 3. ~~Secondary endpoints authz~~ ✅ Done (H1)
-4. pageSize vs limit param mismatch — deferred
+4. ~~pageSize vs limit param mismatch~~ ✅ Done (H2)
 5. No automated test suite in active repo
 6. Manager UI: some buttons visible but backend may 403 (project member role not checked in UI)
 7. STATUS_PROGRESS constant has stale HOLD:0/CANCELLED:0 (bypassed by helper, no functional impact)

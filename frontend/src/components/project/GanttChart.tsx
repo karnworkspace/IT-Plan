@@ -374,7 +374,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 
             {/* Header */}
             <div style={{ display: 'flex', minWidth: weeks.length * WEEK_WIDTH + TASK_NAME_WIDTH + DATE_COL_WIDTH }}>
-                {/* Task name column header */}
+                {/* Task name column header — sticky */}
                 <div style={{
                     width: TASK_NAME_WIDTH,
                     minWidth: TASK_NAME_WIDTH,
@@ -383,12 +383,15 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                     borderBottom: '2px solid #e8e8e8',
                     background: '#fafafa',
                     fontWeight: 600,
-                    fontSize: '13px'
+                    fontSize: '13px',
+                    position: 'sticky',
+                    left: 0,
+                    zIndex: 3,
                 }}>
                     Task Name
                 </div>
 
-                {/* Date column header */}
+                {/* Date column header — sticky */}
                 <div style={{
                     width: DATE_COL_WIDTH,
                     minWidth: DATE_COL_WIDTH,
@@ -398,7 +401,10 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                     background: '#fafafa',
                     fontWeight: 600,
                     fontSize: '13px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    position: 'sticky',
+                    left: TASK_NAME_WIDTH,
+                    zIndex: 3,
                 }}>
                     Duration
                 </div>
@@ -458,7 +464,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                         transition: 'background 0.2s'
                     }}
                 >
-                    {/* Task name cell */}
+                    {/* Task name cell — sticky */}
                     <div style={{
                         width: TASK_NAME_WIDTH,
                         minWidth: TASK_NAME_WIDTH,
@@ -467,7 +473,11 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                         borderBottom: '1px solid #f0f0f0',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 10
+                        gap: 10,
+                        position: 'sticky',
+                        left: 0,
+                        zIndex: 2,
+                        background: idx % 2 === 0 ? '#fff' : '#fafafa',
                     }}>
                         <div style={{
                             width: 10,
@@ -502,7 +512,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                         </Popover>
                     </div>
 
-                    {/* Date column */}
+                    {/* Date column — sticky */}
                     <div style={{
                         width: DATE_COL_WIDTH,
                         minWidth: DATE_COL_WIDTH,
@@ -511,7 +521,11 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                         borderBottom: '1px solid #f0f0f0',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        position: 'sticky',
+                        left: TASK_NAME_WIDTH,
+                        zIndex: 2,
+                        background: idx % 2 === 0 ? '#fff' : '#fafafa',
                     }}>
                         <Tag
                             color={STATUS_COLORS[task.status]?.bg}

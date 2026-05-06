@@ -42,24 +42,16 @@ coverage/
 # Data export files
 *_export.json
 
-# Internal review documents
-riskassetment.md
+# Archived / unused files
+_not-used/
 
-# Deploy scripts & keys (server-only)
+# Deploy scripts (server-only)
 deploy/
-key-dontpushgit/
 
 # Cloudflare Tunnel docs (local only)
 CLOUDFLARE-TUNNEL.md
 
-# Database admin credentials (local only)
-DATABASE-ADMIN.md
-
-# Server deployment guide (local only)
-readbeforeserver.md
-
 # Internal files (not for git)
-Data-edit/
 Manual/
-manualuser.md
+SENA Design Template/
 .claude/skills/

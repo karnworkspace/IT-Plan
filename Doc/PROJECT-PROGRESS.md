@@ -1,6 +1,6 @@
 # Project Progress - Task Management System
 
-**Last Updated:** 2026-02-26
+**Last Updated:** 2026-05-06
 **Status:** ✅ Production — Deployed on Internal Server
 **Phase 1-11 Archive:** `Doc/PROGRESS-ARCHIVE.md`
 
@@ -20,6 +20,10 @@
 | Annual Plan Timeline | ✅ 100% |
 | Desktop Responsive | ✅ 100% |
 | Production Deployment (Internal Server) | ✅ Done |
+| V2 Refactor — Sprint P0-3 | ✅ 100% |
+| SENA Design System | ✅ 100% |
+| Internal Projects + My Tasks Fix | ✅ 100% |
+| Remember Me Login | ✅ 100% |
 
 ### Dev Environment
 - **Docker (แนะนำ):** `docker-compose up -d`
@@ -165,6 +169,81 @@
 5. URL: `http://172.22.22.11:4200/taskflow/`
 
 **Deploy workflow:** `git pull origin main` → `docker compose -f docker-compose.prod.yml up -d --build`
+
+---
+
+## Phase 18: Tag Enhancement + ETL + Bugfix ✅ (2026-02-26)
+
+1. **Inline Tag Creation** — สร้าง tag ได้ตรงใน TaskDetailModal
+2. **Tag Popover** — hover tag badge แสดงรายละเอียด
+3. **Smart Timeline Bars** — ปรับ bar ตาม time period อัตโนมัติ
+4. **Tag Tasks Page** — คลิก tag badge → Kanban view แสดง tasks ทั้งหมดที่มี tag นั้น
+5. **Timeline Fix** — word-wrap ชื่อ project ยาว + nowrap columns
+6. **ETL Scripts** — import JO Excel → 3 projects (CMS, AMS, SF) + JSON seed script
+7. **Production Seed** — JS seed script สำหรับ production container
+
+---
+
+## Phase 19: V2 Refactor — Sprint P0-3 ✅ (2026-04-06)
+
+**Sprint P0: Role & Status Foundation**
+1. **Role 3 ระดับ** — ADMIN / MANAGER / MEMBER พร้อม permission matrix
+2. **Mandatory Status Comment** — บังคับใส่ comment เมื่อเปลี่ยน status
+3. **Cancel Logic** — task cancellation workflow
+4. **Project Type** — เพิ่ม type classification
+
+**Sprint 1: UI/UX Quick Wins**
+5. **Layout Restructure** — ปรับโครงสร้าง layout
+6. **UI/UX Batch Improvements** — batch 1-2 quick wins
+
+**Sprint 2: Feature Expansion**
+7. **My Projects Page** — หน้ารวม projects ของตัวเอง
+8. **List View** — เพิ่ม view mode แบบ list
+9. **Multi-filter** — filter หลายเงื่อนไขพร้อมกัน
+10. **Subtask Enhancements** — ปรับปรุง subtask (แสดงทั้ง view/edit mode)
+11. **Hold Logic** — task hold/resume workflow
+12. **Calendar Filter** — กรอง calendar ตามเงื่อนไข
+13. **File Attachment 20MB** — รองรับไฟล์แนบสูงสุด 20MB
+14. **Activity Log** — บันทึก activity history
+15. **Permissions** — fine-grained permission control
+16. **Tag CRUD UI** — จัดการ tags ผ่าน UI
+17. **Dashboard Chart** — กราฟสถิติใน dashboard
+18. **Global Search** — ค้นหาข้ามหน้า
+19. **Bulk Action** — เลือกทำหลาย tasks พร้อมกัน
+20. **Category** — จัดหมวดหมู่ project
+
+**Sprint 3: Performance & Advanced**
+21. **Gantt Chart** — drag & drop gantt view
+22. **Responsive** — ปรับ responsive layout
+23. **DB Indexing** — เพิ่ม database indexes
+24. **Rate Limiting** — API rate limiter
+25. **Backup Scripts** — database backup automation
+
+**Bugfixes:**
+- Timeline bar colors by time period + project status badge
+- Sidebar collapse button bigger + visible
+- Time remaining "Delay จาก Plan X วัน" in red
+
+**Frontend Refactor:**
+- Reorganize pages/components into feature-based subfolders
+
+---
+
+## Phase 20: SENA Design System + Internal Projects ✅ (2026-04-07)
+
+1. **SENA Development Design System** — apply CI brand ทั้ง app (colors, typography, spacing)
+2. **Timeline Page Polish** — SENA branded, status-colored badges, hover effects
+3. **SENA Design Polish** — fix My Tasks logic + UI refinement
+4. **Internal Projects Page** — หน้าแสดง internal projects + member modal cleanup
+5. **PDF/Excel/Video Attachments** — แสดง file card แทน "No Image"
+6. **TypeScript Fixes** — resolve 5 TS errors blocking production build
+7. **CalendarPage Cleanup** — remove unused vars
+
+---
+
+## Phase 21: Login UX ✅ (2026-04-07)
+
+1. **Remember Me** — save email to localStorage, auto-fill on next login
 
 ---
 

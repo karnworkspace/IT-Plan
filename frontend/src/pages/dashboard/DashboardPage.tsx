@@ -136,7 +136,7 @@ const ACTION_COLORS: Record<string, string> = {
     UPDATED: '#2E7D9B',
     DELETED: '#D94F4F',
     ASSIGNED: '#8B5CF6',
-    COMPLETED: '#32BCAD',
+    COMPLETED: '#2E7D9B',
     COMMENTED: '#E8A838',
 };
 

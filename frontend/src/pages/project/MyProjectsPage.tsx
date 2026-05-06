@@ -67,7 +67,7 @@ const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
 const STATUS_OPTIONS: { value: ProjectStatus; label: string; color: string }[] = [
     { value: 'ACTIVE', label: 'Active', color: '#32BCAD' },
     { value: 'DELAY', label: 'Delay', color: '#D94F4F' },
-    { value: 'COMPLETED', label: 'Completed', color: '#32BCAD' },
+    { value: 'COMPLETED', label: 'Completed', color: '#2E7D9B' },
     { value: 'HOLD', label: 'Hold', color: '#E8A838' },
     { value: 'CANCELLED', label: 'Cancelled', color: '#77787B' },
 ];

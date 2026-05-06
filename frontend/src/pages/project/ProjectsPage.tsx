@@ -104,7 +104,7 @@ const StatCardItem = ({ title, value, icon, iconClass, borderClass }: {
 const STATUS_FILTER_COLORS: Record<string, string> = {
     ACTIVE: '#32BCAD',
     DELAY: '#D94F4F',
-    COMPLETED: '#32BCAD',
+    COMPLETED: '#2E7D9B',
     HOLD: '#E8A838',
     CANCELLED: '#77787B',
 };
@@ -124,7 +124,7 @@ const getStatusProgressColor = (status: string) => {
     switch (status) {
         case 'ACTIVE': return '#32BCAD';
         case 'DELAY': return '#D94F4F';
-        case 'COMPLETED': return '#32BCAD';
+        case 'COMPLETED': return '#2E7D9B';
         case 'HOLD': return '#E8A838';
         default: return '#77787B';
     }
@@ -144,7 +144,7 @@ const getStatusIconColor = (status: string) => {
     switch (status) {
         case 'ACTIVE': return '#32BCAD';
         case 'DELAY': return '#D94F4F';
-        case 'COMPLETED': return '#32BCAD';
+        case 'COMPLETED': return '#2E7D9B';
         case 'HOLD': return '#E8A838';
         default: return '#77787B';
     }
@@ -394,7 +394,7 @@ export const ProjectsPage: React.FC = () => {
     const BOARD_COLUMNS = [
         { status: 'ACTIVE', label: 'Active', dotColor: '#32BCAD' },
         { status: 'DELAY', label: 'Delay', dotColor: '#D94F4F' },
-        { status: 'COMPLETED', label: 'Completed', dotColor: '#32BCAD' },
+        { status: 'COMPLETED', label: 'Completed', dotColor: '#2E7D9B' },
         { status: 'HOLD', label: 'Hold', dotColor: '#E8A838' },
         { status: 'CANCELLED', label: 'Cancelled', dotColor: '#77787B' },
     ];

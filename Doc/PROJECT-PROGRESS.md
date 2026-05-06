@@ -291,6 +291,48 @@
 - Status dots circular (already correct)
 - COMPLETED color standardized to #2E7D9B across 7 hardcoded locations
 
+## Phase 22: UAT Feedback Fix — Sprint B ✅ (2026-05-06)
+
+**B1/B2/B3 — Dashboard + Sidebar** (#6,#7,#8,#11):
+- Dashboard overflow fix: max-width + overflow-x:hidden
+- My Active Tasks row clickable (title + entire row)
+- Sidebar toggle button: SENA teal visible style
+
+**B4 — My Tasks List View** (#37 verified, #39 verified, #36 verified, #40):
+- List View + sorting + multi-filter already existed (verified)
+- Backend getMyTasks: added taskAssignees + _count.subTasks + subTasks statuses
+- Subtask count: done/total ratio on Kanban cards (ClickUp-style)
+- Assignees column sorter added
+
+**B7 — Daily Updates Placement** (#43):
+- Moved Daily Updates section after Description (before Sub-tasks)
+
+**B8 — Subtask Enhancement** (#51 verified, #52 verified, #55):
+- Start/Due Date + Assignee in add form (verified existing)
+- Inline title editing: double-click to edit, save on Enter/blur
+
+**B9 — Gantt Improvements** (#62, #59 verified):
+- Sticky columns: Task Name + Duration frozen on horizontal scroll
+- Hover activity preview already existed (verified)
+
+**B10 — Project Detail Stat Cards** (#33):
+- Clickable stat cards: filter + scroll to task section
+- Board View filters via boardTasksByStatus
+- Accessibility: role="button", tabIndex, keyboard Enter
+- Fixed || → ?? for stat values (0 no longer replaced by fallback)
+
+**B11 — My Projects Sort** (#29):
+- All list view columns sortable
+- Default sort by Status (Active → Delay → Hold → Completed → Cancelled)
+
+**B12 — Task Card Assignee** (#35 verified):
+- Assignee display already existed in card footer (verified)
+
+**B13 — Hold/Cancelled Progress** (#42):
+- resolveProgressForStatus() helper: DONE=100, HOLD/CANCELLED=preserve, others=default
+- Applied to both updateTask and updateTaskStatus endpoints
+- SubTaskList: delegate progress to backend
+
 ---
 
 ## Known Issues
@@ -300,20 +342,20 @@
 3. Secondary endpoints (comments, subtasks, status logs) — authz hardening deferred
 4. pageSize vs limit param mismatch — deferred
 5. No automated test suite in active repo
+6. Manager UI: some buttons visible but backend may 403 (project member role not checked in UI)
+7. STATUS_PROGRESS constant has stale HOLD:0/CANCELLED:0 (bypassed by helper, no functional impact)
 
 ---
 
 ## Recommended Next Actions
 
-### Sprint B (UAT Feedback — next)
-- Dashboard layout: Quick Access + Team Activity ย้ายลงล่าง
-- Sidebar collapse button ชัดเจน
-- My Tasks table/list view + sorting
-- Multi-filter: status, priority, tags
-- Subtask: dates, assignee, edit name
-- Gantt: sticky columns, hover activity
-- Hold/Cancelled progress logic
-- Status color + Overdue
+### Sprint C (UAT Feedback — UI Polish & Branding)
+- Label/text changes: "IT Overall", "Project Overall", "View My Projects"
+- Category "Infrastructure and Network"
+- Status color consistency
+- Calendar: remove stat cards, color by status, filter
+- Subtask: remove tags, "Move to task" label, status color badge
+- Gantt drag → auto update + revision log
 
 ### Optional / Future
 - ~~Production deployment (GitHub → Server)~~ ✅ Done
@@ -321,3 +363,4 @@
 - Email notifications
 - WCAG AA accessibility audit
 - Caching strategies
+- Authz hardening for secondary endpoints

@@ -11,6 +11,26 @@ import prisma from '../config/database';
 import { TASK_STATUSES, PRIORITIES, STATUS_PROGRESS } from '../constants';
 
 /**
+ * Resolve progress value when status changes.
+ * DONE=100, HOLD/CANCELLED=keep current, others=STATUS_PROGRESS default.
+ * Explicit progress from client always takes precedence.
+ */
+async function resolveProgressForStatus(
+  taskId: string,
+  newStatus: string | undefined,
+  explicitProgress: number | undefined,
+): Promise<number | undefined> {
+  if (explicitProgress !== undefined) return explicitProgress;
+  if (!newStatus) return undefined;
+  if (newStatus === 'DONE') return 100;
+  if (newStatus === 'HOLD' || newStatus === 'CANCELLED') {
+    const existing = await prisma.task.findUnique({ where: { id: taskId }, select: { progress: true } });
+    return existing?.progress ?? 0;
+  }
+  return STATUS_PROGRESS[newStatus] ?? 0;
+}
+
+/**
  * Get all tasks in a project
  */
 export const getTasks = async (req: Request, res: Response, next: NextFunction) => {
@@ -189,10 +209,8 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       ? assigneeIds
       : (assigneeId !== undefined ? [assigneeId] : undefined);
 
-    // Auto-calculate progress when status changes but progress not explicitly provided
-    const resolvedProgress = (status && progress === undefined)
-      ? STATUS_PROGRESS[status]
-      : progress;
+    // Auto-calculate progress when status changes
+    const resolvedProgress = await resolveProgressForStatus(id, status, progress);
 
     const taskData: UpdateTaskInput = {
       title,
@@ -262,24 +280,13 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
     }
 
     // Auto-calculate progress from status if not explicitly provided
-    let progress: number;
-    if (rawProgress !== undefined) {
-      progress = rawProgress;
-    } else if (status === 'DONE') {
-      progress = 100;
-    } else if (status === 'HOLD' || status === 'CANCELLED') {
-      // Keep current progress — fetch from existing task
-      const existing = await prisma.task.findUnique({ where: { id }, select: { progress: true } });
-      progress = existing?.progress ?? 0;
-    } else {
-      progress = STATUS_PROGRESS[status] ?? 0;
-    }
+    const progress = await resolveProgressForStatus(id, status, rawProgress);
 
-    if (progress < 0 || progress > 100) {
+    if (progress !== undefined && (progress < 0 || progress > 100)) {
       return sendError(res, 'Progress must be between 0 and 100', 400);
     }
 
-    const task = await taskService.updateTaskStatus(id, status, progress, userId, note);
+    const task = await taskService.updateTaskStatus(id, status, progress ?? 0, userId, note);
 
     return sendSuccess(res, { task }, '200');
   } catch (error) {

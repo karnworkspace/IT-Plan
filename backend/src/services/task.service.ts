@@ -640,11 +640,13 @@ export class TaskService {
             name: true,
           },
         },
+        taskAssignees: { include: { user: { select: { id: true, name: true } } } },
         taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
         _count: {
           select: {
             comments: true,
             dailyUpdates: true,
+            subTasks: true,
           },
         },
       },

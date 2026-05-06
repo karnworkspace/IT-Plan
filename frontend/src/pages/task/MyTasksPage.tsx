@@ -847,6 +847,14 @@ export const MyTasksPage: React.FC = () => {
                                                                     </div>
                                                                 )}
 
+                                                                {/* Subtask count */}
+                                                                {(task._count?.subTasks ?? 0) > 0 && (
+                                                                    <div style={{ fontSize: 11, color: '#77787B', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                        <CheckCircleOutlined style={{ fontSize: 11 }} />
+                                                                        {task._count?.subTasks ?? 0} subtask{(task._count?.subTasks ?? 0) > 1 ? 's' : ''}
+                                                                    </div>
+                                                                )}
+
                                                                 {/* Progress */}
                                                                 <div className="mytasks-card-progress">
                                                                     <div className="progress-bar-track">

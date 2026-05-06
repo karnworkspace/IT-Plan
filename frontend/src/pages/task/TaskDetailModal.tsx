@@ -265,6 +265,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     const handleAddComment = async () => {
         if (!task || (!newComment.trim() && pendingFiles.length === 0)) return;
 
+        // Validate total file size <= 20MB
+        if (pendingFiles.length > 0) {
+            const totalSize = pendingFiles.reduce((sum, f) => sum + f.size, 0);
+            const maxTotal = 20 * 1024 * 1024;
+            if (totalSize > maxTotal) {
+                message.error(`ไฟล์รวมกันต้องไม่เกิน 20MB (ส่งมา ${(totalSize / 1024 / 1024).toFixed(1)}MB)`);
+                return;
+            }
+        }
+
         try {
             setSubmittingComment(true);
             const content = newComment.trim() || (pendingFiles.length > 0 ? '(image)' : '');

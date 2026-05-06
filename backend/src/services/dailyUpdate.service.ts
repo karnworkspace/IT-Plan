@@ -115,6 +115,7 @@ export class DailyUpdateService {
         task: {
           include: {
             project: true,
+            taskAssignees: { select: { userId: true } },
           },
         },
       },
@@ -125,11 +126,13 @@ export class DailyUpdateService {
     }
 
     // Check permission
-    const isAssignee = update.task.assigneeId === userId;
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isAdmin = user?.role === 'ADMIN';
+    const isAssignee = update.task.assigneeId === userId || update.task.taskAssignees.some((ta: any) => ta.userId === userId);
     const isCreator = update.task.createdById === userId;
     const isProjectOwner = update.task.project.ownerId === userId;
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    if (!isAdmin && !isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to update this daily update');
     }
 
@@ -158,6 +161,7 @@ export class DailyUpdateService {
         task: {
           include: {
             project: true,
+            taskAssignees: { select: { userId: true } },
           },
         },
       },
@@ -168,11 +172,13 @@ export class DailyUpdateService {
     }
 
     // Check permission
-    const isAssignee = update.task.assigneeId === userId;
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isAdmin = user?.role === 'ADMIN';
+    const isAssignee = update.task.assigneeId === userId || update.task.taskAssignees.some((ta: any) => ta.userId === userId);
     const isCreator = update.task.createdById === userId;
     const isProjectOwner = update.task.project.ownerId === userId;
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    if (!isAdmin && !isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to delete this daily update');
     }
 

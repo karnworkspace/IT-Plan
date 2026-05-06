@@ -48,14 +48,35 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max per file
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB max per individual file (safety net)
+    files: 10, // max 10 files per request
+  },
 });
 
 // All routes require authentication
 router.use(authenticate);
 
-// Upload files for a comment (max 5 files, 20MB each)
-router.post('/comments/:commentId/attachments', upload.array('images', 5), uploadCommentImages);
+// Upload files for a comment (max 10 files, total 20MB per request)
+router.post('/comments/:commentId/attachments', upload.array('images', 10), (req, res, next) => {
+  // Validate total size across all files <= 20MB
+  const files = req.files as Express.Multer.File[] | undefined;
+  if (files && files.length > 0) {
+    const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+    const maxTotal = 20 * 1024 * 1024; // 20MB
+    if (totalSize > maxTotal) {
+      // Clean up uploaded files
+      for (const f of files) {
+        fs.unlink(f.path, () => {});
+      }
+      return res.status(400).json({
+        success: false,
+        error: `ไฟล์รวมกันต้องไม่เกิน 20MB (ส่งมา ${(totalSize / 1024 / 1024).toFixed(1)}MB)`,
+      });
+    }
+  }
+  next();
+}, uploadCommentImages);
 
 // Get attachments for a comment
 router.get('/comments/:commentId/attachments', getCommentAttachments);

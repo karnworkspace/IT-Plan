@@ -679,49 +679,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             </div>
                         )}
 
-                        {/* Status Change History */}
-                        {statusChangeLogs.length > 0 && (
-                            <>
-                                <Divider />
-                                <div className="section">
-                                    <Title level={5}><HistoryOutlined style={{ marginRight: 8 }} />Status Change History ({statusChangeLogs.length})</Title>
-                                    <Timeline mode="left">
-                                        {statusChangeLogs.map(log => (
-                                            <Timeline.Item
-                                                key={log.id}
-                                                color={STATUS_CONFIG[log.toStatus]?.dotColor || '#77787B'}
-                                                label={dayjs(log.createdAt).format('MMM D, HH:mm')}
-                                            >
-                                                <Card size="small" className="update-card">
-                                                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                                                        <Space>
-                                                            <Avatar size={20} style={{ backgroundColor: '#32BCAD', fontSize: 11 }}>
-                                                                {log.user?.name?.[0] || 'U'}
-                                                            </Avatar>
-                                                            <Text strong style={{ fontSize: 12 }}>{log.user?.name || 'Unknown'}</Text>
-                                                        </Space>
-                                                        <Space>
-                                                            <Tag color={STATUS_CONFIG[log.fromStatus]?.color}>
-                                                                {STATUS_CONFIG[log.fromStatus]?.label || log.fromStatus}
-                                                            </Tag>
-                                                            <span>→</span>
-                                                            <Tag color={STATUS_CONFIG[log.toStatus]?.color}>
-                                                                {STATUS_CONFIG[log.toStatus]?.label || log.toStatus}
-                                                            </Tag>
-                                                        </Space>
-                                                        <Text type="secondary" style={{ fontSize: 12 }}>{log.note}</Text>
-                                                    </Space>
-                                                </Card>
-                                            </Timeline.Item>
-                                        ))}
-                                    </Timeline>
-                                </div>
-                            </>
-                        )}
-
+                        {/* Daily Updates Section — after Description */}
                         <Divider />
-
-                        {/* Daily Updates Section */}
                         <div className="section">
                             <Title level={5}><HistoryOutlined style={{ marginRight: 8 }} />Daily Updates ({updates.length})</Title>
                             {!showUpdateForm ? (
@@ -776,6 +735,46 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 ))}
                             </Timeline>
                         </div>
+
+                        {/* Status Change History */}
+                        {statusChangeLogs.length > 0 && (
+                            <>
+                                <Divider />
+                                <div className="section">
+                                    <Title level={5}><HistoryOutlined style={{ marginRight: 8 }} />Status Change History ({statusChangeLogs.length})</Title>
+                                    <Timeline mode="left">
+                                        {statusChangeLogs.map(log => (
+                                            <Timeline.Item
+                                                key={log.id}
+                                                color={STATUS_CONFIG[log.toStatus]?.dotColor || '#77787B'}
+                                                label={dayjs(log.createdAt).format('MMM D, HH:mm')}
+                                            >
+                                                <Card size="small" className="update-card">
+                                                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                                                        <Space>
+                                                            <Avatar size={20} style={{ backgroundColor: '#32BCAD', fontSize: 11 }}>
+                                                                {log.user?.name?.[0] || 'U'}
+                                                            </Avatar>
+                                                            <Text strong style={{ fontSize: 12 }}>{log.user?.name || 'Unknown'}</Text>
+                                                        </Space>
+                                                        <Space>
+                                                            <Tag color={STATUS_CONFIG[log.fromStatus]?.color}>
+                                                                {STATUS_CONFIG[log.fromStatus]?.label || log.fromStatus}
+                                                            </Tag>
+                                                            <span>→</span>
+                                                            <Tag color={STATUS_CONFIG[log.toStatus]?.color}>
+                                                                {STATUS_CONFIG[log.toStatus]?.label || log.toStatus}
+                                                            </Tag>
+                                                        </Space>
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>{log.note}</Text>
+                                                    </Space>
+                                                </Card>
+                                            </Timeline.Item>
+                                        ))}
+                                    </Timeline>
+                                </div>
+                            </>
+                        )}
 
                         <Divider />
 

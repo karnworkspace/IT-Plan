@@ -69,6 +69,7 @@ const PRIORITY_BADGE = PRIORITY_CONFIG;
 
 import { TaskDetailModal } from '../task/TaskDetailModal';
 import { GanttChart } from '../../components/project/GanttChart';
+import { useAuthStore } from '../../store/authStore';
 
 function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
     const { setNodeRef, isOver } = useDroppable({ id });
@@ -103,6 +104,9 @@ function SortableTaskCard({ id, children, onClick }: { id: string; children: Rea
 export const ProjectDetailPage: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
     const navigate = useNavigate();
+    const { user: currentUser } = useAuthStore();
+    // ADMIN and MANAGER can manage project; MEMBER cannot
+    const canManageProject = currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
 
     const [loading, setLoading] = useState(true);
     const [project, setProject] = useState<Project | null>(null);
@@ -463,22 +467,29 @@ export const ProjectDetailPage: React.FC = () => {
         await loadProjectData();
     };
 
-    const getTaskMenuItems = (task: Task): MenuProps['items'] => [
-        {
-            key: 'edit',
-            icon: <EditOutlined />,
-            label: 'Edit Task',
-            onClick: () => handleEditTask(task),
-        },
-        { type: 'divider' },
-        {
-            key: 'delete',
-            icon: <DeleteOutlined />,
-            label: 'Delete Task',
-            danger: true,
-            onClick: () => handleDeleteTask(task.id),
-        },
-    ];
+    const getTaskMenuItems = (task: Task): MenuProps['items'] => {
+        const items: MenuProps['items'] = [
+            {
+                key: 'edit',
+                icon: <EditOutlined />,
+                label: 'Edit Task',
+                onClick: () => handleEditTask(task),
+            },
+        ];
+        if (canManageProject) {
+            items.push(
+                { type: 'divider' },
+                {
+                    key: 'delete',
+                    icon: <DeleteOutlined />,
+                    label: 'Delete Task',
+                    danger: true,
+                    onClick: () => handleDeleteTask(task.id),
+                },
+            );
+        }
+        return items;
+    };
 
     // Filter tasks
     const filteredTasks = statusFilter
@@ -565,13 +576,14 @@ export const ProjectDetailPage: React.FC = () => {
                                     {project.members?.map((m: ProjectMember) => (
                                         <Tag
                                             key={m.id}
-                                            closable
-                                            onClose={(e) => { e.preventDefault(); handleRemoveMember(m); }}
+                                            closable={canManageProject}
+                                            onClose={canManageProject ? (e) => { e.preventDefault(); handleRemoveMember(m); } : undefined}
                                             style={{ fontSize: 12, borderRadius: 6 }}
                                         >
                                             {m.user?.name || 'Unknown'} <span style={{ color: '#999', fontSize: 10 }}>({m.role})</span>
                                         </Tag>
                                     ))}
+                                    {canManageProject && (
                                     <Button
                                         type="dashed"
                                         size="small"
@@ -581,10 +593,12 @@ export const ProjectDetailPage: React.FC = () => {
                                     >
                                         เพิ่มสมาชิก
                                     </Button>
+                                    )}
                                 </div>
                         </div>
 
                         <Space>
+                            {canManageProject && (
                             <Button
                                 size="large"
                                 icon={<EditOutlined />}
@@ -593,6 +607,8 @@ export const ProjectDetailPage: React.FC = () => {
                             >
                                 Edit
                             </Button>
+                            )}
+                            {canManageProject && (
                             <Button
                                 size="large"
                                 danger
@@ -602,6 +618,7 @@ export const ProjectDetailPage: React.FC = () => {
                             >
                                 Delete
                             </Button>
+                            )}
                             <Button
                                 size="large"
                                 icon={<DownloadOutlined />}

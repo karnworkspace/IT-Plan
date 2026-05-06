@@ -296,9 +296,9 @@ export class ProjectService {
       return null;
     }
 
-    // Allow owner, ADMIN, or OWNER role
+    // Allow project owner or system ADMIN
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
-    if (project.ownerId !== userId && user?.role !== 'ADMIN' && user?.role !== 'OWNER') {
+    if (project.ownerId !== userId && user?.role !== 'ADMIN') {
       throw new AppError('You do not have permission to update this project', 403);
     }
 

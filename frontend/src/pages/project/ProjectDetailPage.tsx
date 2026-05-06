@@ -117,6 +117,7 @@ export const ProjectDetailPage: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
     const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
     const [form] = Form.useForm();
+    const taskSectionRef = React.useRef<HTMLDivElement>(null);
 
     // Task Detail Modal State
     const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -491,6 +492,14 @@ export const ProjectDetailPage: React.FC = () => {
         return items;
     };
 
+    // Stat card click → set filter + scroll to task section
+    const handleStatClick = (filter?: string) => {
+        setStatusFilter(filter);
+        setTimeout(() => {
+            taskSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    };
+
     // Filter tasks
     const filteredTasks = statusFilter
         ? tasks.filter(t => t.status === statusFilter)
@@ -723,42 +732,70 @@ export const ProjectDetailPage: React.FC = () => {
                         );
                     })()}
 
-                    {/* Stats */}
+                    {/* Stats — clickable to filter tasks */}
                     <Row gutter={16} className="project-stats">
                         <Col xs={6}>
-                            <Card className="stat-card stat-total">
+                            <Card
+                                className="stat-card stat-total"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleStatClick(undefined)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStatClick(undefined)}
+                            >
                                 <Statistic
                                     title="Total Tasks"
-                                    value={stats?.total_tasks || tasks.length}
+                                    value={stats?.total_tasks ?? tasks.length}
                                     prefix={<FolderOutlined style={{ color: '#77787B' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card stat-completed">
+                            <Card
+                                className="stat-card stat-completed"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleStatClick('DONE')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStatClick('DONE')}
+                            >
                                 <Statistic
                                     title="Completed"
-                                    value={stats?.completed_tasks || tasksByStatus.DONE.length}
+                                    value={stats?.completed_tasks ?? tasksByStatus.DONE.length}
                                     valueStyle={{ color: '#065F46' }}
-                                    prefix={<CheckCircleOutlined style={{ color: '#32BCAD' }} />}
+                                    prefix={<CheckCircleOutlined style={{ color: '#2E7D9B' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card stat-inprogress">
+                            <Card
+                                className="stat-card stat-inprogress"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleStatClick('IN_PROGRESS')}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStatClick('IN_PROGRESS')}
+                            >
                                 <Statistic
                                     title="In Progress"
-                                    value={stats?.in_progress_tasks || tasksByStatus.IN_PROGRESS.length}
+                                    value={stats?.in_progress_tasks ?? tasksByStatus.IN_PROGRESS.length}
                                     valueStyle={{ color: '#1E40AF' }}
                                     prefix={<SyncOutlined style={{ color: '#32BCAD' }} />}
                                 />
                             </Card>
                         </Col>
                         <Col xs={6}>
-                            <Card className="stat-card stat-progress">
+                            <Card
+                                className="stat-card stat-progress"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleStatClick(undefined)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStatClick(undefined)}
+                            >
                                 <Statistic
                                     title="Progress"
-                                    value={stats?.progress || 0}
+                                    value={stats?.progress ?? 0}
                                     suffix="%"
                                     valueStyle={{ color: '#92400E' }}
                                 />
@@ -768,7 +805,7 @@ export const ProjectDetailPage: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <Content className="project-detail-content">
+                <Content className="project-detail-content" ref={taskSectionRef}>
                     <Tabs defaultActiveKey="board" size="large" destroyInactiveTabPane>
                         {/* Board View */}
                         <TabPane tab="Board View" key="board">

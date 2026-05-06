@@ -1,12 +1,12 @@
 #!/bin/bash
 # ============================================================
-# Setup itproject.senadigital.com on host Nginx
+# Setup itpj.senadigital.com on host Nginx
 # รันที่ server: cd /home/admindigital/taskflow && bash deploy/setup-domain.sh
 # ============================================================
 
 set -e
 
-DOMAIN="itproject.senadigital.com"
+DOMAIN="itpj.senadigital.com"
 NGINX_CONF="deploy/$DOMAIN"
 
 echo "🔧 Setting up $DOMAIN..."
@@ -34,10 +34,10 @@ sudo systemctl reload nginx
 # 5. Update CORS
 echo "5. Updating CORS..."
 ENV_FILE="/home/admindigital/taskflow/.env"
-if grep -q "itproject.senadigital.com" "$ENV_FILE" 2>/dev/null; then
+if grep -q "itpj.senadigital.com" "$ENV_FILE" 2>/dev/null; then
     echo "   CORS already has domain"
 else
-    echo "   ⚠️  ต้องเพิ่ม http://itproject.senadigital.com ใน CORS_ORIGIN ใน .env"
+    echo "   ⚠️  ต้องเพิ่ม http://itpj.senadigital.com ใน CORS_ORIGIN ใน .env"
     echo "   แล้วรัน: docker compose -f docker-compose.prod.yml restart taskflow-backend-prod"
 fi
 

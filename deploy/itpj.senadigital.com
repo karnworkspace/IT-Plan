@@ -1,11 +1,11 @@
-# IT Project System — itproject.senadigital.com
+# IT Project System — itpj.senadigital.com
 # Proxy to taskflow containers (frontend:4200, backend:4201)
-# วางไฟล์: sudo cp deploy/itproject.senadigital.com /etc/nginx/sites-available/
-# Enable:  sudo ln -s /etc/nginx/sites-available/itproject.senadigital.com /etc/nginx/sites-enabled/
+# วางไฟล์: sudo cp deploy/itpj.senadigital.com /etc/nginx/sites-available/
+# Enable:  sudo ln -s /etc/nginx/sites-available/itpj.senadigital.com /etc/nginx/sites-enabled/
 
 server {
     listen 80;
-    server_name itproject.senadigital.com;
+    server_name itpj.senadigital.com;
 
     # Let's Encrypt challenge
     location /.well-known/acme-challenge/ {

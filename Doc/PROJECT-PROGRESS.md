@@ -347,6 +347,26 @@
 - Fixed 5 endpoints: projects, my-projects, project tasks, my-tasks, tasks-by-tag
 - Impact: Dashboard/ProjectDetail now receive correct number of items (was silently capped to defaults)
 
+## Phase 22: UAT Feedback Fix — Sprint C ✅ (2026-05-06)
+
+**C1-C8 — Labels + Branding:**
+- #1(v) Title "IT Project System", #4 Login SENA logo, #5(v) "Dashboard", #9(v) "IT Overall"
+- #10 Dashboard stat cards neutral (removed colored borders)
+- #12(v) "View My Projects", #13 Member subtitle "Project Overall", #19(v) Infrastructure category
+
+**C9-C14 — Colors + Page Titles + Form:**
+- #20/#28/#57(v) Status bar colors use PROJECT_STATUS_GRADIENT, #21(v) progress text bold+black
+- #22(v) My Projects menu, #23 document.title added to all 17 pages
+- #26(v) "Project Status :" label, #45/#46(v) Daily Update form notes-only + "Update" button
+
+**C16-C20 — Subtask + Calendar Polish:**
+- #50(v) Subtask status color badge, #53(v) No tags in subtask
+- #54 "Move to task" tooltip/message, #65(v) Calendar stat boxes removed
+- #66(v) Calendar task bars colored by status
+
+**C21 — Gantt Drag + Revision Log:**
+- #58(v) Drag auto-updates dates via updateTask + activity log with user/timestamp/changes
+
 ---
 
 ## Known Issues
@@ -363,13 +383,10 @@
 
 ## Recommended Next Actions
 
-### Sprint C (UAT Feedback — UI Polish & Branding)
-- Label/text changes: "IT Overall", "Project Overall", "View My Projects"
-- Category "Infrastructure and Network"
-- Status color consistency
-- Calendar: remove stat cards, color by status, filter
-- Subtask: remove tags, "Move to task" label, status color badge
-- Gantt drag → auto update + revision log
+### Sprint D (UAT Feedback — Remaining)
+- #68 Email notification (Zimbra) — skipped, needs SMTP config
+- #71 Responsive Tablet/iPad — deferred
+- #60 Gantt in MyTasksPage — skipped per plan
 
 ### Optional / Future
 - ~~Production deployment (GitHub → Server)~~ ✅ Done

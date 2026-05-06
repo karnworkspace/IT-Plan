@@ -247,13 +247,73 @@
 
 ---
 
+## Phase 22: UAT Feedback Fix — Sprint A ✅ (2026-05-06)
+
+**Source:** `Doc/UAT-FEEDBACK-29APR2026.md` (71 issues from UAT 29 Apr 2026)
+
+**A0 — Baseline Check:** builds pass, Docker healthy, port 3002 confirmed
+
+**A1 — Role Visibility Foundation** (#3,#13,#17,#18,#24,#25,#34,#38):
+- Backend service-layer role filtering ทุก endpoint:
+  - getAllProjects: ADMIN=all, MANAGER/MEMBER=member projects only
+  - getAllTasks: membership gate + MEMBER=assigned only
+  - getMyTasks: ADMIN=all, MANAGER=member project tasks, MEMBER=assigned
+  - getTaskById: ADMIN=any, MANAGER=member project, MEMBER=assigned
+  - getProjectById: membership gate, no task count leak
+  - getProjectStats + getTaskStats: membership gate + MEMBER assigned-only
+  - getRecentActivities: scoped to member projects
+
+**A2 — Member UI Permission Controls** (#32, partial #70):
+- Hide Edit/Delete Project, Add/Remove Member, Delete Task for MEMBER
+- Backend mutation permissions verified (reject MEMBER at service layer)
+
+**A3 — Daily Update & Attachments** (#44,#47 partial,#48,#49):
+- Fix "Failed to add update": progress/status now optional (default from task)
+- Upload total size limit: 20MB per request (backend + frontend validation)
+- ADMIN bypass + taskAssignees permission for create/update/delete daily update
+- #47 partial: Daily Update attachment deferred (needs schema change)
+
+**A4 — Export & Navigation** (#27,#31,#14,#15):
+- Export Excel + PDF restored in My Projects
+- Dashboard stat cards → /my-projects
+- Back button → navigate(-1)
+- Team Members card: display only (no wrong navigation)
+
+**A5 — Gantt Critical Bugs** (#61,#63,#64):
+- destroyInactiveTabPane: prevent DndContext interference
+- All tasks shown (createdAt fallback for dateless tasks)
+- Status filter applies to Gantt via filteredTasks
+- Consistent date fallback helper (getTaskStartDate/getTaskEndDate)
+
+**A6 — Small UI Fixes** (#1,#2,#16,#30):
+- Title "IT Project System" (already correct)
+- Forgot Password hidden (already done)
+- Status dots circular (already correct)
+- COMPLETED color standardized to #2E7D9B across 7 hardcoded locations
+
+---
+
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)
+2. #47 Daily Update attachment — partial (needs schema change for per-update attachments)
+3. Secondary endpoints (comments, subtasks, status logs) — authz hardening deferred
+4. pageSize vs limit param mismatch — deferred
+5. No automated test suite in active repo
 
 ---
 
 ## Recommended Next Actions
+
+### Sprint B (UAT Feedback — next)
+- Dashboard layout: Quick Access + Team Activity ย้ายลงล่าง
+- Sidebar collapse button ชัดเจน
+- My Tasks table/list view + sorting
+- Multi-filter: status, priority, tags
+- Subtask: dates, assignee, edit name
+- Gantt: sticky columns, hover activity
+- Hold/Cancelled progress logic
+- Status color + Overdue
 
 ### Optional / Future
 - ~~Production deployment (GitHub → Server)~~ ✅ Done

@@ -1,0 +1,68 @@
+# Docker Compose for API Integration Tests
+# Isolated from dev/prod: separate DB, ports, volumes
+# Usage: docker compose -f docker-compose.test.yml up -d
+
+services:
+  test-db:
+    image: postgres:16-alpine
+    container_name: taskflow-test-db
+    environment:
+      POSTGRES_USER: taskflow_test
+      POSTGRES_PASSWORD: taskflow_test123
+      POSTGRES_DB: taskflow_test
+    ports:
+      - "55432:5432"
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow_test -d taskflow_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - taskflow-test-network
+
+  test-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: taskflow-test-backend
+    environment:
+      NODE_ENV: test
+      PORT: 3000
+      DATABASE_URL: postgresql://taskflow_test:taskflow_test123@test-db:5432/taskflow_test?schema=public
+      JWT_ACCESS_SECRET: test-jwt-access-secret
+      JWT_REFRESH_SECRET: test-jwt-refresh-secret
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:5174
+    ports:
+      - "3100:3000"
+    volumes:
+      - ./backend/src:/app/src:delegated
+      - ./backend/prisma:/app/prisma:delegated
+      - ./backend/uploads:/app/uploads:delegated
+      - test_backend_modules:/app/node_modules
+    depends_on:
+      test-db:
+        condition: service_healthy
+    networks:
+      - taskflow-test-network
+    command: >
+      sh -c "
+        npx prisma generate &&
+        npx prisma db push --accept-data-loss &&
+        npm run dev
+      "
+
+volumes:
+  test_postgres_data:
+    name: taskflow_test_postgres_data
+  test_backend_modules:
+    name: taskflow_test_backend_modules
+
+networks:
+  taskflow-test-network:
+    name: taskflow-test-network
+    driver: bridge

@@ -310,7 +310,7 @@ export const DashboardPage: React.FC = () => {
                             <Title level={3} style={{ margin: 0, color: '#000000', fontSize: 20, fontWeight: 500, fontFamily: "'Prompt', sans-serif" }}>
                                 Dashboard
                             </Title>
-                            <Text style={{ color: '#77787B', fontSize: 14 }}>IT Overall</Text>
+                            <Text style={{ color: '#77787B', fontSize: 14 }}>{user?.role === 'MEMBER' ? 'Project Overall' : 'IT Overall'}</Text>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <AutoComplete
@@ -350,7 +350,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.totalProjects}
                                     icon={<FolderOutlined />}
                                     iconClass="icon-slate"
-                                    borderClass="stat-border-green"
                                     onClick={() => navigate('/my-projects')}
                                 />
                             </div>
@@ -360,7 +359,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.activeProjects}
                                     icon={<ProjectOutlined />}
                                     iconClass="icon-blue"
-                                    borderClass="stat-border-green"
                                     onClick={() => navigate('/my-projects')}
                                 />
                             </div>
@@ -370,7 +368,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.pendingTasks}
                                     icon={<ClockCircleOutlined />}
                                     iconClass="icon-amber"
-                                    borderClass="stat-border-amber"
                                     onClick={() => navigate('/my-tasks')}
                                 />
                             </div>
@@ -380,7 +377,6 @@ export const DashboardPage: React.FC = () => {
                                     value={stats.teamMembers}
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
-                                    borderClass="stat-border-green"
                                 />
                             </div>
                             <div style={{ flex: '1 1 180px', minWidth: 180 }}>
@@ -390,7 +386,6 @@ export const DashboardPage: React.FC = () => {
                                     suffix="%"
                                     icon={<RocketOutlined />}
                                     iconClass="icon-blue"
-                                    borderClass="stat-border-blue"
                                     description="DONE tasks / total tasks x 100"
                                     onClick={() => navigate('/my-projects')}
                                 />

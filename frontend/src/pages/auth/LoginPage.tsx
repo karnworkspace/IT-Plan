@@ -3,6 +3,7 @@ import React from 'react';
 import { Form, Input, Button, Checkbox, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/authStore';
+import SenaDlogo from '../../assets/SenaDlogo.png';
 import './LoginPage.css';
 
 const { Title, Text } = Typography;
@@ -40,6 +41,7 @@ export const LoginPage: React.FC = () => {
             {/* Left Side - SENA Branding */}
             <div className="login-branding">
                 <div className="branding-title">
+                    <img src={SenaDlogo} alt="SENA Development" style={{ height: 48, objectFit: 'contain', marginBottom: 16 }} />
                     <div className="app-name">SENA</div>
                     <div className="app-subtitle">IT Project System</div>
                 </div>

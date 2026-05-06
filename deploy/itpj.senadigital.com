@@ -12,19 +12,8 @@ server {
         root /var/www/html;
     }
 
-    # Root → redirect to /taskflow/
-    location = / {
-        return 301 /taskflow/;
-    }
-
-    # Uploads → proxy ตรงไป backend (container Nginx ไม่มี location นี้)
-    location /taskflow/uploads/ {
-        proxy_pass http://127.0.0.1:4201/uploads/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # ที่เหลือทั้งหมด → proxy ไป frontend container
+    # Everything → proxy to frontend container
+    # Container Nginx handles: SPA routing, /api/ proxy, /uploads/ proxy, /taskflow/* redirects
     location / {
         proxy_pass http://127.0.0.1:4200;
         proxy_http_version 1.1;

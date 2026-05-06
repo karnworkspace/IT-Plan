@@ -143,7 +143,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
     const handleConvertToTask = async (subTaskId: string) => {
         try {
             await taskService.convertToTask(subTaskId);
-            message.success('Converted to independent task');
+            message.success('Moved to independent task');
             onRefresh();
         } catch {
             message.error('Convert failed');
@@ -219,7 +219,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                         </Option>
                                     ))}
                                 </Select>,
-                                <Tooltip key="convert" title="Convert to Task">
+                                <Tooltip key="convert" title="Move to task">
                                     <Button
                                         type="text"
                                         size="small"

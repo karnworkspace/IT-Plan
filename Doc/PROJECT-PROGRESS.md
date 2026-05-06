@@ -373,6 +373,12 @@
 - 26 tests: auth, role visibility (exact counts), CRUD, attachment upload+download, pagination, unauthorized
 - Run: `./scripts/test-local-api.sh`
 
+**T2 — Playwright UI E2E (11 tests + 1 skipped):**
+- Isolated frontend on port 5174 via docker-compose.test.yml
+- 11 tests: login, dashboard, my projects, project detail, task modal, daily update, comment, calendar, gantt tab, member role scoping
+- Gantt drag skipped (flaky in headless)
+- Run: `./scripts/test-local-e2e.sh`
+
 ---
 
 ## Known Issues
@@ -381,7 +387,7 @@
 2. #47 Daily Update attachment — partial (needs schema change for per-update attachments)
 3. ~~Secondary endpoints authz~~ ✅ Done (H1)
 4. ~~pageSize vs limit param mismatch~~ ✅ Done (H2)
-5. ~~No automated test suite~~ ✅ Done (T1 — 26 API smoke tests)
+5. ~~No automated test suite~~ ✅ Done (T1: 26 API + T2: 11 E2E)
 6. Manager UI: some buttons visible but backend may 403 (project member role not checked in UI)
 7. STATUS_PROGRESS constant has stale HOLD:0/CANCELLED:0 (bypassed by helper, no functional impact)
 

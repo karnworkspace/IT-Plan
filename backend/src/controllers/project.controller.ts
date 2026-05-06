@@ -35,13 +35,15 @@ export const getMyProjects = async (
       return sendError(res, 'Unauthorized', 401);
     }
 
-    const { status, projectType, page, pageSize } = req.query;
+    const { status, projectType, page, pageSize, limit } = req.query;
 
     const filters: Record<string, string | number> = {};
     if (status) filters.status = status as string;
     if (projectType) filters.projectType = projectType as string;
     if (page) filters.page = parseInt(page as string, 10);
-    if (pageSize) filters.pageSize = parseInt(pageSize as string, 10);
+    // Accept both limit and pageSize; limit takes precedence → map to service's 'limit' param
+    const resolvedLimit = limit || pageSize;
+    if (resolvedLimit) filters.limit = parseInt(resolvedLimit as string, 10);
 
     const result = await projectService.getMyProjects(userId, filters);
 
@@ -63,14 +65,16 @@ export const getProjects = async (
   next: NextFunction
 ) => {
   try {
-    const { status, owner_id, project_type, page, limit } = req.query;
+    const { status, owner_id, project_type, page, limit, pageSize } = req.query;
 
     const filters: Record<string, string | number> = {};
     if (status) filters.status = status as string;
     if (owner_id) filters.ownerId = owner_id as string;
     if (project_type) filters.projectType = project_type as string;
     if (page) filters.page = parseInt(page as string, 10);
-    if (limit) filters.limit = parseInt(limit as string, 10);
+    // Accept both limit and pageSize; limit takes precedence
+    const resolvedLimit = limit || pageSize;
+    if (resolvedLimit) filters.limit = parseInt(resolvedLimit as string, 10);
 
     const user = req.user ? { id: req.user.id, email: req.user.email, role: req.user.role } : undefined;
     const result = await projectService.getAllProjects(filters, user);

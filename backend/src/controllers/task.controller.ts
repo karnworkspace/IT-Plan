@@ -39,7 +39,8 @@ export const getTasks = async (req: Request, res: Response, next: NextFunction) 
     const { projectId } = req.params as { projectId: string };
     const userId = extractUserId(req);
 
-    // Build filters
+    // Build filters — accept both limit and pageSize
+    const rawLimit = (req.query.limit || req.query.pageSize) as string | undefined;
     const filters: TaskFilters = {
       projectId,
       status: req.query.status as string | undefined,
@@ -48,7 +49,7 @@ export const getTasks = async (req: Request, res: Response, next: NextFunction) 
       dueDateFrom: req.query.due_date_from ? new Date(req.query.due_date_from as string) : undefined,
       dueDateTo: req.query.due_date_to ? new Date(req.query.due_date_to as string) : undefined,
       page: req.query.page ? parseInt(req.query.page as string) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
+      limit: rawLimit ? parseInt(rawLimit) : 20,
     };
 
     // Pass user for role-based task visibility
@@ -305,11 +306,12 @@ export const getMyTasks = async (req: Request, res: Response, next: NextFunction
       return sendError(res, 'User not authenticated', 401);
     }
 
+    const rawLimit = (req.query.limit || req.query.pageSize) as string | undefined;
     const filters = {
       status: req.query.status as string | undefined,
       priority: req.query.priority as string | undefined,
       page: req.query.page ? parseInt(req.query.page as string) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+      limit: rawLimit ? parseInt(rawLimit) : 50,
     };
 
     const result = await taskService.getMyTasks(authReq.user, filters);
@@ -405,11 +407,12 @@ export const getTasksByTag = async (req: Request, res: Response, next: NextFunct
   try {
     const { tagId } = req.params as { tagId: string };
 
+    const rawLimit = (req.query.limit || req.query.pageSize) as string | undefined;
     const filters = {
       status: req.query.status as string | undefined,
       priority: req.query.priority as string | undefined,
       page: req.query.page ? parseInt(req.query.page as string) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+      limit: rawLimit ? parseInt(rawLimit) : 100,
     };
 
     const result = await taskService.getTasksByTag(tagId, filters);

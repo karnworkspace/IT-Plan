@@ -40,6 +40,13 @@ const generateWeeks = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
 
 import { GANTT_STATUS_COLORS as STATUS_COLORS, GANTT_PRIORITY_COLORS as PRIORITY_COLORS } from '../../constants';
 
+// Consistent date fallback: startDate → dueDate → createdAt → today
+const getTaskStartDate = (task: Task): dayjs.Dayjs =>
+    task.startDate ? dayjs(task.startDate) : task.dueDate ? dayjs(task.dueDate) : task.createdAt ? dayjs(task.createdAt) : dayjs();
+
+const getTaskEndDate = (task: Task): dayjs.Dayjs =>
+    task.dueDate ? dayjs(task.dueDate) : getTaskStartDate(task);
+
 // --- TaskActivityPreview component ---
 const TaskActivityPreview: React.FC<{ taskId: string }> = ({ taskId }) => {
     const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -126,14 +133,10 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     const dragRef = useRef<DragState | null>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
 
-    // Include all tasks, sort by start date (use createdAt as fallback for tasks without dates)
+    // Include all tasks, sort by effective start date
     const tasksWithDates = useMemo(() => {
         return [...tasks]
-            .sort((a, b) => {
-                const aStart = a.startDate ? new Date(a.startDate).getTime() : (a.dueDate ? new Date(a.dueDate).getTime() : new Date(a.createdAt || 0).getTime());
-                const bStart = b.startDate ? new Date(b.startDate).getTime() : (b.dueDate ? new Date(b.dueDate).getTime() : new Date(b.createdAt || 0).getTime());
-                return aStart - bStart;
-            });
+            .sort((a, b) => getTaskStartDate(a).valueOf() - getTaskStartDate(b).valueOf());
     }, [tasks]);
 
     // Calculate date range
@@ -143,10 +146,9 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         }
 
         const allDates = tasksWithDates.flatMap(t => [
-            t.startDate ? new Date(t.startDate) : null,
-            t.dueDate ? new Date(t.dueDate) : null,
-            (!t.startDate && !t.dueDate && t.createdAt) ? new Date(t.createdAt) : null,
-        ]).filter(Boolean) as Date[];
+            getTaskStartDate(t).toDate(),
+            getTaskEndDate(t).toDate(),
+        ]);
 
         if (projectStartDate) allDates.push(new Date(projectStartDate));
         if (projectEndDate) allDates.push(new Date(projectEndDate));
@@ -193,8 +195,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             start = dragState.currentStartDate;
             end = dragState.currentDueDate;
         } else {
-            start = task.startDate ? dayjs(task.startDate) : dayjs(task.dueDate);
-            end = task.dueDate ? dayjs(task.dueDate) : start;
+            start = getTaskStartDate(task);
+            end = getTaskEndDate(task);
         }
 
         const startOffset = start.diff(rangeStart, 'day');
@@ -217,26 +219,27 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 
     // Format date range text
     const getDateRangeText = useCallback((task: Task) => {
-        let start: dayjs.Dayjs | null;
-        let end: dayjs.Dayjs | null;
+        let start: dayjs.Dayjs;
+        let end: dayjs.Dayjs;
 
         if (dragState && dragState.taskId === task.id) {
             start = dragState.currentStartDate;
             end = dragState.currentDueDate;
         } else {
-            start = task.startDate ? dayjs(task.startDate) : null;
-            end = task.dueDate ? dayjs(task.dueDate) : null;
+            start = getTaskStartDate(task);
+            end = getTaskEndDate(task);
         }
 
-        if (start && end) {
-            if (start.isSame(end, 'month')) {
-                return `${start.format('MMM D')} - ${end.format('D')}`;
-            }
-            return `${start.format('MMM D')} - ${end.format('MMM D')}`;
+        const isFallback = !task.startDate && !task.dueDate;
+        const prefix = isFallback ? '(created) ' : '';
+
+        if (start.isSame(end, 'day')) {
+            return `${prefix}${start.format('MMM D')}`;
         }
-        if (start) return start.format('MMM D');
-        if (end) return end.format('MMM D');
-        return '';
+        if (start.isSame(end, 'month')) {
+            return `${prefix}${start.format('MMM D')} - ${end.format('D')}`;
+        }
+        return `${prefix}${start.format('MMM D')} - ${end.format('MMM D')}`;
     }, [dragState]);
 
     // --- Drag handlers ---
@@ -245,8 +248,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         e.preventDefault();
         e.stopPropagation();
 
-        const startDate = task.startDate ? dayjs(task.startDate) : dayjs(task.dueDate);
-        const dueDate = task.dueDate ? dayjs(task.dueDate) : startDate;
+        const startDate = getTaskStartDate(task);
+        const dueDate = getTaskEndDate(task);
 
         const state: DragState = {
             taskId: task.id,

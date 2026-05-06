@@ -1,0 +1,40 @@
+# IT Project System — itproject.senadigital.com
+# Proxy to taskflow containers (frontend:4200, backend:4201)
+# วางไฟล์: sudo cp deploy/itproject.senadigital.com /etc/nginx/sites-available/
+# Enable:  sudo ln -s /etc/nginx/sites-available/itproject.senadigital.com /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    server_name itproject.senadigital.com;
+
+    # Let's Encrypt challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    # Root → redirect to /taskflow/
+    location = / {
+        return 301 /taskflow/;
+    }
+
+    # Uploads → proxy ตรงไป backend (container Nginx ไม่มี location นี้)
+    location /taskflow/uploads/ {
+        proxy_pass http://127.0.0.1:4201/uploads/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # ที่เหลือทั้งหมด → proxy ไป frontend container
+    location / {
+        proxy_pass http://127.0.0.1:4200;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        client_max_body_size 25M;
+    }
+}

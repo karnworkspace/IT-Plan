@@ -78,14 +78,26 @@ export class TaskService {
     if (tagId) where.taskTags = { some: { tagId } };
 
     // Role-based task visibility within a project
-    if (user && user.role === 'MEMBER') {
-      // MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง (ทั้ง assigneeId และ taskAssignees)
-      where.OR = [
-        { assigneeId: user.id },
-        { taskAssignees: { some: { userId: user.id } } },
-      ];
+    if (user && user.role !== 'ADMIN') {
+      // MANAGER/MEMBER: ต้องเป็น project member ถึงจะเห็น tasks
+      // (project membership enforced via getProjectById already,
+      //  but double-check here for direct API access)
+      const isMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: user.id } },
+      });
+      if (!isMember) {
+        return { data: [], pagination: { page, limit, total: 0 } };
+      }
+
+      if (user.role === 'MEMBER') {
+        // MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง
+        where.OR = [
+          { assigneeId: user.id },
+          { taskAssignees: { some: { userId: user.id } } },
+        ];
+      }
+      // MANAGER: เห็นทุก task ใน project ที่ตนเป็น member (ผ่าน check ข้างบนแล้ว)
     }
-    // ADMIN + MANAGER: เห็นทุก task ในproject
 
     if (dueDateFrom || dueDateTo) {
       where.dueDate = {};
@@ -561,8 +573,13 @@ export class TaskService {
     if (user.role === 'ADMIN') {
       // ADMIN: เห็นทุก task ในระบบ — oversight ทั้งองค์กร
       where = {};
+    } else if (user.role === 'MANAGER') {
+      // MANAGER: เห็นทุก task ใน project ที่ตนเป็น member
+      where = {
+        project: { members: { some: { userId: user.id } } },
+      };
     } else {
-      // MANAGER + MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง (ทั้ง assigneeId และ taskAssignees)
+      // MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง (ทั้ง assigneeId และ taskAssignees)
       where = {
         OR: [
           { assigneeId: user.id },

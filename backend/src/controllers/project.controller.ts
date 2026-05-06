@@ -88,14 +88,15 @@ export const getProjects = async (
  * Get project by ID
  */
 export const getProject = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const { id } = req.params;
+    const user = req.user ? { id: req.user.id, role: req.user.role } : undefined;
 
-    const project = await projectService.getProjectById(id as string);
+    const project = await projectService.getProjectById(id as string, user);
 
     if (!project) {
       return sendError(res, 'Project not found', 404);
@@ -234,14 +235,15 @@ export const deleteProject = async (
  * Get project statistics
  */
 export const getProjectStats = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const { id } = req.params;
+    const user = req.user ? { id: req.user.id, role: req.user.role } : undefined;
 
-    const stats = await projectService.getProjectStats(id as string);
+    const stats = await projectService.getProjectStats(id as string, user);
 
     return sendSuccess(res, { stats });
   } catch (error) {

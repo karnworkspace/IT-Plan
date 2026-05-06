@@ -195,9 +195,11 @@ export class ProjectService {
   }
 
   /**
-   * Get project by ID
+   * Get project by ID — role-aware
+   * ADMIN: sees everything
+   * MANAGER/MEMBER: must be project member, tasks filtered by role
    */
-  async getProjectById(id: string): Promise<any | null> {
+  async getProjectById(id: string, user?: { id: string; role: string }): Promise<any | null> {
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
@@ -219,19 +221,6 @@ export class ProjectService {
             },
           },
         },
-        tasks: {
-          include: {
-            assignee: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
         _count: {
           select: {
             tasks: true,
@@ -240,6 +229,14 @@ export class ProjectService {
         },
       },
     });
+
+    if (!project) return null;
+
+    // Non-ADMIN must be project member to view
+    if (user && user.role !== 'ADMIN') {
+      const isMember = project.members.some((m: any) => m.userId === user.id);
+      if (!isMember) return null;
+    }
 
     return project;
   }
@@ -347,11 +344,21 @@ export class ProjectService {
   }
 
   /**
-   * Get project statistics
+   * Get project statistics — role-aware
    */
-  async getProjectStats(projectId: string): Promise<any> {
+  async getProjectStats(projectId: string, user?: { id: string; role: string }): Promise<any> {
+    const where: any = { projectId };
+
+    // MEMBER sees only assigned task stats
+    if (user && user.role === 'MEMBER') {
+      where.OR = [
+        { assigneeId: user.id },
+        { taskAssignees: { some: { userId: user.id } } },
+      ];
+    }
+
     const tasks = await prisma.task.findMany({
-      where: { projectId },
+      where,
       select: { status: true },
     });
 

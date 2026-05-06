@@ -2,6 +2,35 @@ import prisma from '../config/database';
 import notificationService from './notification.service';
 import activityLogService from './activityLog.service';
 
+/**
+ * Shared helper: check if user can access a task based on role.
+ * ADMIN: any task. MANAGER: task in member project. MEMBER: assigned only.
+ * Returns true if access allowed.
+ */
+export async function canAccessTask(userId: string, taskId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!user) return false;
+  if (user.role === 'ADMIN') return true;
+
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: { projectId: true, assigneeId: true, createdById: true, taskAssignees: { select: { userId: true } } },
+  });
+  if (!task) return false;
+
+  if (user.role === 'MANAGER') {
+    const isMember = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId: task.projectId, userId } },
+    });
+    return !!isMember;
+  }
+
+  // MEMBER: must be assigned, creator, or project owner
+  return task.assigneeId === userId
+    || task.createdById === userId
+    || task.taskAssignees.some(ta => ta.userId === userId);
+}
+
 // Types
 export interface CreateTaskInput {
   title: string;
@@ -321,11 +350,12 @@ export class TaskService {
    * Update task
    */
   async updateTask(id: string, data: UpdateTaskInput, userId: string): Promise<any | null> {
-    // Check if user has permission (assignee, creator, project owner, or ADMIN)
+    // Check if user has permission (assignee via assigneeId OR taskAssignees, creator, project owner, or ADMIN)
     const existingTask = await prisma.task.findUnique({
       where: { id },
       include: {
         project: true,
+        taskAssignees: { select: { userId: true } },
       },
     });
 
@@ -333,13 +363,13 @@ export class TaskService {
       return null;
     }
 
-    const isAssignee = existingTask.assigneeId === userId;
+    const isAssignee = existingTask.assigneeId === userId || existingTask.taskAssignees.some(ta => ta.userId === userId);
     const isCreator = existingTask.createdById === userId;
     const isProjectOwner = existingTask.project.ownerId === userId;
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
-    const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER';
+    const isAdmin = user?.role === 'ADMIN';
 
-    if (!isAssignee && !isCreator && !isProjectOwner && !isAdmin) {
+    if (!isAdmin && !isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to update this task');
     }
 

@@ -4,6 +4,7 @@ import taskService, {
   CreateTaskInput,
   UpdateTaskInput,
   TaskFilters,
+  canAccessTask,
 } from '../services/task.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
@@ -324,6 +325,11 @@ export const getMyTasks = async (req: Request, res: Response, next: NextFunction
 export const getSubTasks = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, id))) {
+      return sendError(res, 'Task not found', 404);
+    }
 
     const subTasks = await taskService.getSubTasks(id);
 
@@ -437,6 +443,12 @@ export const convertToTask = async (req: Request, res: Response, next: NextFunct
 export const getStatusChangeLogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, id))) {
+      return sendError(res, 'Task not found', 404);
+    }
+
     const logs = await taskService.getStatusChangeLogs(id);
     return sendSuccess(res, { logs });
   } catch (error) {

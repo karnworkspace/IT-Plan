@@ -5,6 +5,7 @@ import commentService, {
 } from '../services/comment.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
+import { canAccessTask } from '../services/task.service';
 
 /**
  * Get all comments for a task
@@ -12,6 +13,11 @@ import { extractUserId } from '../utils/auth';
 export const getTaskComments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { taskId } = req.params as { taskId: string };
+    const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, taskId))) {
+      return sendError(res, 'Task not found', 404);
+    }
 
     const comments = await commentService.getTaskComments(taskId);
     return sendSuccess(res, { comments }, '200');
@@ -46,6 +52,10 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
   try {
     const { taskId } = req.params as { taskId: string };
     const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, taskId))) {
+      return sendError(res, 'Task not found', 404);
+    }
 
     // Validation
     const { content } = req.body;

@@ -6,6 +6,7 @@ import dailyUpdateService, {
 import { DAILY_UPDATE_STATUSES } from '../constants';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
+import { canAccessTask } from '../services/task.service';
 
 /**
  * Get all daily updates for a task
@@ -13,6 +14,11 @@ import { extractUserId } from '../utils/auth';
 export const getTaskUpdates = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { taskId } = req.params as { taskId: string };
+    const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, taskId))) {
+      return sendError(res, 'Task not found', 404);
+    }
 
     const updates = await dailyUpdateService.getTaskUpdates(taskId);
     return sendSuccess(res, { updates }, '200');
@@ -143,6 +149,11 @@ export const deleteDailyUpdate = async (req: Request, res: Response, next: NextF
 export const getUpdatesByDateRange = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { taskId } = req.params as { taskId: string };
+    const userId = extractUserId(req);
+
+    if (!(await canAccessTask(userId, taskId))) {
+      return sendError(res, 'Task not found', 404);
+    }
 
     const { start_date, end_date } = req.query;
 

@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import attachmentService from '../services/attachment.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
+import { canAccessTask } from '../services/task.service';
+import prisma from '../config/database';
 
 /**
  * Upload images for a comment
@@ -9,7 +11,14 @@ import { extractUserId } from '../utils/auth';
 export const uploadCommentImages = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { commentId } = req.params as { commentId: string };
+    const userId = extractUserId(req);
     const files = req.files as Express.Multer.File[];
+
+    // Check access via comment → task
+    const comment = await prisma.comment.findUnique({ where: { id: commentId }, select: { taskId: true } });
+    if (!comment || !(await canAccessTask(userId, comment.taskId))) {
+      return sendError(res, 'Comment not found', 404);
+    }
 
     if (!files || files.length === 0) {
       return sendError(res, 'No files uploaded', 400);
@@ -39,6 +48,13 @@ export const uploadCommentImages = async (req: Request, res: Response, next: Nex
 export const getCommentAttachments = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { commentId } = req.params as { commentId: string };
+    const userId = extractUserId(req);
+
+    const comment = await prisma.comment.findUnique({ where: { id: commentId }, select: { taskId: true } });
+    if (!comment || !(await canAccessTask(userId, comment.taskId))) {
+      return sendError(res, 'Comment not found', 404);
+    }
+
     const attachments = await attachmentService.getCommentAttachments(commentId);
     return sendSuccess(res, { attachments });
   } catch (error) {

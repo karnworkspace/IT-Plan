@@ -223,7 +223,6 @@ export class ProjectService {
         },
         _count: {
           select: {
-            tasks: true,
             members: true,
           },
         },
@@ -344,9 +343,19 @@ export class ProjectService {
   }
 
   /**
-   * Get project statistics — role-aware
+   * Get project statistics — role-aware with membership gate
    */
   async getProjectStats(projectId: string, user?: { id: string; role: string }): Promise<any> {
+    // Non-ADMIN must be project member
+    if (user && user.role !== 'ADMIN') {
+      const isMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: user.id } },
+      });
+      if (!isMember) {
+        return { total_tasks: 0, completed_tasks: 0, in_progress_tasks: 0, todo_tasks: 0, blocked_tasks: 0, hold_tasks: 0, cancelled_tasks: 0, progress: 0 };
+      }
+    }
+
     const where: any = { projectId };
 
     // MEMBER sees only assigned task stats

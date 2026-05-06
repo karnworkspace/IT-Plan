@@ -161,9 +161,12 @@ export class TaskService {
   }
 
   /**
-   * Get task by ID
+   * Get task by ID — role-aware
+   * ADMIN: any task
+   * MANAGER: task in member project
+   * MEMBER: assigned via assigneeId or taskAssignees
    */
-  async getTaskById(id: string): Promise<any | null> {
+  async getTaskById(id: string, user?: { id: string; role: string }): Promise<any | null> {
     const task = await prisma.task.findUnique({
       where: { id },
       include: {
@@ -224,6 +227,24 @@ export class TaskService {
         },
       },
     });
+
+    if (!task) return null;
+
+    // Role-based access check
+    if (user && user.role !== 'ADMIN') {
+      if (user.role === 'MANAGER') {
+        // MANAGER: must be project member
+        const isMember = await prisma.projectMember.findUnique({
+          where: { projectId_userId: { projectId: task.projectId, userId: user.id } },
+        });
+        if (!isMember) return null;
+      } else {
+        // MEMBER: must be assigned (assigneeId or taskAssignees)
+        const isAssigned = task.assigneeId === user.id ||
+          task.taskAssignees?.some((ta: any) => ta.userId === user.id);
+        if (!isAssigned) return null;
+      }
+    }
 
     return task;
   }

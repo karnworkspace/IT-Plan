@@ -45,8 +45,11 @@ export const getTasks = async (req: Request, res: Response, next: NextFunction) 
 export const getTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
 
-    const task = await taskService.getTaskById(id);
+    // Pass user for role-based access check
+    const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
+    const task = await taskService.getTaskById(id, userRecord || undefined);
 
     if (!task) {
       return sendError(res, 'Task not found', 404);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Typography } from 'antd';
 import {
@@ -41,6 +41,7 @@ const configMenus = [
 
 export const ConfigurationPage: React.FC = () => {
     const navigate = useNavigate();
+    useEffect(() => { document.title = 'Configuration — IT Project System'; }, []);
 
     return (
         <Layout style={{ minHeight: '100vh' }}>

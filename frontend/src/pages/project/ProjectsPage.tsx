@@ -205,6 +205,8 @@ export const ProjectsPage: React.FC = () => {
     const [activeDragProject, setActiveDragProject] = useState<ProjectWithStats | null>(null);
     const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
+    useEffect(() => { document.title = 'Projects — IT Project System'; }, []);
+
     useEffect(() => {
         loadProjects();
     }, []);

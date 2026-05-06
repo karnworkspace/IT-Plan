@@ -170,6 +170,7 @@ export const ProjectDetailPage: React.FC = () => {
             ]);
 
             setProject(projectData);
+            document.title = `${projectData?.name || 'Project'} — IT Project System`;
             setStats(statsData);
             setTasks(tasksData.tasks || []);
         } catch (error) {

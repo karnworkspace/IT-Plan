@@ -69,6 +69,8 @@ export const GroupsPage: React.FC = () => {
     const [addMemberUserId, setAddMemberUserId] = useState<string | undefined>();
     const [addProjectId, setAddProjectId] = useState<string | undefined>();
 
+    useEffect(() => { document.title = 'Groups — IT Project System'; }, []);
+
     useEffect(() => {
         loadGroups();
         loadUsersAndProjects();

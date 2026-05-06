@@ -36,6 +36,8 @@ export const UserListPage: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
     const [resetting, setResetting] = useState(false);
 
+    useEffect(() => { document.title = 'User Management — IT Project System'; }, []);
+
     useEffect(() => {
         loadUsers();
     }, []);

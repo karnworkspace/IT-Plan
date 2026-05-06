@@ -173,6 +173,8 @@ export const TagTasksPage: React.FC = () => {
         },
     ];
 
+    useEffect(() => { document.title = 'Tagged Tasks — IT Project System'; }, []);
+
     useEffect(() => {
         if (tagId) loadTasks();
     }, [tagId]);

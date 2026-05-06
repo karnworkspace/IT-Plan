@@ -1,5 +1,5 @@
 // Login Page - Email/Password only
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form, Input, Button, Checkbox, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/authStore';
@@ -12,6 +12,7 @@ const REMEMBER_KEY = 'taskflow_remember_email';
 
 export const LoginPage: React.FC = () => {
     const { loginWithEmail, isLoading, clearError } = useAuthStore();
+    useEffect(() => { document.title = 'Login — IT Project System'; }, []);
 
     const savedEmail = localStorage.getItem(REMEMBER_KEY);
 

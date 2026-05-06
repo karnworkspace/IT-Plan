@@ -56,7 +56,7 @@ export class TaskService {
   /**
    * Get all tasks in a project with filters and pagination
    */
-  async getAllTasks(filters: TaskFilters): Promise<PaginationResult<any>> {
+  async getAllTasks(filters: TaskFilters, user?: { id: string; role: string }): Promise<PaginationResult<any>> {
     const {
       projectId,
       status,
@@ -76,6 +76,16 @@ export class TaskService {
     if (assigneeId) where.assigneeId = assigneeId;
     if (priority) where.priority = priority;
     if (tagId) where.taskTags = { some: { tagId } };
+
+    // Role-based task visibility within a project
+    if (user && user.role === 'MEMBER') {
+      // MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง (ทั้ง assigneeId และ taskAssignees)
+      where.OR = [
+        { assigneeId: user.id },
+        { taskAssignees: { some: { userId: user.id } } },
+      ];
+    }
+    // ADMIN + MANAGER: เห็นทุก task ในproject
 
     if (dueDateFrom || dueDateTo) {
       where.dueDate = {};
@@ -552,8 +562,13 @@ export class TaskService {
       // ADMIN: เห็นทุก task ในระบบ — oversight ทั้งองค์กร
       where = {};
     } else {
-      // MANAGER + MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง
-      where = { assigneeId: user.id };
+      // MANAGER + MEMBER: เห็นเฉพาะ task ที่ assign ให้ตัวเอง (ทั้ง assigneeId และ taskAssignees)
+      where = {
+        OR: [
+          { assigneeId: user.id },
+          { taskAssignees: { some: { userId: user.id } } },
+        ],
+      };
     }
 
     if (status) where.status = status;
@@ -638,9 +653,19 @@ export class TaskService {
   /**
    * Get task statistics for a project
    */
-  async getTaskStats(projectId: string): Promise<any> {
+  async getTaskStats(projectId: string, user?: { id: string; role: string }): Promise<any> {
+    const where: any = { projectId };
+
+    // MEMBER sees only assigned task stats
+    if (user && user.role === 'MEMBER') {
+      where.OR = [
+        { assigneeId: user.id },
+        { taskAssignees: { some: { userId: user.id } } },
+      ];
+    }
+
     const tasks = await prisma.task.findMany({
-      where: { projectId },
+      where,
       select: { status: true },
     });
 

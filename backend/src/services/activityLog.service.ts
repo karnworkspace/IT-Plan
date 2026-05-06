@@ -66,8 +66,16 @@ class ActivityLogService {
     });
   }
 
-  async getRecentActivities(limit: number = 20, offset: number = 0) {
+  async getRecentActivities(limit: number = 20, offset: number = 0, user?: { id: string; role: string }) {
+    const where: any = {};
+
+    if (user && user.role !== 'ADMIN') {
+      // MANAGER/MEMBER: เห็นเฉพาะ activity ของ project ที่ตนเองเป็นสมาชิก
+      where.project = { members: { some: { userId: user.id } } };
+    }
+
     return await prisma.activityLog.findMany({
+      where,
       include: {
         user: { select: { id: true, name: true } },
         project: { select: { id: true, name: true } },

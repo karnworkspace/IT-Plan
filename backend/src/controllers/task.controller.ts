@@ -30,7 +30,9 @@ export const getTasks = async (req: Request, res: Response, next: NextFunction) 
       limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
     };
 
-    const result = await taskService.getAllTasks(filters);
+    // Pass user for role-based task visibility
+    const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
+    const result = await taskService.getAllTasks(filters, userRecord || undefined);
     return sendSuccess(res, { tasks: result.data, pagination: result.pagination }, '200');
   } catch (error) {
     next(error);
@@ -334,8 +336,11 @@ export const reorderTasks = async (req: Request, res: Response, next: NextFuncti
 export const getTaskStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { projectId } = req.params as { projectId: string };
+    const userId = extractUserId(req);
 
-    const stats = await taskService.getTaskStats(projectId);
+    // Pass user for role-based stat visibility
+    const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
+    const stats = await taskService.getTaskStats(projectId, userRecord || undefined);
 
     return sendSuccess(res, { stats }, '200');
   } catch (error) {

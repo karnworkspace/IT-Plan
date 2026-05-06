@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import activityLogService from '../services/activityLog.service';
 import { sendSuccess, sendError } from '../utils/response';
+import { extractUserId } from '../utils/auth';
+import prisma from '../config/database';
 
 export async function getProjectActivities(req: Request, res: Response, next: NextFunction) {
   try {
@@ -56,10 +58,13 @@ export async function getUserActivities(req: Request, res: Response, next: NextF
 export async function getRecentActivities(req: Request, res: Response, next: NextFunction) {
   try {
     const { limit = '20', offset = '0' } = req.query;
+    const userId = extractUserId(req);
+    const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
 
     const activities = await activityLogService.getRecentActivities(
       Number(limit),
-      Number(offset)
+      Number(offset),
+      userRecord || undefined
     );
 
     sendSuccess(res, { activities });

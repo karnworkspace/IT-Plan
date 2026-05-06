@@ -677,6 +677,11 @@ export const MyTasksPage: React.FC = () => {
                                             title: 'Assignees',
                                             key: 'assignees',
                                             width: '10%',
+                                            sorter: (a, b) => {
+                                                const aName = a.taskAssignees?.[0]?.user?.name || a.assignee?.name || '';
+                                                const bName = b.taskAssignees?.[0]?.user?.name || b.assignee?.name || '';
+                                                return aName.localeCompare(bName);
+                                            },
                                             render: (_: unknown, record: Task) => {
                                                 const assignees = record.taskAssignees || [];
                                                 if (assignees.length === 0 && record.assignee) {
@@ -847,13 +852,17 @@ export const MyTasksPage: React.FC = () => {
                                                                     </div>
                                                                 )}
 
-                                                                {/* Subtask count */}
-                                                                {(task._count?.subTasks ?? 0) > 0 && (
-                                                                    <div style={{ fontSize: 11, color: '#77787B', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                                        <CheckCircleOutlined style={{ fontSize: 11 }} />
-                                                                        {task._count?.subTasks ?? 0} subtask{(task._count?.subTasks ?? 0) > 1 ? 's' : ''}
-                                                                    </div>
-                                                                )}
+                                                                {/* Subtask count (done/total) */}
+                                                                {(task._count?.subTasks ?? 0) > 0 && (() => {
+                                                                    const total = task._count?.subTasks ?? 0;
+                                                                    const done = (task as any).subTasks?.filter((st: any) => st.status === 'DONE').length ?? 0;
+                                                                    return (
+                                                                        <div style={{ fontSize: 11, color: done === total ? '#2E7D9B' : '#77787B', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                            <CheckCircleOutlined style={{ fontSize: 11 }} />
+                                                                            {done}/{total}
+                                                                        </div>
+                                                                    );
+                                                                })()}
 
                                                                 {/* Progress */}
                                                                 <div className="mytasks-card-progress">

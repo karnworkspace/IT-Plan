@@ -642,6 +642,7 @@ export class TaskService {
         },
         taskAssignees: { include: { user: { select: { id: true, name: true } } } },
         taskTags: { include: { tag: { select: { id: true, name: true, color: true } } } },
+        subTasks: { select: { id: true, status: true } },
         _count: {
           select: {
             comments: true,

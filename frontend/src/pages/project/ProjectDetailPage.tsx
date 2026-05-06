@@ -769,7 +769,7 @@ export const ProjectDetailPage: React.FC = () => {
 
                 {/* Content */}
                 <Content className="project-detail-content">
-                    <Tabs defaultActiveKey="board" size="large">
+                    <Tabs defaultActiveKey="board" size="large" destroyInactiveTabPane>
                         {/* Board View */}
                         <TabPane tab="Board View" key="board">
                             <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleTaskDragEnd}>
@@ -991,7 +991,7 @@ export const ProjectDetailPage: React.FC = () => {
                         <TabPane tab="Gantt View" key="gantt">
                             <div style={{ padding: '16px 0' }}>
                                 <GanttChart
-                                    tasks={tasks}
+                                    tasks={filteredTasks}
                                     projectStartDate={project?.startDate}
                                     projectEndDate={project?.endDate}
                                     onTaskDateChange={async (taskId, startDate, dueDate) => {

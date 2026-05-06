@@ -126,13 +126,12 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     const dragRef = useRef<DragState | null>(null);
     const timelineRef = useRef<HTMLDivElement>(null);
 
-    // Filter tasks with dates and sort by start date
+    // Include all tasks, sort by start date (use createdAt as fallback for tasks without dates)
     const tasksWithDates = useMemo(() => {
-        return tasks
-            .filter(t => t.startDate || t.dueDate)
+        return [...tasks]
             .sort((a, b) => {
-                const aStart = a.startDate ? new Date(a.startDate).getTime() : (a.dueDate ? new Date(a.dueDate).getTime() : 0);
-                const bStart = b.startDate ? new Date(b.startDate).getTime() : (b.dueDate ? new Date(b.dueDate).getTime() : 0);
+                const aStart = a.startDate ? new Date(a.startDate).getTime() : (a.dueDate ? new Date(a.dueDate).getTime() : new Date(a.createdAt || 0).getTime());
+                const bStart = b.startDate ? new Date(b.startDate).getTime() : (b.dueDate ? new Date(b.dueDate).getTime() : new Date(b.createdAt || 0).getTime());
                 return aStart - bStart;
             });
     }, [tasks]);
@@ -146,6 +145,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         const allDates = tasksWithDates.flatMap(t => [
             t.startDate ? new Date(t.startDate) : null,
             t.dueDate ? new Date(t.dueDate) : null,
+            (!t.startDate && !t.dueDate && t.createdAt) ? new Date(t.createdAt) : null,
         ]).filter(Boolean) as Date[];
 
         if (projectStartDate) allDates.push(new Date(projectStartDate));

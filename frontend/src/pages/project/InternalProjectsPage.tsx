@@ -99,6 +99,7 @@ export const InternalProjectsPage: React.FC = () => {
         }
     };
 
+    useEffect(() => { document.title = 'Internal Projects — IT Project System'; }, []);
     useEffect(() => { fetchProjects(); }, []);
 
     // --- Create internal project ---

@@ -207,6 +207,8 @@ export const MyTasksPage: React.FC = () => {
         },
     ];
 
+    useEffect(() => { document.title = 'My Tasks — IT Project System'; }, []);
+
     useEffect(() => {
         loadMyTasks();
         loadTags();

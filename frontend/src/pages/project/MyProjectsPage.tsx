@@ -83,6 +83,8 @@ export const MyProjectsPage: React.FC = () => {
     const [savingPdf, setSavingPdf] = useState(false);
 
     // --- Fetch my projects ---
+    useEffect(() => { document.title = 'My Projects — IT Project System'; }, []);
+
     useEffect(() => {
         const fetchProjects = async () => {
             try {

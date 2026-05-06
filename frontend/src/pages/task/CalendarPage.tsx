@@ -49,6 +49,8 @@ export const CalendarPage: React.FC = () => {
     const [tagFilters, setTagFilters] = useState<string[]>([]);
     const [allTags, setAllTags] = useState<{ id: string; name: string; color: string }[]>([]);
 
+    useEffect(() => { document.title = 'Calendar — IT Project System'; }, []);
+
     useEffect(() => {
         loadTasks();
         tagService.getAllTags().then(tags => setAllTags(tags)).catch(() => {});

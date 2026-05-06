@@ -174,6 +174,8 @@ export const DashboardPage: React.FC = () => {
     const [allTasksList, setAllTasksList] = useState<any[]>([]);
     const [searchValue, setSearchValue] = useState('');
 
+    useEffect(() => { document.title = 'Dashboard — IT Project System'; }, []);
+
     useEffect(() => {
         if (user) {
             loadDashboardData();

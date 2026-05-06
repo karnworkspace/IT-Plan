@@ -168,6 +168,8 @@ export const TimelinePage: React.FC = () => {
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
 
+    useEffect(() => { document.title = 'Annual Plan — IT Project System'; }, []);
+
     useEffect(() => {
         loadTimeline();
         tagService.getAllTags().then(setAllTags).catch(() => {});

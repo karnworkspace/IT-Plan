@@ -56,6 +56,26 @@ services:
         npm run dev
       "
 
+  test-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: taskflow-test-frontend
+    environment:
+      VITE_API_URL: http://localhost:3100/api/v1
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/public:/app/public:delegated
+      - ./frontend/index.html:/app/index.html:delegated
+      - test_frontend_modules:/app/node_modules
+    depends_on:
+      - test-backend
+    networks:
+      - taskflow-test-network
+
 volumes:
   test_postgres_data:
     name: taskflow_test_postgres_data
@@ -63,6 +83,8 @@ volumes:
     name: taskflow_test_backend_modules
   test_uploads:
     name: taskflow_test_uploads
+  test_frontend_modules:
+    name: taskflow_test_frontend_modules
 
 networks:
   taskflow-test-network:

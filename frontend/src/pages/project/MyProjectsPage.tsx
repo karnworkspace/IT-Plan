@@ -118,12 +118,16 @@ export const MyProjectsPage: React.FC = () => {
         localStorage.setItem('myProjectsViewMode', mode);
     };
 
+    // --- Status sort order for consistent grouping ---
+    const STATUS_ORDER = ['ACTIVE', 'DELAY', 'IN_PROGRESS', 'HOLD', 'COMPLETED', 'CANCELLED', 'POSTPONE', 'ARCHIVED'];
+
     // --- Table columns for list view ---
     const columns: ColumnsType<Project> = [
         {
             title: 'Project Name',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name),
             render: (name: string, record: Project) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div
@@ -150,6 +154,8 @@ export const MyProjectsPage: React.FC = () => {
             dataIndex: 'status',
             key: 'status',
             width: 120,
+            sorter: (a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
+            defaultSortOrder: 'ascend',
             render: (status: string) => {
                 const gradient = PROJECT_STATUS_GRADIENT[status];
                 return (
@@ -167,6 +173,7 @@ export const MyProjectsPage: React.FC = () => {
             key: 'tasks',
             width: 80,
             align: 'center' as const,
+            sorter: (a, b) => (a._count?.tasks ?? 0) - (b._count?.tasks ?? 0),
             render: (_: unknown, record: Project) => (
                 <Text type="secondary">{record._count?.tasks ?? 0}</Text>
             ),
@@ -176,6 +183,7 @@ export const MyProjectsPage: React.FC = () => {
             key: 'members',
             width: 80,
             align: 'center' as const,
+            sorter: (a, b) => (a._count?.members ?? 0) - (b._count?.members ?? 0),
             render: (_: unknown, record: Project) => (
                 <Text type="secondary">{record._count?.members ?? 0}</Text>
             ),
@@ -185,6 +193,7 @@ export const MyProjectsPage: React.FC = () => {
             dataIndex: 'startDate',
             key: 'startDate',
             width: 120,
+            sorter: (a, b) => (a.startDate || '').localeCompare(b.startDate || ''),
             render: (date: string) => date ? dayjs(date).format('DD MMM YYYY') : '-',
         },
         {
@@ -192,6 +201,7 @@ export const MyProjectsPage: React.FC = () => {
             dataIndex: 'endDate',
             key: 'endDate',
             width: 120,
+            sorter: (a, b) => (a.endDate || '').localeCompare(b.endDate || ''),
             render: (date: string) => date ? dayjs(date).format('DD MMM YYYY') : '-',
         },
     ];

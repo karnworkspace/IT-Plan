@@ -582,11 +582,13 @@ export const DashboardPage: React.FC = () => {
                                         dataSource={myTasks}
                                         renderItem={task => (
                                             <List.Item
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
                                                 actions={[
                                                     <Button
                                                         type="text"
                                                         icon={<ArrowRightOutlined />}
-                                                        onClick={() => navigate(`/projects/${task.projectId}?taskId=${task.id}`)}
+                                                        onClick={(e) => { e.stopPropagation(); navigate(`/projects/${task.projectId}?taskId=${task.id}`); }}
                                                     />
                                                 ]}
                                             >
@@ -596,7 +598,7 @@ export const DashboardPage: React.FC = () => {
                                                             <CheckCircleOutlined />
                                                         </div>
                                                     }
-                                                    title={<Text strong style={{ color: '#000000' }}>{task.title}</Text>}
+                                                    title={<Text strong style={{ color: '#1a1a1a', cursor: 'pointer' }}>{task.title}</Text>}
                                                     description={
                                                         <Space split={<span style={{ color: '#CBD5E1' }}>·</span>}>
                                                             <Text style={{ color: '#77787B', fontSize: 13 }}>{task.project?.name}</Text>

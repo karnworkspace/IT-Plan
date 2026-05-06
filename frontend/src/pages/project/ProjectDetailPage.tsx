@@ -505,13 +505,22 @@ export const ProjectDetailPage: React.FC = () => {
         ? tasks.filter(t => t.status === statusFilter)
         : tasks;
 
-    // Group tasks by status for board view
+    // Group ALL tasks by status (for stat card fallback counts)
     const tasksByStatus = {
         TODO: tasks.filter(t => t.status === 'TODO'),
         IN_PROGRESS: tasks.filter(t => t.status === 'IN_PROGRESS'),
         DONE: tasks.filter(t => t.status === 'DONE'),
         HOLD: tasks.filter(t => t.status === 'HOLD'),
         CANCELLED: tasks.filter(t => t.status === 'CANCELLED'),
+    };
+
+    // Group FILTERED tasks by status (for board view rendering)
+    const boardTasksByStatus = {
+        TODO: filteredTasks.filter(t => t.status === 'TODO'),
+        IN_PROGRESS: filteredTasks.filter(t => t.status === 'IN_PROGRESS'),
+        DONE: filteredTasks.filter(t => t.status === 'DONE'),
+        HOLD: filteredTasks.filter(t => t.status === 'HOLD'),
+        CANCELLED: filteredTasks.filter(t => t.status === 'CANCELLED'),
     };
 
     if (loading) {
@@ -811,7 +820,7 @@ export const ProjectDetailPage: React.FC = () => {
                         <TabPane tab="Board View" key="board">
                             <DndContext sensors={dndSensors} collisionDetection={kanbanCollision} onDragStart={handleDragStart} onDragEnd={handleTaskDragEnd}>
                                 <div className="task-board">
-                                    {Object.entries(tasksByStatus).map(([status, statusTasks]) => {
+                                    {Object.entries(boardTasksByStatus).map(([status, statusTasks]) => {
                                         const config = STATUS_CONFIG[status];
                                         return (
                                             <div key={status} className="board-column">

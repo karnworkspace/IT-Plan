@@ -332,7 +332,7 @@ export const DashboardPage: React.FC = () => {
                             <Button
                                 type="primary"
                                 size="large"
-                                onClick={() => navigate('/projects')}
+                                onClick={() => navigate('/my-projects')}
                                 style={{ background: '#32BCAD', borderColor: '#32BCAD' }}
                                 icon={<ArrowRightOutlined />}
                             >
@@ -351,7 +351,7 @@ export const DashboardPage: React.FC = () => {
                                     icon={<FolderOutlined />}
                                     iconClass="icon-slate"
                                     borderClass="stat-border-green"
-                                    onClick={() => navigate('/projects')}
+                                    onClick={() => navigate('/my-projects')}
                                 />
                             </div>
                             <div style={{ flex: '1 1 180px', minWidth: 180 }}>
@@ -361,7 +361,7 @@ export const DashboardPage: React.FC = () => {
                                     icon={<ProjectOutlined />}
                                     iconClass="icon-blue"
                                     borderClass="stat-border-green"
-                                    onClick={() => navigate('/projects')}
+                                    onClick={() => navigate('/my-projects')}
                                 />
                             </div>
                             <div style={{ flex: '1 1 180px', minWidth: 180 }}>
@@ -381,7 +381,6 @@ export const DashboardPage: React.FC = () => {
                                     icon={<TeamOutlined />}
                                     iconClass="icon-emerald"
                                     borderClass="stat-border-green"
-                                    onClick={() => navigate('/projects')}
                                 />
                             </div>
                             <div style={{ flex: '1 1 180px', minWidth: 180 }}>
@@ -393,7 +392,7 @@ export const DashboardPage: React.FC = () => {
                                     iconClass="icon-blue"
                                     borderClass="stat-border-blue"
                                     description="DONE tasks / total tasks x 100"
-                                    onClick={() => navigate('/projects')}
+                                    onClick={() => navigate('/my-projects')}
                                 />
                             </div>
                         </div>
@@ -489,7 +488,7 @@ export const DashboardPage: React.FC = () => {
                             {/* Recent Projects */}
                             <div className="section-header">
                                 <Title level={4} style={{ color: '#000000', margin: 0 }}>Recent Projects</Title>
-                                <button className="view-all-link" onClick={() => navigate('/projects')}>View all</button>
+                                <button className="view-all-link" onClick={() => navigate('/my-projects')}>View all</button>
                             </div>
                             <Row gutter={[16, 16]}>
                                 {recentProjects.slice(0, 4).map(project => (

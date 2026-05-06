@@ -275,7 +275,7 @@ export const ProjectDetailPage: React.FC = () => {
                 try {
                     await projectService.deleteProject(projectId);
                     message.success('ลบโปรเจกต์สำเร็จ');
-                    navigate('/projects');
+                    navigate('/my-projects');
                 } catch {
                     message.error('ลบโปรเจกต์ไม่สำเร็จ');
                 }
@@ -539,16 +539,16 @@ export const ProjectDetailPage: React.FC = () => {
                     <div className="header-top">
                         <Breadcrumb
                             items={[
-                                { title: <a onClick={() => navigate('/projects')}><FolderOutlined /> Projects</a> },
+                                { title: <a onClick={() => navigate('/my-projects')}><FolderOutlined /> Projects</a> },
                                 { title: project.name },
                             ]}
                         />
                         <Button
                             type="text"
                             icon={<ArrowLeftOutlined />}
-                            onClick={() => navigate('/projects')}
+                            onClick={() => navigate(-1)}
                         >
-                            Back to Projects
+                            Back
                         </Button>
                     </div>
 

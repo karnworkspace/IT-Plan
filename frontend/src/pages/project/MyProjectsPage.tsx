@@ -23,11 +23,15 @@ import {
     AppstoreOutlined,
     BarsOutlined,
     FileTextOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
 } from '@ant-design/icons';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { projectService } from '../../services/projectService';
 import { useCountUp } from '../../hooks/useCountUp';
 import { PROJECT_STATUS_GRADIENT, PROJECT_STATUS_LABELS } from '../../constants';
+import { exportProjects } from '../../utils/exportExcel';
+import { exportProjectsPDF } from '../../utils/exportPDF';
 import type { Project, ProjectStatus } from '../../types';
 import './MyProjectsPage.css';
 import './ProjectsPage.css';
@@ -76,6 +80,7 @@ export const MyProjectsPage: React.FC = () => {
     const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
         return (localStorage.getItem('myProjectsViewMode') as 'card' | 'list') || 'card';
     });
+    const [savingPdf, setSavingPdf] = useState(false);
 
     // --- Fetch my projects ---
     useEffect(() => {
@@ -271,22 +276,44 @@ export const MyProjectsPage: React.FC = () => {
                                         ))}
                                     </Checkbox.Group>
                                 </div>
-                                <Button.Group>
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                                     <Button
-                                        icon={<AppstoreOutlined />}
-                                        type={viewMode === 'card' ? 'primary' : 'default'}
-                                        onClick={() => handleViewChange('card')}
+                                        icon={<DownloadOutlined />}
+                                        onClick={() => exportProjects(filteredProjects)}
                                     >
-                                        Card
+                                        Export Excel
                                     </Button>
                                     <Button
-                                        icon={<BarsOutlined />}
-                                        type={viewMode === 'list' ? 'primary' : 'default'}
-                                        onClick={() => handleViewChange('list')}
+                                        icon={<FilePdfOutlined />}
+                                        loading={savingPdf}
+                                        onClick={async () => {
+                                            try {
+                                                setSavingPdf(true);
+                                                await exportProjectsPDF(filteredProjects);
+                                            } catch { /* ignore */ } finally {
+                                                setSavingPdf(false);
+                                            }
+                                        }}
                                     >
-                                        List
+                                        Save PDF
                                     </Button>
-                                </Button.Group>
+                                    <Button.Group>
+                                        <Button
+                                            icon={<AppstoreOutlined />}
+                                            type={viewMode === 'card' ? 'primary' : 'default'}
+                                            onClick={() => handleViewChange('card')}
+                                        >
+                                            Card
+                                        </Button>
+                                        <Button
+                                            icon={<BarsOutlined />}
+                                            type={viewMode === 'list' ? 'primary' : 'default'}
+                                            onClick={() => handleViewChange('list')}
+                                        >
+                                            List
+                                        </Button>
+                                    </Button.Group>
+                                </div>
                             </div>
                         </div>
 

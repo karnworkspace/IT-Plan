@@ -15,6 +15,12 @@ const results = [];
 
 function ok(name) { passed++; results.push(`  ✅ ${name}`); }
 function fail(name, detail) { failed++; results.push(`  ❌ ${name}: ${detail}`); }
+function expectEqual(name, actual, expected) {
+  actual === expected ? ok(`${name} (${actual})`) : fail(name, `expected ${expected}, got ${actual}`);
+}
+function expectStatus(name, status, expected) {
+  status === expected ? ok(`${name} (HTTP ${status})`) : fail(name, `expected HTTP ${expected}, got ${status}`);
+}
 
 async function api(method, path, body, token) {
   const headers = { 'Content-Type': 'application/json' };
@@ -88,24 +94,23 @@ async function main() {
     process.exit(1);
   }
 
-  // ── 3. Project visibility ──
+  // ── 3. Project visibility (exact counts from deterministic seed) ──
   let projectId;
   {
     const r = await api('GET', '/projects?pageSize=500', null, adminToken);
     const count = r.data?.pagination?.total ?? 0;
-    count > 0 ? ok(`Admin sees ${count} projects`) : fail('Admin projects', 'got 0');
+    expectEqual('Admin /projects count', count, 1);
     projectId = r.data?.projects?.find(p => p.name === 'Smoke Test Project')?.id;
   }
   {
     const r = await api('GET', '/projects?pageSize=500', null, mgrToken);
     const count = r.data?.pagination?.total ?? 0;
-    count > 0 ? ok(`Manager sees ${count} projects (scoped)`) : fail('Manager projects', 'got 0');
+    expectEqual('Manager /projects count', count, 1);
   }
   {
     const r = await api('GET', '/projects?pageSize=500', null, mbrToken);
     const count = r.data?.pagination?.total ?? 0;
-    // Member should see at least Smoke Test Project
-    count > 0 ? ok(`Member sees ${count} projects (member only)`) : fail('Member projects', 'got 0 — member may not be added to project');
+    expectEqual('Member /projects count', count, 1);
   }
 
   // ── 4. My Projects ──
@@ -131,13 +136,12 @@ async function main() {
     {
       const r = await api('GET', `/projects/${projectId}/tasks?pageSize=100`, null, adminToken);
       const count = r.data?.pagination?.total ?? 0;
-      count > 0 ? ok(`Admin sees ${count} tasks in project`) : fail('Admin project tasks', 'got 0');
+      expectEqual('Admin project tasks count', count, 2);
     }
     {
       const r = await api('GET', `/projects/${projectId}/tasks?pageSize=100`, null, mbrToken);
       const count = r.data?.pagination?.total ?? 0;
-      // Member should see only assigned task (1), not unassigned (manager's task)
-      ok(`Member sees ${count} task(s) in project (assigned only)`);
+      expectEqual('Member project tasks count (assigned only)', count, 1);
     }
     {
       const r = await api('GET', `/projects/${projectId}/stats`, null, adminToken);
@@ -150,12 +154,12 @@ async function main() {
   {
     const r = await api('GET', '/my-tasks?pageSize=500', null, adminToken);
     const count = r.data?.pagination?.total ?? 0;
-    ok(`Admin /my-tasks: ${count} tasks`);
+    expectEqual('Admin /my-tasks count', count, 2);
   }
   {
     const r = await api('GET', '/my-tasks?pageSize=500', null, mbrToken);
     const count = r.data?.pagination?.total ?? 0;
-    ok(`Member /my-tasks: ${count} tasks (assigned only)`);
+    expectEqual('Member /my-tasks count (assigned only)', count, 1);
     assignedTaskId = r.data?.tasks?.[0]?.id;
   }
 
@@ -166,13 +170,13 @@ async function main() {
       r.success ? ok('Member task detail (assigned)') : fail('Member task detail', r.error);
     }
   }
-  // Unassigned task — find manager's task
+  // Unassigned task — member must get 404
   if (projectId) {
     const adminTasks = await api('GET', `/projects/${projectId}/tasks?pageSize=100`, null, adminToken);
     const unassignedTask = adminTasks.data?.tasks?.find(t => t.title === 'Smoke Task Unassigned');
     if (unassignedTask) {
       const r = await api('GET', `/tasks/${unassignedTask.id}`, null, mbrToken);
-      !r.success || !r.data?.task ? ok('Member denied unassigned task detail') : fail('Member unassigned task', 'should be denied');
+      expectStatus('Member denied unassigned task', r.status, 404);
     }
   }
 

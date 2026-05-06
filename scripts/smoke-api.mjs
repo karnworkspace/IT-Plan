@@ -26,9 +26,24 @@ async function api(method, path, body, token) {
   return { status: res.status, ...data };
 }
 
-async function uploadFile(path, token) {
+// 1x1 red PNG (68 bytes)
+const PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+const PNG_BYTES = Uint8Array.from(atob(PNG_BASE64), c => c.charCodeAt(0));
+
+async function uploadImage(path, token) {
   const fd = new FormData();
-  fd.append('images', new Blob(['test file content'], { type: 'text/plain' }), 'test.txt');
+  fd.append('images', new Blob([PNG_BYTES], { type: 'image/png' }), 'test-smoke.png');
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: fd,
+  });
+  return { status: res.status, ...(await res.json().catch(() => ({}))) };
+}
+
+async function uploadInvalidFile(path, token) {
+  const fd = new FormData();
+  fd.append('images', new Blob(['not an image'], { type: 'text/plain' }), 'test.txt');
   const res = await fetch(`${API}${path}`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
@@ -182,25 +197,24 @@ async function main() {
     const cRes = await api('POST', `/tasks/${assignedTaskId}/comments`, { content: 'attachment test' }, mbrToken);
     const commentId = cRes.data?.comment?.id;
     if (commentId) {
-      const upRes = await uploadFile(`/comments/${commentId}/attachments`, mbrToken);
+      // Positive: upload valid PNG image
+      const upRes = await uploadImage(`/comments/${commentId}/attachments`, mbrToken);
       if (upRes.success) {
-        ok('Attachment upload');
-        // Test static download
+        ok('Attachment upload (image/png)');
         const att = upRes.data?.attachments?.[0];
         if (att) {
           const filename = att.path.split('/').pop() || att.path.split('\\').pop();
           const baseUrl = API.replace('/api/v1', '');
           const dlRes = await fetch(`${baseUrl}/uploads/${filename}`);
-          dlRes.status === 200 ? ok('Attachment download (static)') : fail('Attachment download', `HTTP ${dlRes.status}`);
+          dlRes.status === 200 ? ok('Attachment download (static URL)') : fail('Attachment download', `HTTP ${dlRes.status}`);
         }
       } else {
-        // text/plain may be rejected by file filter — that's correct behavior
-        if (upRes.error?.includes('ไฟล์ที่รองรับ') || upRes.status === 500) {
-          ok('Attachment upload rejected (file type filter works)');
-        } else {
-          fail('Attachment upload', upRes.error);
-        }
+        fail('Attachment upload (image/png)', upRes.error);
       }
+
+      // Negative: upload invalid file type
+      const badRes = await uploadInvalidFile(`/comments/${commentId}/attachments`, mbrToken);
+      (!badRes.success || badRes.status >= 400) ? ok('Invalid file type rejected') : fail('Invalid file type', 'should reject text/plain');
     }
   }
 

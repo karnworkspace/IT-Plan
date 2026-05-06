@@ -42,7 +42,7 @@ services:
     volumes:
       - ./backend/src:/app/src:delegated
       - ./backend/prisma:/app/prisma:delegated
-      - ./backend/uploads:/app/uploads:delegated
+      - test_uploads:/app/uploads
       - test_backend_modules:/app/node_modules
     depends_on:
       test-db:
@@ -61,6 +61,8 @@ volumes:
     name: taskflow_test_postgres_data
   test_backend_modules:
     name: taskflow_test_backend_modules
+  test_uploads:
+    name: taskflow_test_uploads
 
 networks:
   taskflow-test-network:

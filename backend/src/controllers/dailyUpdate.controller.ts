@@ -33,10 +33,16 @@ export const getTaskUpdates = async (req: Request, res: Response, next: NextFunc
 export const getDailyUpdate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
+    const userId = extractUserId(req);
 
     const update = await dailyUpdateService.getUpdateById(id);
 
     if (!update) {
+      return sendError(res, 'Daily update not found', 404);
+    }
+
+    // Check access via update → task
+    if (!(await canAccessTask(userId, update.taskId))) {
       return sendError(res, 'Daily update not found', 404);
     }
 

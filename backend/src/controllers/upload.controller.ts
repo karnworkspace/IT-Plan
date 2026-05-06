@@ -1,9 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
 import attachmentService from '../services/attachment.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { extractUserId } from '../utils/auth';
 import { canAccessTask } from '../services/task.service';
 import prisma from '../config/database';
+
+/** Remove uploaded files from disk (cleanup on auth failure) */
+function cleanupFiles(files: Express.Multer.File[] | undefined) {
+  if (!files) return;
+  for (const f of files) {
+    fs.unlink(f.path, () => {});
+  }
+}
 
 /**
  * Upload images for a comment
@@ -14,9 +23,10 @@ export const uploadCommentImages = async (req: Request, res: Response, next: Nex
     const userId = extractUserId(req);
     const files = req.files as Express.Multer.File[];
 
-    // Check access via comment → task
+    // Check access via comment → task (files already on disk from multer, cleanup if unauthorized)
     const comment = await prisma.comment.findUnique({ where: { id: commentId }, select: { taskId: true } });
     if (!comment || !(await canAccessTask(userId, comment.taskId))) {
+      cleanupFiles(files);
       return sendError(res, 'Comment not found', 404);
     }
 

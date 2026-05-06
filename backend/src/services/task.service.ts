@@ -14,20 +14,21 @@ export async function canAccessTask(userId: string, taskId: string): Promise<boo
 
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    select: { projectId: true, assigneeId: true, createdById: true, taskAssignees: { select: { userId: true } } },
+    select: { projectId: true, assigneeId: true, taskAssignees: { select: { userId: true } } },
   });
   if (!task) return false;
 
   if (user.role === 'MANAGER') {
+    // MANAGER: must be project member
     const isMember = await prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId: task.projectId, userId } },
     });
     return !!isMember;
   }
 
-  // MEMBER: must be assigned, creator, or project owner
+  // MEMBER: assigned only (via assigneeId or taskAssignees N:M)
+  // Consistent with A1 getTaskById rule — no creator fallback for reads
   return task.assigneeId === userId
-    || task.createdById === userId
     || task.taskAssignees.some(ta => ta.userId === userId);
 }
 

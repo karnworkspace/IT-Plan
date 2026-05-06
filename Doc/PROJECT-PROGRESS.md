@@ -333,13 +333,22 @@
 - Applied to both updateTask and updateTaskStatus endpoints
 - SubTaskList: delegate progress to backend
 
+## Phase 22: Hardening — H1 Authz ✅ (2026-05-06)
+
+**H1 — Secondary Endpoint Authz Hardening:**
+- canAccessTask(userId, taskId) shared helper: ADMIN=any, MANAGER=project member, MEMBER=assigned only
+- Gated 9 endpoints: comments (list/create), daily updates (list/range/getById), subtasks, status logs, attachments (upload/read)
+- Upload: cleanup orphan files on unauthorized access
+- updateTask: checks taskAssignees N:M (was assigneeId only)
+- canAccessTask aligned with A1: MEMBER = assigned only (no creator fallback for reads)
+
 ---
 
 ## Known Issues
 
 1. Prisma 5.10.2 (7.x available but needs migration)
 2. #47 Daily Update attachment — partial (needs schema change for per-update attachments)
-3. Secondary endpoints (comments, subtasks, status logs) — authz hardening deferred
+3. ~~Secondary endpoints authz~~ ✅ Done (H1)
 4. pageSize vs limit param mismatch — deferred
 5. No automated test suite in active repo
 6. Manager UI: some buttons visible but backend may 403 (project member role not checked in UI)

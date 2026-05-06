@@ -8,6 +8,11 @@ node_modules/
 
 # Build outputs
 dist/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
 build/
 
 # Database files (SQLite)

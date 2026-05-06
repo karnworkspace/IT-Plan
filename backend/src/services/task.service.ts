@@ -692,6 +692,16 @@ export class TaskService {
    * Get task statistics for a project
    */
   async getTaskStats(projectId: string, user?: { id: string; role: string }): Promise<any> {
+    const emptyStats = { total_tasks: 0, todo_tasks: 0, in_progress_tasks: 0, in_review_tasks: 0, completed_tasks: 0, blocked_tasks: 0, hold_tasks: 0, cancelled_tasks: 0, completion_rate: 0 };
+
+    // Non-ADMIN must be project member
+    if (user && user.role !== 'ADMIN') {
+      const isMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: user.id } },
+      });
+      if (!isMember) return emptyStats;
+    }
+
     const where: any = { projectId };
 
     // MEMBER sees only assigned task stats

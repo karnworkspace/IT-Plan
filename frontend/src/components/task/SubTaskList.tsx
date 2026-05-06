@@ -47,6 +47,10 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
     const [newAssigneeId, setNewAssigneeId] = useState<string | undefined>(undefined);
     const [submitting, setSubmitting] = useState(false);
 
+    // Inline edit state
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = useState('');
+
     // Status change modal state
     const [statusChangeModal, setStatusChangeModal] = useState<{
         visible: boolean;
@@ -145,6 +149,21 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
         }
     };
 
+    const handleSaveTitle = async (subTaskId: string) => {
+        if (!editingTitle.trim()) {
+            setEditingId(null);
+            return;
+        }
+        try {
+            await taskService.updateTask(subTaskId, { title: editingTitle.trim() });
+            message.success('Title updated');
+            setEditingId(null);
+            onRefresh();
+        } catch {
+            message.error('Failed to update title');
+        }
+    };
+
     return (
         <div className="subtask-list">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -227,14 +246,31 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({ parentTask, subTasks, 
                                             : <ClockCircleOutlined style={{ color: '#d9d9d9', fontSize: 18 }} />
                                 }
                                 title={
-                                    <Text
-                                        style={{
-                                            textDecoration: isDone ? 'line-through' : 'none',
-                                            color: isDone ? '#8c8c8c' : '#262626',
-                                        }}
-                                    >
-                                        {subTask.title}
-                                    </Text>
+                                    editingId === subTask.id ? (
+                                        <Input
+                                            size="small"
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            onPressEnter={() => handleSaveTitle(subTask.id)}
+                                            onBlur={() => handleSaveTitle(subTask.id)}
+                                            autoFocus
+                                            style={{ width: '100%' }}
+                                        />
+                                    ) : (
+                                        <Text
+                                            style={{
+                                                textDecoration: isDone ? 'line-through' : 'none',
+                                                color: isDone ? '#8c8c8c' : '#262626',
+                                                cursor: 'pointer',
+                                            }}
+                                            onDoubleClick={() => {
+                                                setEditingId(subTask.id);
+                                                setEditingTitle(subTask.title);
+                                            }}
+                                        >
+                                            {subTask.title}
+                                        </Text>
+                                    )
                                 }
                                 description={
                                     <Space size={8} wrap>

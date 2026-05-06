@@ -7,8 +7,8 @@ export type { DailyUpdate } from '../types';
 // Input types (request-specific, kept here)
 export interface CreateDailyUpdateInput {
   date?: string;
-  progress: number;
-  status: string;
+  progress?: number;
+  status?: string;
   notes?: string;
 }
 

@@ -51,24 +51,16 @@ export const createDailyUpdate = async (req: Request, res: Response, next: NextF
     // Validation
     const { progress, status, notes } = req.body;
 
-    if (progress === undefined) {
-      return sendError(res, 'Progress is required', 400);
-    }
-
-    if (progress < 0 || progress > 100) {
+    if (progress !== undefined && (progress < 0 || progress > 100)) {
       return sendError(res, 'Progress must be between 0 and 100', 400);
     }
 
-    if (!status) {
-      return sendError(res, 'Status is required', 400);
-    }
-
-    if (!(DAILY_UPDATE_STATUSES as readonly string[]).includes(status)) {
+    if (status && !(DAILY_UPDATE_STATUSES as readonly string[]).includes(status)) {
       return sendError(res, 'Invalid status value', 400);
     }
 
-    if (notes && notes.length > 500) {
-      return sendError(res, 'Notes must be less than 500 characters', 400);
+    if (notes && notes.length > 2000) {
+      return sendError(res, 'Notes must be less than 2000 characters', 400);
     }
 
     const updateData: CreateDailyUpdateInput = {

@@ -3,8 +3,8 @@ import prisma from '../config/database';
 // Types
 export interface CreateDailyUpdateInput {
   taskId: string;
-  progress: number;
-  status: string;
+  progress?: number;
+  status?: string;
   notes?: string;
 }
 
@@ -63,6 +63,7 @@ export class DailyUpdateService {
       where: { id: data.taskId },
       include: {
         project: true,
+        taskAssignees: { select: { userId: true } },
       },
     });
 
@@ -70,19 +71,26 @@ export class DailyUpdateService {
       throw new Error('Task not found');
     }
 
-    const isAssignee = task.assigneeId === userId;
+    // System ADMIN can always create updates
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const isAdmin = user?.role === 'ADMIN';
+    const isAssignee = task.assigneeId === userId || task.taskAssignees.some(ta => ta.userId === userId);
     const isCreator = task.createdById === userId;
     const isProjectOwner = task.project.ownerId === userId;
 
-    if (!isAssignee && !isCreator && !isProjectOwner) {
+    if (!isAdmin && !isAssignee && !isCreator && !isProjectOwner) {
       throw new Error('You do not have permission to update this task');
     }
+
+    // Use task's current values as defaults if not provided
+    const effectiveProgress = data.progress ?? task.progress ?? 0;
+    const effectiveStatus = data.status ?? task.status ?? 'TODO';
 
     return await prisma.dailyUpdate.create({
       data: {
         taskId: data.taskId,
-        progress: data.progress,
-        status: data.status,
+        progress: effectiveProgress,
+        status: effectiveStatus,
         notes: data.notes,
       },
       include: {

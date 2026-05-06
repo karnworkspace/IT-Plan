@@ -1,5 +1,5 @@
 // Setup PIN Page - Updated with Auth Store
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Typography, Progress, message, Space } from 'antd';
 import { LockOutlined, CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ const { Title, Text } = Typography;
 export const SetupPinPage: React.FC = () => {
     const navigate = useNavigate();
     const { setupPin, isLoading } = useAuthStore();
+    useEffect(() => { document.title = 'Setup PIN — IT Project System'; }, []);
 
     const [pin, setPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // No Link import here to avoid confusion
@@ -11,6 +11,7 @@ const { Title, Text, Link: AntLink } = Typography;
 export const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const { register, isLoading, clearError } = useAuthStore();
+    useEffect(() => { document.title = 'Register — IT Project System'; }, []);
     const [form] = Form.useForm();
 
     const handleRegister = async (values: { email: string; password: string; name: string }) => {

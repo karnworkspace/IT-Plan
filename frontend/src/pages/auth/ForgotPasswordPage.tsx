@@ -1,5 +1,5 @@
 // Forgot Password Page - Request password reset
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Typography, message, Steps, Result } from 'antd';
 import { MailOutlined, LockOutlined, KeyOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ const { Title, Text, Link } = Typography;
 
 export const ForgotPasswordPage: React.FC = () => {
     const navigate = useNavigate();
+    useEffect(() => { document.title = 'Forgot Password — IT Project System'; }, []);
     const [currentStep, setCurrentStep] = useState(0);
     const [email, setEmail] = useState('');
     const [resetToken, setResetToken] = useState('');

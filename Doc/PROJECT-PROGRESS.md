@@ -367,6 +367,12 @@
 **C21 — Gantt Drag + Revision Log:**
 - #58(v) Drag auto-updates dates via updateTask + activity log with user/timestamp/changes
 
+**T1 — Local API Integration Test Suite (26 tests):**
+- docker-compose.test.yml: isolated DB(55432), API(3100), uploads volume
+- Deterministic seed: 3 users (ADMIN/MANAGER/MEMBER), 1 project, 2 tasks
+- 26 tests: auth, role visibility (exact counts), CRUD, attachment upload+download, pagination, unauthorized
+- Run: `./scripts/test-local-api.sh`
+
 ---
 
 ## Known Issues
@@ -375,7 +381,7 @@
 2. #47 Daily Update attachment — partial (needs schema change for per-update attachments)
 3. ~~Secondary endpoints authz~~ ✅ Done (H1)
 4. ~~pageSize vs limit param mismatch~~ ✅ Done (H2)
-5. No automated test suite in active repo
+5. ~~No automated test suite~~ ✅ Done (T1 — 26 API smoke tests)
 6. Manager UI: some buttons visible but backend may 403 (project member role not checked in UI)
 7. STATUS_PROGRESS constant has stale HOLD:0/CANCELLED:0 (bypassed by helper, no functional impact)
 

@@ -407,3 +407,17 @@
 - WCAG AA accessibility audit
 - Caching strategies
 - Authz hardening for secondary endpoints
+
+### Concept Notes (ยังไม่ทำ)
+> หมายเหตุ: 8 พ.ค. 2026 — วันรับ comment จาก user รวบรวม idea ก่อน ยังไม่ implement
+
+- **Tag overview page** — ตอนนี้ user เห็น tag ได้แค่บน task card / task detail modal และเข้าหน้า `/tags/:tagId` ผ่านการคลิก tag เท่านั้น ไม่มีที่รวม tag ทั้งหมดให้ดูในมุมเดียว ควรพิจารณาเพิ่ม
+  - เมนู "Tags" ใน Sidebar → list tag ทั้งหมด + จำนวน task ของแต่ละ tag
+  - หรือ widget/section "All Tags" บน Dashboard
+  - เพื่อให้ user สำรวจ tag ที่มีอยู่ในระบบโดยไม่ต้องคลิกผ่าน task ก่อน
+
+- **Internal Project รวมเป็น Project ใน MyTasks** — รวม task จากหน้า Internal Project เข้ามาใน MyTasks ได้ไหม
+  - ตอนนี้ Internal Project แยกหน้าออกจาก MyTasks → user ต้องสลับหน้าเพื่อดูงานทั้งหมดของตัวเอง
+  - แนวคิด: ให้ MyTasks แสดง task รวมจากทุกแหล่ง (project ปกติ + internal project) ในมุมเดียวกัน
+  - หรือทำเป็น "virtual project" ใน MyTasks group by project source
+  - ต้องคิดเรื่อง filter/grouping ว่าจะให้แยกออกจากกันยังไงให้ user ไม่งง

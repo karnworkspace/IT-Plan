@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import notificationService from './notification.service';
 import activityLogService from './activityLog.service';
+import { forbidden } from '../utils/AppError';
 
 /**
  * Shared helper: check if user can access a task based on role.
@@ -474,7 +475,7 @@ export class TaskService {
     const isSystemAdmin = user?.role === 'ADMIN';
 
     if (!isAssignee && !isCreator && !isProjectOwner && !isSystemAdmin) {
-      throw new Error('You do not have permission to delete this task');
+      throw forbidden('You do not have permission to delete this task');
     }
 
     // Log activity before deletion (so we have record, though cascade might delete it if linked)

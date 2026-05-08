@@ -320,8 +320,9 @@ export const ProjectDetailPage: React.FC = () => {
                     await taskService.deleteTask(taskId);
                     message.success('Task deleted successfully');
                     await loadProjectData();
-                } catch (error) {
-                    message.error('Failed to delete task');
+                } catch (error: any) {
+                    const apiMsg = error?.response?.data?.error;
+                    message.error(apiMsg || 'Failed to delete task');
                 }
             },
         });

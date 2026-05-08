@@ -262,6 +262,19 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         }
     };
 
+    const handleDeleteTask = async () => {
+        if (!task) return;
+        try {
+            await taskService.deleteTask(task.id);
+            message.success('Task deleted');
+            onUpdate();
+            onClose();
+        } catch (error: any) {
+            const apiMsg = error?.response?.data?.error;
+            message.error(apiMsg || 'Failed to delete task');
+        }
+    };
+
     const handleAddComment = async () => {
         if (!task || (!newComment.trim() && pendingFiles.length === 0)) return;
 
@@ -540,7 +553,30 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             </Form>
                         )}
 
-                        <Button type="primary" onClick={handleSaveTask}>Save</Button>
+                        <Space>
+                            <Button type="primary" onClick={handleSaveTask}>Save</Button>
+                            {(() => {
+                                const isAssignee = task.assigneeId === user?.id
+                                    || (task as any).taskAssignees?.some((ta: { user: { id: string } }) => ta.user.id === user?.id);
+                                const isCreator = task.createdById === user?.id;
+                                const isProjectOwner = (task as any).project?.ownerId === user?.id;
+                                const isAdmin = user?.role === 'ADMIN';
+                                const canDelete = isAdmin || isCreator || isProjectOwner || isAssignee;
+                                if (!canDelete) return null;
+                                return (
+                                    <Popconfirm
+                                        title="Delete this task?"
+                                        description="This cannot be undone. Sub-tasks, comments, and updates will also be removed."
+                                        okText="Delete"
+                                        okType="danger"
+                                        cancelText="Cancel"
+                                        onConfirm={handleDeleteTask}
+                                    >
+                                        <Button danger icon={<DeleteOutlined />}>Delete</Button>
+                                    </Popconfirm>
+                                );
+                            })()}
+                        </Space>
                     </div>
                 </div>
 

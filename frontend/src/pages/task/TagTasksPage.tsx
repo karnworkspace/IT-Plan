@@ -164,8 +164,9 @@ export const TagTasksPage: React.FC = () => {
                             await taskService.deleteTask(task.id);
                             message.success('Task deleted');
                             loadTasks();
-                        } catch {
-                            message.error('Failed to delete task');
+                        } catch (error: any) {
+                            const apiMsg = error?.response?.data?.error;
+                            message.error(apiMsg || 'Failed to delete task');
                         }
                     },
                 });

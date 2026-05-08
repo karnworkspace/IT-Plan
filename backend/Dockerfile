@@ -89,6 +89,9 @@ RUN npx prisma generate
 # Copy built files
 COPY --from=build /app/dist ./dist
 
+# Pre-create uploads dir with correct ownership so named volume inherits it on first init
+RUN mkdir -p /app/uploads
+
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
 

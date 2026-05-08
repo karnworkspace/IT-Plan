@@ -9,6 +9,10 @@ import { apiLimiter } from './middlewares/rateLimiter.middleware';
 // Create Express app
 const app: Application = express();
 
+// Trust the first proxy hop (nginx/Cloudflare) so req.ip reflects the real client
+// for rate limiting and logging instead of the proxy's IP.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
     origin: config.cors.origin,

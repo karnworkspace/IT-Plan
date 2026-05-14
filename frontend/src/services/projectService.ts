@@ -14,6 +14,9 @@ export interface CreateProjectInput {
   projectType?: 'PROJECT' | 'INTERNAL';
   startDate?: string;
   endDate?: string;
+  projectCode?: string;
+  category?: string;
+  businessOwner?: string;
 }
 
 export interface UpdateProjectInput {

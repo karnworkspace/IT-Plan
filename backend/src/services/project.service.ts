@@ -12,6 +12,9 @@ export interface CreateProjectInput {
   startDate?: Date;
   endDate?: Date;
   ownerId: string;
+  projectCode?: string;
+  category?: string;
+  businessOwner?: string;
 }
 
 export interface UpdateProjectInput {
@@ -22,6 +25,9 @@ export interface UpdateProjectInput {
   status?: string;
   startDate?: Date;
   endDate?: Date;
+  projectCode?: string;
+  category?: string;
+  businessOwner?: string;
 }
 
 export interface ProjectFilters {
@@ -258,6 +264,9 @@ export class ProjectService {
           startDate: data.startDate,
           endDate: data.endDate,
           ownerId: data.ownerId,
+          projectCode: data.projectCode,
+          category: data.category,
+          businessOwner: data.businessOwner,
         },
         include: {
           owner: {

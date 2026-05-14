@@ -8,17 +8,29 @@ import {
     Progress,
     Tag,
     message,
+    Button,
+    Modal,
+    Form,
+    Input,
+    DatePicker,
+    Row,
+    Col,
 } from 'antd';
+import dayjs from 'dayjs';
 import {
     FieldTimeOutlined,
     CaretRightOutlined,
     CaretDownOutlined,
+    PlusOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { TaskDetailModal } from './TaskDetailModal';
 import api from '../../services/api';
 import { tagService } from '../../services/tagService';
+import { projectService } from '../../services/projectService';
+import { useAuthStore } from '../../store/authStore';
+import { PROJECT_COLORS } from '../../constants';
 import type { Tag as TagType } from '../../types';
 import './TimelinePage.css';
 
@@ -159,6 +171,9 @@ const currentMonth = new Date().getMonth(); // 0-indexed
 
 export const TimelinePage: React.FC = () => {
     const navigate = useNavigate();
+    const currentUser = useAuthStore(s => s.user);
+    const canCreateProject = currentUser?.role === 'ADMIN';
+
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<TimelineProject[]>([]);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
@@ -167,6 +182,9 @@ export const TimelinePage: React.FC = () => {
     const [allTags, setAllTags] = useState<TagType[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
+    const [creating, setCreating] = useState(false);
+    const [createForm] = Form.useForm();
 
     useEffect(() => { document.title = 'Annual Plan — IT Project System'; }, []);
 
@@ -238,6 +256,47 @@ export const TimelinePage: React.FC = () => {
         });
     };
 
+    const openCreateModal = () => {
+        createForm.resetFields();
+        createForm.setFieldsValue({
+            status: 'ACTIVE',
+            color: '#32BCAD',
+            category: filterCategory !== 'ALL' ? filterCategory : undefined,
+            startDate: dayjs('2026-01-01'),
+            endDate: dayjs('2026-12-31'),
+        });
+        setCreateModalVisible(true);
+    };
+
+    const handleCreateProject = async () => {
+        try {
+            const values = await createForm.validateFields();
+            setCreating(true);
+            await projectService.createProject({
+                name: values.name.trim(),
+                projectCode: values.projectCode?.trim() || undefined,
+                category: values.category,
+                businessOwner: values.businessOwner?.trim() || undefined,
+                status: values.status,
+                color: values.color,
+                projectType: 'PROJECT',
+                startDate: values.startDate ? values.startDate.toISOString() : undefined,
+                endDate: values.endDate ? values.endDate.toISOString() : undefined,
+                description: values.description?.trim() || undefined,
+            });
+            message.success('สร้าง Project สำเร็จ');
+            setCreateModalVisible(false);
+            createForm.resetFields();
+            await loadTimeline();
+        } catch (err: any) {
+            if (err?.errorFields) return; // validation error — Antd shows inline
+            const msg = err?.response?.data?.error || 'สร้าง Project ไม่สำเร็จ';
+            message.error(msg);
+        } finally {
+            setCreating(false);
+        }
+    };
+
     // Running project number
     let projectNumber = 0;
 
@@ -306,6 +365,16 @@ export const TimelinePage: React.FC = () => {
                                         </Select.Option>
                                     ))}
                                 </Select>
+                            )}
+                            {canCreateProject && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={openCreateModal}
+                                    style={{ background: '#32BCAD', borderColor: '#32BCAD' }}
+                                >
+                                    เพิ่ม Project
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -519,6 +588,112 @@ export const TimelinePage: React.FC = () => {
                 onClose={() => { setDetailModalVisible(false); setSelectedTaskId(null); }}
                 onUpdate={loadTimeline}
             />
+
+            <Modal
+                title={<span><PlusOutlined style={{ marginRight: 8 }} />เพิ่ม Project ใหม่</span>}
+                open={createModalVisible}
+                onOk={handleCreateProject}
+                onCancel={() => setCreateModalVisible(false)}
+                okText="สร้าง Project"
+                cancelText="ยกเลิก"
+                confirmLoading={creating}
+                width={640}
+            >
+                <Form form={createForm} layout="vertical" size="middle">
+                    <Form.Item
+                        name="name"
+                        label="ชื่อ Project"
+                        rules={[
+                            { required: true, message: 'กรุณากรอกชื่อ Project' },
+                            { max: 100, message: 'ชื่อ Project ต้องไม่เกิน 100 ตัวอักษร' },
+                        ]}
+                    >
+                        <Input placeholder="เช่น SENA SiteMaps (Masterplan) 2026" />
+                    </Form.Item>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="projectCode"
+                                label="Project ID"
+                                tooltip="รหัสตามรูปแบบ เช่น PP26000-XX-00"
+                            >
+                                <Input placeholder="PP26000-XX-00" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="category"
+                                label="หมวดหมู่"
+                                rules={[{ required: true, message: 'กรุณาเลือกหมวดหมู่' }]}
+                            >
+                                <Select placeholder="เลือกหมวดหมู่">
+                                    {Object.entries(CATEGORY_CONFIG).map(([key, cfg]) => (
+                                        <Select.Option key={key} value={key}>{cfg.label}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="status"
+                                label="สถานะ"
+                                rules={[{ required: true, message: 'กรุณาเลือกสถานะ' }]}
+                            >
+                                <Select>
+                                    <Select.Option value="ACTIVE">Active</Select.Option>
+                                    <Select.Option value="DELAY">Delay</Select.Option>
+                                    <Select.Option value="COMPLETED">Completed</Select.Option>
+                                    <Select.Option value="HOLD">Hold</Select.Option>
+                                    <Select.Option value="CANCELLED">Cancelled</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="businessOwner" label="Business Owner">
+                                <Input placeholder="เช่น ฝ่ายขาย / IT" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="startDate" label="วันที่เริ่มต้น">
+                                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="endDate" label="วันที่สิ้นสุด">
+                                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Form.Item
+                        name="color"
+                        label="สีของ Project"
+                        rules={[{ required: true, message: 'กรุณาเลือกสี' }]}
+                    >
+                        <Select>
+                            {PROJECT_COLORS.map(c => (
+                                <Select.Option key={c.value} value={c.value}>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                                        <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 3, backgroundColor: c.value }} />
+                                        {c.label}
+                                    </span>
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item name="description" label="รายละเอียด (Optional)">
+                        <Input.TextArea rows={3} maxLength={500} showCount placeholder="คำอธิบาย Project" />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </Layout>
     );
 };

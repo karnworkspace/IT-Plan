@@ -122,7 +122,7 @@ export const createProject = async (
 ) => {
   try {
     const userId = extractUserId(req);
-    const { name, description, color, icon, status, startDate, endDate, projectType } = req.body;
+    const { name, description, color, icon, status, startDate, endDate, projectType, projectCode, category, businessOwner } = req.body;
 
     // Validation
     if (!name || (typeof name === 'string' && name.trim().length === 0)) {
@@ -140,6 +140,11 @@ export const createProject = async (
       }
     }
 
+    const ALLOWED_CATEGORIES = ['CONSTRUCTION_OPERATION', 'SALES_MARKETING', 'CORPORATE', 'PRODUCT', 'CUSTOMER_SERVICE', 'INFRASTRUCTURE_NETWORK'];
+    if (category && !ALLOWED_CATEGORIES.includes(category)) {
+      return sendError(res, `Invalid category. Must be one of: ${ALLOWED_CATEGORIES.join(', ')}`, 400);
+    }
+
     const project = await projectService.createProject({
       name: typeof name === 'string' ? name.trim() : name,
       description: description ? (typeof description === 'string' ? description.trim() : description) : undefined,
@@ -150,6 +155,9 @@ export const createProject = async (
       endDate: endDate ? new Date(endDate) : undefined,
       ownerId: userId,
       projectType,
+      projectCode: projectCode ? String(projectCode).trim() : undefined,
+      category: category || undefined,
+      businessOwner: businessOwner ? String(businessOwner).trim() : undefined,
     });
 
     return sendSuccess(res, { project }, undefined, 201);
